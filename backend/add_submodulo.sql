@@ -1,0 +1,1 @@
+ALTER TABLE Permisos ADD SubModulo NVARCHAR(100) NULL;

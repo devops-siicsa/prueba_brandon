@@ -1,0 +1,73 @@
+Traceback (most recent call last):
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 922, in do_execute
+    cursor.execute(statement, parameters)
+pyodbc.Error: ('HY104', '[HY104] [Microsoft][ODBC SQL Server Driver]Valor de precisión no válido (0) (SQLBindParameter)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\proyectos\sistema_inventario\backend\debug_create_user.py", line 29, in <module>
+    ConfigService.create_user(data)
+  File "C:\proyectos\sistema_inventario\backend\app\services\config_service.py", line 165, in create_user
+    db.session.commit()
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\scoping.py", line 598, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1969, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1256, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1231, in _prepare_impl
+    self.session.flush()
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4312, in flush
+    self._flush(objects)
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4447, in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4408, in _flush
+    flush_context.execute()
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1226, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1416, in execute
+    return meth(
+           ^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 516, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1639, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2343, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\proyectos\sistema_inventario\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 922, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.DBAPIError: (pyodbc.Error) ('HY104', '[HY104] [Microsoft][ODBC SQL Server Driver]Valor de precisión no válido (0) (SQLBindParameter)')
+[SQL: INSERT INTO [Personas] ([Nombre], [Apellido], [Correo], [Celular], [SedeId], [AreaId], [CargoId], [RolId], [PasswordHash], [EsUsuarioSistema], [EsContactoCliente], [TwoFactorSecret], [TwoFactorEnabled], [IntentosFallidos], [BloqueoHasta], [UltimoLogin], [Activo]) OUTPUT inserted.[Id] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('Debug', 'User', 'debug@test.com', '57', None, None, None, 1, 'scrypt:32768:8:1$iIhu1Clo54ZLdtRJ$f8326fd67181f0ea82edecd079cf2e3b6186eb3a672e9719b3630dee71d97c0ba08548879cd4123aa0b47e35e04162d622b1b6f4d6aa85796b9841f702c0005c', 1, 0, None, 0, 0, None, None, 1)]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)

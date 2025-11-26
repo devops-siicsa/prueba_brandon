@@ -1,0 +1,8 @@
+import requests
+try:
+    print("Enviando petición de login...")
+    res = requests.post('http://127.0.0.1:5000/api/auth/login', json={"identifier": "test", "password": "test"})
+    print(f"Status: {res.status_code}")
+    print(f"Body: {res.text}")
+except Exception as e:
+    print(f"Error: {e}")

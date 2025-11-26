@@ -1,0 +1,296 @@
+<template>
+  <v-container fluid class="bg-grey-lighten-5 fill-height align-start">
+    <div class="w-100">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="text-caption text-grey mb-1">
+                <v-icon size="small" class="mr-1">mdi-home</v-icon> / Sistema / Configuración
+            </div>
+            <h1 class="text-h4 font-weight-bold text-primary mb-1">
+                Configuración del Sistema
+            </h1>
+            <p class="text-body-1 text-grey-darken-1">
+                Administra los parámetros generales, usuarios y catálogos.
+            </p>
+        </div>
+
+        <!-- SECCIÓN 1: EMPRESA Y USUARIOS -->
+        <div class="mb-8">
+            <div class="d-flex align-center mb-4">
+                <v-icon color="primary" class="mr-2">mdi-domain</v-icon>
+                <h2 class="text-h6 font-weight-bold text-grey-darken-3">Empresa y Usuarios</h2>
+            </div>
+            
+            <v-row>
+                <v-col cols="12" sm="6" md="3" lg="2" v-for="item in companyItems" :key="item.title">
+                    <v-card 
+                        class="config-card border-0 elevation-1"
+                        height="120"
+                        @click="openSection(item)"
+                        v-ripple
+                    >
+                        <div class="card-corner-decoration" :class="`bg-${item.color}-lighten-5`">
+                            <v-icon size="small" :color="item.color">mdi-chevron-right</v-icon>
+                        </div>
+                        
+                        <v-card-text class="pa-3 d-flex flex-column justify-space-between h-100">
+                            <div class="icon-box" :class="`bg-${item.color}-lighten-5`">
+                                <v-icon size="24" :color="item.color">{{ item.icon }}</v-icon>
+                            </div>
+                            
+                            <div>
+                                <div class="text-subtitle-2 font-weight-bold text-grey-darken-3 mb-0 line-height-tight">
+                                    {{ item.title }}
+                                </div>
+                                <div class="text-caption text-grey" style="font-size: 0.7rem !important;">Configurar</div>
+                            </div>
+                        </v-card-text>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </div>
+
+        <!-- SECCIÓN 2: CATÁLOGOS -->
+        <div class="mb-8">
+            <div class="d-flex align-center mb-4">
+                <v-icon color="teal" class="mr-2">mdi-database</v-icon>
+                <h2 class="text-h6 font-weight-bold text-grey-darken-3">Catálogos de Inventario</h2>
+            </div>
+
+            <v-row>
+                <v-col cols="12" sm="6" md="3" lg="2" v-for="item in catalogItems" :key="item.title">
+                    <v-card 
+                        class="config-card border-0 elevation-1"
+                        height="120"
+                        @click="openCatalog(item)"
+                        v-ripple
+                    >
+                        <div class="card-corner-decoration" :class="`bg-${item.color}-lighten-5`">
+                            <v-icon size="small" :color="item.color">mdi-chevron-right</v-icon>
+                        </div>
+
+                        <v-card-text class="pa-3 d-flex flex-column justify-space-between h-100">
+                            <div class="icon-box" :class="`bg-${item.color}-lighten-5`">
+                                <v-icon size="24" :color="item.color">{{ item.icon }}</v-icon>
+                            </div>
+                            
+                            <div>
+                                <div class="text-subtitle-2 font-weight-bold text-grey-darken-3 mb-0 line-height-tight">
+                                    {{ item.title }}
+                                </div>
+                                <div class="text-caption text-grey" style="font-size: 0.7rem !important;">Configurar</div>
+                            </div>
+                        </v-card-text>
+                    </v-card>
+                </v-col>
+                
+
+            </v-row>
+        </div>
+
+        <!-- SECCIÓN 3: AUDITORÍA -->
+        <div class="mb-8">
+            <div class="d-flex align-center mb-4">
+                <v-icon color="orange" class="mr-2">mdi-shield-search</v-icon>
+                <h2 class="text-h6 font-weight-bold text-grey-darken-3">Auditoría y Seguridad</h2>
+            </div>
+
+            <v-row>
+                <v-col cols="12" sm="6" md="3" lg="2">
+                    <v-card 
+                        class="config-card border-0 elevation-1"
+                        height="120"
+                        @click="openAudit"
+                        v-ripple
+                    >
+                        <div class="card-corner-decoration bg-orange-lighten-5">
+                            <v-icon size="small" color="orange">mdi-chevron-right</v-icon>
+                        </div>
+
+                        <v-card-text class="pa-3 d-flex flex-column justify-space-between h-100">
+                            <div class="icon-box bg-orange-lighten-5">
+                                <v-icon size="24" color="orange">mdi-history</v-icon>
+                            </div>
+                            
+                            <div>
+                                <div class="text-subtitle-2 font-weight-bold text-grey-darken-3 mb-0 line-height-tight">
+                                    Log de Auditoría
+                                </div>
+                                <div class="text-caption text-grey" style="font-size: 0.7rem !important;">Configurar</div>
+                            </div>
+                        </v-card-text>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </div>
+    </div>
+
+    <!-- DIÁLOGOS -->
+    <v-dialog v-model="showCatalogDialog" max-width="900" scrollable>
+        <v-card>
+            <v-toolbar color="primary" :title="currentCatalogTitle">
+                <v-spacer></v-spacer>
+                <v-btn icon="mdi-close" @click="showCatalogDialog = false"></v-btn>
+            </v-toolbar>
+            <v-card-text class="pa-0">
+                <CatalogManager 
+                    v-if="currentCatalogName" 
+                    :catalog-name="currentCatalogName" 
+                    :title="currentCatalogTitle"
+                />
+            </v-card-text>
+        </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="showFeatureDialog" max-width="600">
+        <v-card>
+            <v-card-title>En Construcción</v-card-title>
+            <v-card-text>
+                La funcionalidad <strong>{{ currentFeatureName }}</strong> está siendo implementada.
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" @click="showFeatureDialog = false">Cerrar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <!-- PANTALLAS COMPLETAS (Listados) -->
+    <v-dialog v-model="showCompanyList" fullscreen transition="dialog-bottom-transition">
+        <CompanyList v-model="showCompanyList" />
+    </v-dialog>
+
+    <v-dialog v-model="showSedeList" fullscreen transition="dialog-bottom-transition">
+        <SedeList v-model="showSedeList" />
+    </v-dialog>
+
+    <v-dialog v-model="showUserList" fullscreen transition="dialog-bottom-transition">
+        <UserList v-model="showUserList" />
+    </v-dialog>
+
+  </v-container>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import CatalogManager from '@/components/Config/CatalogManager.vue'
+import CompanyList from '@/components/Config/CompanyList.vue'
+import SedeList from '@/components/Config/SedeList.vue'
+import UserList from '@/components/Config/UserList.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// Estado para diálogos
+const showCatalogDialog = ref(false)
+const currentCatalogName = ref('')
+const currentCatalogTitle = ref('')
+const showCompanyList = ref(false)
+const showSedeList = ref(false)
+const showUserList = ref(false)
+const showFeatureDialog = ref(false)
+const currentFeatureName = ref('')
+
+// Items de Sección Empresa (Color base: blue-grey o primary)
+const companyItems = [
+    { title: 'Mis Empresas', icon: 'mdi-domain', action: 'companies', color: 'blue-grey' },
+    { title: 'Mis Sedes', icon: 'mdi-map-marker', action: 'sedes', color: 'blue-grey' },
+    { title: 'Mis Usuarios', icon: 'mdi-account-group', action: 'users', color: 'blue-grey' },
+    { title: 'Áreas', icon: 'mdi-chart-tree', action: 'catalog', catalog: 'areas', color: 'blue-grey' },
+    { title: 'Cargos', icon: 'mdi-badge-account', action: 'catalog', catalog: 'cargos', color: 'blue-grey' },
+]
+
+// Items de Catálogos (Color base: teal)
+const catalogItems = [
+    { title: 'Estado Equipo', icon: 'mdi-toggle-switch', catalog: 'estados_equipo', color: 'teal' },
+    { title: 'Tipo Equipo', icon: 'mdi-laptop', catalog: 'tipos_equipo', color: 'teal' },
+    { title: 'Fabricantes', icon: 'mdi-factory', catalog: 'fabricantes', color: 'teal' },
+    { title: 'Procesadores', icon: 'mdi-cpu-64-bit', catalog: 'marcas_procesador', color: 'teal' },
+    { title: 'RAM', icon: 'mdi-memory', catalog: 'tipos_ram', color: 'teal' },
+    { title: 'Almacenamiento', icon: 'mdi-harddisk', catalog: 'tipos_almacenamiento', color: 'teal' },
+    { title: 'Puertos', icon: 'mdi-serial-port', catalog: 'puertos', color: 'teal' },
+    { title: 'Sistema Operativo', icon: 'mdi-monitor', catalog: 'sistemas_operativos', color: 'teal' },
+    { title: 'Ofimáticas', icon: 'mdi-file-document', catalog: 'ofimaticas', color: 'teal' },
+    { title: 'Antivirus', icon: 'mdi-shield-check', catalog: 'antivirus', color: 'teal' },
+    { title: 'Aplicaciones', icon: 'mdi-apps', catalog: 'aplicaciones', color: 'teal' },
+]
+
+function openSection(item) {
+    if (item.action === 'catalog') {
+        openCatalog({ title: item.title, catalog: item.catalog })
+    } else if (item.action === 'companies') {
+        showCompanyList.value = true
+    } else if (item.action === 'sedes') {
+        showSedeList.value = true
+    } else if (item.action === 'users') {
+        showUserList.value = true
+    } else {
+        currentFeatureName.value = item.title
+        showFeatureDialog.value = true
+    }
+}
+
+function openCatalog(item) {
+    currentCatalogName.value = item.catalog
+    currentCatalogTitle.value = item.title
+    showCatalogDialog.value = true
+}
+
+function openAudit() {
+    currentFeatureName.value = 'Auditoría'
+    showFeatureDialog.value = true
+}
+</script>
+
+<style scoped>
+.config-card {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px !important;
+}
+
+.config-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08) !important;
+}
+
+.icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.card-corner-decoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    border-bottom-left-radius: 40px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-top: 8px;
+    padding-right: 8px;
+    opacity: 0;
+    transform: translate(10px, -10px);
+    transition: all 0.3s ease;
+}
+
+.config-card:hover .card-corner-decoration {
+    opacity: 1;
+    transform: translate(0, 0);
+    width: 50px;
+    height: 50px;
+    border-bottom-left-radius: 50px;
+}
+
+.line-height-tight {
+    line-height: 1.1;
+}
+</style>
