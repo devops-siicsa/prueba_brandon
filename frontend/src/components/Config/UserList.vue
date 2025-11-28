@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import UserForm from './UserForm.vue'
 
@@ -245,6 +245,10 @@ async function handleSave() {
     await loadData()
     showForm.value = false
 }
+
+watch(dialog, (val) => {
+    if (val) loadData()
+}, { immediate: true })
 
 onMounted(() => {
     loadData()

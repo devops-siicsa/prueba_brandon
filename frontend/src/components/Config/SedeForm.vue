@@ -74,7 +74,6 @@
                         bg-color="grey-lighten-5"
                         class="rounded-lg"
                         @update:model-value="loadCities"
-                        return-object
                         hide-details="auto"
                     ></v-autocomplete>
                 </v-col>
@@ -224,14 +223,16 @@ async function loadDepartments() {
     }
 }
 
-async function loadCities(dept) {
-    if (!dept) {
+async function loadCities(deptId) {
+    console.log("Cargando ciudades para depto:", deptId)
+    if (!deptId) {
         cities.value = []
         return
     }
     try {
-        const res = await axios.get(`http://localhost:5000/api/config/cities/${dept.Id}`, { withCredentials: true })
+        const res = await axios.get(`http://localhost:5000/api/config/cities/${deptId}`, { withCredentials: true })
         cities.value = res.data
+        console.log("Ciudades cargadas:", cities.value.length)
     } catch (e) {
         console.error(e)
     }
@@ -244,8 +245,14 @@ async function findDepartmentByCity(cityId) {
 }
 
 async function save() {
-    const { valid } = await form.value.validate()
-    if (!valid) return
+    console.log("Intentando guardar sede...", formData.value)
+    const { valid, errors } = await form.value.validate()
+    console.log("Validación del formulario:", valid, errors)
+    
+    if (!valid) {
+        console.warn("Formulario inválido, no se envía.")
+        return
+    }
     
     loading.value = true
     try {
@@ -255,11 +262,14 @@ async function save() {
         
         const method = props.sede ? 'put' : 'post'
         
+        console.log(`Enviando ${method.toUpperCase()} a ${url}`)
         await axios[method](url, formData.value, { withCredentials: true })
+        console.log("Guardado exitoso")
+        
         emit('save')
         dialog.value = false
     } catch (error) {
-        console.error(error)
+        console.error("Error en petición:", error)
         alert('Error al guardar: ' + (error.response?.data?.message || error.message))
     } finally {
         loading.value = false

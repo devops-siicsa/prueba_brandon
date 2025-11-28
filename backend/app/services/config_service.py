@@ -1,7 +1,7 @@
 from app.extensions import db
 from app.models.core_models import (
     Empresa, Sede, Area, Cargo, 
-    EstadoEquipo, TipoEquipo, Fabricante, Puerto, SistemaOperativo, Ofimatica, Antivirus
+    EstadoEquipo, TipoEquipo, Fabricante, Puerto, SistemaOperativo, Ofimatica, Antivirus, Aplicacion
 )
 from app.models.inventory_models import (
     MarcaProcesador, TipoProcesador, GeneracionProcesador,
@@ -31,7 +31,8 @@ CATALOG_MODELS = {
     'tipos_almacenamiento': TipoAlmacenamiento,
     'capacidades_almacenamiento': CapacidadAlmacenamiento,
     'protocolos_almacenamiento': ProtocoloAlmacenamiento,
-    'factores_forma_almacenamiento': FactorFormaAlmacenamiento
+    'factores_forma_almacenamiento': FactorFormaAlmacenamiento,
+    'aplicaciones': Aplicacion
 }
 
 class ConfigService:
@@ -194,11 +195,18 @@ class ConfigService:
 
     # --- CATÁLOGOS GENÉRICOS ---
     @staticmethod
-    def get_catalog_items(catalog_name):
+    def get_catalog_items(catalog_name, filters=None):
         model = CATALOG_MODELS.get(catalog_name)
         if not model:
             raise ValueError("Catálogo no válido")
-        return model.query.all()
+        
+        query = model.query
+        if filters:
+            for key, value in filters.items():
+                if hasattr(model, key):
+                    query = query.filter(getattr(model, key) == value)
+                    
+        return query.all()
         
     @staticmethod
     def create_catalog_item(catalog_name, data):
@@ -213,3 +221,28 @@ class ConfigService:
         db.session.add(new_item)
         db.session.commit()
         return new_item
+
+    @staticmethod
+    def update_catalog_item(catalog_name, item_id, data):
+        model = CATALOG_MODELS.get(catalog_name)
+        if not model:
+            raise ValueError("Catálogo no válido")
+            
+        item = model.query.get(item_id)
+        if not item:
+            return None
+            
+        # Actualización genérica de campos comunes
+        if 'Nombre' in data and hasattr(item, 'Nombre'):
+            item.Nombre = data['Nombre']
+        if 'Activo' in data and hasattr(item, 'Activo'):
+            item.Activo = data['Activo']
+            
+        # Campos específicos (se pueden agregar más según necesidad)
+        if 'Capacidad' in data and hasattr(item, 'Capacidad'):
+            item.Capacidad = data['Capacidad']
+        if 'Velocidad' in data and hasattr(item, 'Velocidad'):
+            item.Velocidad = data['Velocidad']
+            
+        db.session.commit()
+        return item

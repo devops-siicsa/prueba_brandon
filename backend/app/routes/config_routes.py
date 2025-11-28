@@ -168,7 +168,9 @@ def update_user(current_user, user_id):
 @token_required
 def get_catalog(current_user, catalog_name):
     try:
-        items = ConfigService.get_catalog_items(catalog_name)
+        # Convertir request.args a dict para filtrar
+        filters = request.args.to_dict()
+        items = ConfigService.get_catalog_items(catalog_name, filters)
         # Serialización genérica (asume Id y Nombre/Capacidad/Velocidad)
         result = []
         for item in items:
@@ -177,6 +179,9 @@ def get_catalog(current_user, catalog_name):
             if hasattr(item, 'Capacidad'): data['Capacidad'] = item.Capacidad
             if hasattr(item, 'Velocidad'): data['Velocidad'] = item.Velocidad
             if hasattr(item, 'Activo'): data['Activo'] = item.Activo
+            # Incluir FKs para jerarquías
+            if hasattr(item, 'MarcaId'): data['MarcaId'] = item.MarcaId
+            if hasattr(item, 'TipoId'): data['TipoId'] = item.TipoId
             result.append(data)
         return jsonify(result), 200
     except ValueError:
@@ -192,5 +197,20 @@ def create_catalog_item(current_user, catalog_name):
         return jsonify({'message': 'Item creado', 'Id': new_item.Id}), 201
     except ValueError:
         return jsonify({'message': 'Catálogo no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'message': str(e)}), 400
+
+@config_bp.route('/catalogs/<catalog_name>/<int:item_id>', methods=['PUT', 'POST'])
+@token_required
+@requires_permission('catalogs:create') # Usamos el mismo permiso de crear por ahora, o podríamos crear 'catalogs:manage'
+def update_catalog_item(current_user, catalog_name, item_id):
+    data = request.get_json()
+    try:
+        updated = ConfigService.update_catalog_item(catalog_name, item_id, data)
+        if not updated:
+            return jsonify({'message': 'Item no encontrado'}), 404
+        return jsonify({'message': 'Item actualizado'}), 200
+    except ValueError:
+        return jsonify({'message': 'Catálogo no válido'}), 400
     except Exception as e:
         return jsonify({'message': str(e)}), 400

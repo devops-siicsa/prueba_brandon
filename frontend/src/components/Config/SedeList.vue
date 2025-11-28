@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import SedeForm from './SedeForm.vue'
 
@@ -189,6 +189,10 @@ async function handleSave() {
     await loadData() // Recargar lista
     showForm.value = false
 }
+
+watch(dialog, (val) => {
+    if (val) loadData()
+}, { immediate: true })
 
 onMounted(() => {
     loadData()

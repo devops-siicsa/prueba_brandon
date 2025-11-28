@@ -183,6 +183,12 @@ function openForm(company) {
 
 watch(dialog, (val) => {
     if (val) loadCompanies()
+}, { immediate: true })
+
+import { onMounted } from 'vue'
+
+onMounted(() => {
+    if (dialog.value) loadCompanies()
 })
 </script>
 

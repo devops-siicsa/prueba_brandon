@@ -62,7 +62,7 @@
                     <v-card 
                         class="config-card border-0 elevation-1"
                         height="120"
-                        @click="openCatalog(item)"
+                        @click="openSection(item)"
                         v-ripple
                     >
                         <div class="card-corner-decoration" :class="`bg-${item.color}-lighten-5`">
@@ -83,8 +83,6 @@
                         </v-card-text>
                     </v-card>
                 </v-col>
-                
-
             </v-row>
         </div>
 
@@ -126,20 +124,18 @@
     </div>
 
     <!-- DIÁLOGOS -->
-    <v-dialog v-model="showCatalogDialog" max-width="900" scrollable>
-        <v-card>
-            <v-toolbar color="primary" :title="currentCatalogTitle">
-                <v-spacer></v-spacer>
-                <v-btn icon="mdi-close" @click="showCatalogDialog = false"></v-btn>
-            </v-toolbar>
-            <v-card-text class="pa-0">
-                <CatalogManager 
-                    v-if="currentCatalogName" 
-                    :catalog-name="currentCatalogName" 
-                    :title="currentCatalogTitle"
-                />
-            </v-card-text>
-        </v-card>
+    <v-dialog v-model="showUnifiedCatalog" fullscreen transition="dialog-bottom-transition">
+        <UnifiedCatalogList 
+            v-model="showUnifiedCatalog" 
+            :catalog-name="currentCatalogName"
+            :title="currentCatalogTitle"
+            :icon="currentCatalogIcon"
+            :description="currentCatalogDescription"
+        />
+    </v-dialog>
+
+    <v-dialog v-model="showProcessorConfig" fullscreen transition="dialog-bottom-transition">
+        <ProcessorConfig v-model="showProcessorConfig" />
     </v-dialog>
 
     <v-dialog v-model="showFeatureDialog" max-width="600">
@@ -173,18 +169,23 @@
 
 <script setup>
 import { ref } from 'vue'
-import CatalogManager from '@/components/Config/CatalogManager.vue'
 import CompanyList from '@/components/Config/CompanyList.vue'
 import SedeList from '@/components/Config/SedeList.vue'
 import UserList from '@/components/Config/UserList.vue'
+import UnifiedCatalogList from '@/components/Config/UnifiedCatalogList.vue'
+import ProcessorConfig from '@/components/Config/ProcessorConfig.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 // Estado para diálogos
-const showCatalogDialog = ref(false)
+const showUnifiedCatalog = ref(false)
+const showProcessorConfig = ref(false)
 const currentCatalogName = ref('')
 const currentCatalogTitle = ref('')
+const currentCatalogIcon = ref('')
+const currentCatalogDescription = ref('')
+
 const showCompanyList = ref(false)
 const showSedeList = ref(false)
 const showUserList = ref(false)
@@ -196,34 +197,36 @@ const companyItems = [
     { title: 'Mis Empresas', icon: 'mdi-domain', action: 'companies', color: 'blue-grey' },
     { title: 'Mis Sedes', icon: 'mdi-map-marker', action: 'sedes', color: 'blue-grey' },
     { title: 'Mis Usuarios', icon: 'mdi-account-group', action: 'users', color: 'blue-grey' },
-    { title: 'Áreas', icon: 'mdi-chart-tree', action: 'catalog', catalog: 'areas', color: 'blue-grey' },
-    { title: 'Cargos', icon: 'mdi-badge-account', action: 'catalog', catalog: 'cargos', color: 'blue-grey' },
+    { title: 'Áreas', icon: 'mdi-chart-tree', action: 'catalog', catalog: 'areas', description: 'Administra las dependencias y departamentos.', color: 'blue-grey' },
+    { title: 'Cargos', icon: 'mdi-badge-account', action: 'catalog', catalog: 'cargos', description: 'Gestiona los cargos y roles laborales.', color: 'blue-grey' },
 ]
 
 // Items de Catálogos (Color base: teal)
 const catalogItems = [
-    { title: 'Estado Equipo', icon: 'mdi-toggle-switch', catalog: 'estados_equipo', color: 'teal' },
-    { title: 'Tipo Equipo', icon: 'mdi-laptop', catalog: 'tipos_equipo', color: 'teal' },
-    { title: 'Fabricantes', icon: 'mdi-factory', catalog: 'fabricantes', color: 'teal' },
-    { title: 'Procesadores', icon: 'mdi-cpu-64-bit', catalog: 'marcas_procesador', color: 'teal' },
+    { title: 'Estado Equipo', icon: 'mdi-toggle-switch', catalog: 'estados_equipo', description: 'Estados posibles de un equipo (Nuevo, Usado, etc).', color: 'teal' },
+    { title: 'Tipo Equipo', icon: 'mdi-laptop', catalog: 'tipos_equipo', description: 'Tipos de dispositivos (Laptop, Desktop, Móvil).', color: 'teal' },
+    { title: 'Fabricantes', icon: 'mdi-factory', catalog: 'fabricantes', description: 'Marcas y fabricantes de hardware.', color: 'teal' },
+    { title: 'Catálogo de Procesadores', icon: 'mdi-cpu-64-bit', action: 'processors', description: 'Configuración de Marcas, Tipos y Generaciones.', color: 'teal' },
     { title: 'RAM', icon: 'mdi-memory', catalog: 'tipos_ram', color: 'teal' },
     { title: 'Almacenamiento', icon: 'mdi-harddisk', catalog: 'tipos_almacenamiento', color: 'teal' },
-    { title: 'Puertos', icon: 'mdi-serial-port', catalog: 'puertos', color: 'teal' },
-    { title: 'Sistema Operativo', icon: 'mdi-monitor', catalog: 'sistemas_operativos', color: 'teal' },
-    { title: 'Ofimáticas', icon: 'mdi-file-document', catalog: 'ofimaticas', color: 'teal' },
-    { title: 'Antivirus', icon: 'mdi-shield-check', catalog: 'antivirus', color: 'teal' },
-    { title: 'Aplicaciones', icon: 'mdi-apps', catalog: 'aplicaciones', color: 'teal' },
+    { title: 'Puertos', icon: 'mdi-serial-port', catalog: 'puertos', description: 'Tipos de puertos y conexiones.', color: 'teal' },
+    { title: 'Sistema Operativo', icon: 'mdi-monitor', catalog: 'sistemas_operativos', description: 'Sistemas operativos soportados.', color: 'teal' },
+    { title: 'Ofimáticas', icon: 'mdi-file-document', catalog: 'ofimaticas', description: 'Suites de ofimática y versiones.', color: 'teal' },
+    { title: 'Antivirus', icon: 'mdi-shield-check', catalog: 'antivirus', description: 'Soluciones de seguridad y antivirus.', color: 'teal' },
+    { title: 'Aplicaciones', icon: 'mdi-apps', catalog: 'aplicaciones', description: 'Otras aplicaciones y software corporativo.', color: 'teal' },
 ]
 
 function openSection(item) {
     if (item.action === 'catalog') {
-        openCatalog({ title: item.title, catalog: item.catalog })
+        openCatalog(item)
     } else if (item.action === 'companies') {
         showCompanyList.value = true
     } else if (item.action === 'sedes') {
         showSedeList.value = true
     } else if (item.action === 'users') {
         showUserList.value = true
+    } else if (item.action === 'processors') {
+        showProcessorConfig.value = true
     } else {
         currentFeatureName.value = item.title
         showFeatureDialog.value = true
@@ -233,7 +236,9 @@ function openSection(item) {
 function openCatalog(item) {
     currentCatalogName.value = item.catalog
     currentCatalogTitle.value = item.title
-    showCatalogDialog.value = true
+    currentCatalogIcon.value = item.icon
+    currentCatalogDescription.value = item.description || 'Gestión de catálogo del sistema.'
+    showUnifiedCatalog.value = true
 }
 
 function openAudit() {

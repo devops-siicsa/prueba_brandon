@@ -88,3 +88,9 @@ class Antivirus(db.Model):
     Id = db.Column(db.Integer, primary_key=True)
     Nombre = db.Column(db.String(100))
     Activo = db.Column(db.Boolean, default=True)
+
+class Aplicacion(db.Model):
+    __tablename__ = 'Aplicaciones'
+    Id = db.Column(db.Integer, primary_key=True)
+    Nombre = db.Column(db.String(100))
+    Activo = db.Column(db.Boolean, default=True)
