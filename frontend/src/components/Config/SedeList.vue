@@ -146,12 +146,23 @@ const selectedSede = ref(null)
 const loading = ref(false)
 
 const filteredSedes = computed(() => {
-    if (!search.value) return sedes.value
+    if (!search.value) {
+        // Filtrar sedes de empresas internas (No clientes)
+        return sedes.value.filter(s => {
+            const comp = companies.value.find(c => c.Id === s.EmpresaId)
+            return comp && !comp.EsCliente
+        })
+    }
+    
     const term = search.value.toLowerCase()
-    return sedes.value.filter(s => 
-        s.NombreSede.toLowerCase().includes(term) ||
-        (s.Direccion && s.Direccion.toLowerCase().includes(term))
-    )
+    return sedes.value.filter(s => {
+        const comp = companies.value.find(c => c.Id === s.EmpresaId)
+        // Debe ser empresa interna Y coincidir con búsqueda
+        if (comp && comp.EsCliente) return false
+        
+        return s.NombreSede.toLowerCase().includes(term) ||
+               (s.Direccion && s.Direccion.toLowerCase().includes(term))
+    })
 })
 
 function getCompanyName(id) {

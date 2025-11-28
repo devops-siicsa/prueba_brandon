@@ -75,3 +75,21 @@ class Persona(db.Model):
 
     def __repr__(self):
         return f'<Persona {self.Nombre} {self.Apellido}>'
+
+    def has_permission(self, permission_code):
+        # 1. Super Admin tiene acceso total
+        if self.Rol and self.Rol.Nombre == 'SUPER ADMINISTRADOR':
+            return True
+        
+        # 2. Verificar en Rol
+        if self.Rol:
+            for perm in self.Rol.Permisos:
+                if perm.Codigo == permission_code:
+                    return True
+                    
+        # 3. Verificar Permisos Específicos
+        for perm in self.PermisosEspecificos:
+            if perm.Codigo == permission_code:
+                return True
+                
+        return False

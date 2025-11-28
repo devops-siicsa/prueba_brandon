@@ -70,6 +70,16 @@ class ConfigService:
         company.Direccion = data.get('Direccion', company.Direccion)
         company.Telefono = data.get('Telefono', company.Telefono)
         company.CiudadId = data.get('CiudadId', company.CiudadId)
+        company.EsCliente = data.get('EsCliente', company.EsCliente)
+        
+        # Si se desactiva la empresa, desactivar todas sus sedes
+        new_activo = data.get('Activo')
+        if new_activo is not None:
+            company.Activo = new_activo
+            if not new_activo:
+                sedes = Sede.query.filter_by(EmpresaId=company.Id).all()
+                for sede in sedes:
+                    sede.Activo = False
         
         db.session.commit()
         return company
@@ -85,6 +95,11 @@ class ConfigService:
 
     @staticmethod
     def create_sede(data):
+        # Validar que la empresa esté activa
+        empresa = Empresa.query.get(data.get('EmpresaId'))
+        if not empresa or not empresa.Activo:
+            raise ValueError("No se puede crear una sede para una empresa inactiva")
+
         new_sede = Sede(
             EmpresaId=data.get('EmpresaId'),
             NombreSede=data.get('NombreSede'),
@@ -107,7 +122,15 @@ class ConfigService:
         sede.Direccion = data.get('Direccion', sede.Direccion)
         sede.CiudadId = data.get('CiudadId', sede.CiudadId)
         sede.Telefono = data.get('Telefono', sede.Telefono)
-        sede.Activo = data.get('Activo', sede.Activo)
+        
+        # Validar activación
+        new_activo = data.get('Activo')
+        if new_activo is not None:
+            if new_activo and not sede.Activo: # Intentando activar
+                empresa = Empresa.query.get(sede.EmpresaId)
+                if not empresa or not empresa.Activo:
+                    raise ValueError("No se puede activar la sede porque la empresa está inactiva")
+            sede.Activo = new_activo
         
         db.session.commit()
         return sede

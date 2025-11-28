@@ -70,7 +70,14 @@
         v-model="showContactsDialog"
         :filter-roles="['ADMINISTRADOR CLIENTE', 'SOPORTE CLIENTE', 'AUDITOR EXTERNO']"
         title="Gestión de Contactos"
+        client-mode
     />
+
+    <!-- Diálogo de Gestión de Clientes -->
+    <ClientList v-model="showClientsDialog" />
+
+    <!-- Diálogo de Gestión de Sedes de Clientes -->
+    <ClientSedeList v-model="showClientSedesDialog" />
 
   </v-container>
 </template>
@@ -79,11 +86,15 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import UserList from '@/components/Config/UserList.vue'
+import ClientList from '@/components/Config/ClientList.vue'
+import ClientSedeList from '@/components/Config/ClientSedeList.vue'
 
 const router = useRouter()
 
 const showFeatureDialog = ref(false)
 const showContactsDialog = ref(false)
+const showClientsDialog = ref(false)
+const showClientSedesDialog = ref(false)
 const currentFeatureName = ref('')
 
 // Items de Configuración Cliente
@@ -96,6 +107,14 @@ const clientItems = [
 function openSection(item) {
     if (item.action === 'contacts') {
         showContactsDialog.value = true
+        return
+    }
+    if (item.action === 'clients') {
+        showClientsDialog.value = true
+        return
+    }
+    if (item.action === 'client_sedes') {
+        showClientSedesDialog.value = true
         return
     }
     currentFeatureName.value = item.title

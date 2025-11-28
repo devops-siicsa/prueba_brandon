@@ -23,39 +23,46 @@ class TipoRAM(db.Model):
     __tablename__ = 'TipoRAM'
     Id = db.Column(db.Integer, primary_key=True)
     Nombre = db.Column(db.String(50))
+    Activo = db.Column(db.Boolean, default=True)
 
 class CapacidadRAM(db.Model):
     __tablename__ = 'CapacidadRAM'
     Id = db.Column(db.Integer, primary_key=True)
     Capacidad = db.Column(db.String(50))
+    Activo = db.Column(db.Boolean, default=True)
 
 class BusRAM(db.Model):
     __tablename__ = 'BusRAM'
     Id = db.Column(db.Integer, primary_key=True)
     TipoId = db.Column(db.Integer, db.ForeignKey('TipoRAM.Id'))
     Velocidad = db.Column(db.String(50))
+    Activo = db.Column(db.Boolean, default=True)
 
 class TipoAlmacenamiento(db.Model):
     __tablename__ = 'TipoAlmacenamiento'
     Id = db.Column(db.Integer, primary_key=True)
     Nombre = db.Column(db.String(50))
+    Activo = db.Column(db.Boolean, default=True)
 
 class CapacidadAlmacenamiento(db.Model):
     __tablename__ = 'CapacidadAlmacenamiento'
     Id = db.Column(db.Integer, primary_key=True)
     Capacidad = db.Column(db.String(50))
+    Activo = db.Column(db.Boolean, default=True)
 
 class ProtocoloAlmacenamiento(db.Model):
     __tablename__ = 'ProtocoloAlmacenamiento'
     Id = db.Column(db.Integer, primary_key=True)
     TipoId = db.Column(db.Integer, db.ForeignKey('TipoAlmacenamiento.Id'))
     Nombre = db.Column(db.String(50))
+    Activo = db.Column(db.Boolean, default=True)
 
 class FactorFormaAlmacenamiento(db.Model):
     __tablename__ = 'FactorFormaAlmacenamiento'
     Id = db.Column(db.Integer, primary_key=True)
     TipoId = db.Column(db.Integer, db.ForeignKey('TipoAlmacenamiento.Id'))
     Nombre = db.Column(db.String(50))
+    Activo = db.Column(db.Boolean, default=True)
 
 # --- EQUIPOS Y DETALLES ---
 

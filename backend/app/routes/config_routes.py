@@ -105,7 +105,12 @@ def update_sede(current_user, sede_id):
 def get_roles(current_user):
     try:
         roles = ConfigService.get_all_roles()
-        return jsonify([{'Id': r.Id, 'Nombre': r.Nombre, 'Descripcion': r.Descripcion} for r in roles]), 200
+        return jsonify([{
+            'Id': r.Id, 
+            'Nombre': r.Nombre, 
+            'Descripcion': r.Descripcion,
+            'Permisos': [p.Id for p in r.Permisos]
+        } for r in roles]), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
@@ -132,7 +137,7 @@ def get_users(current_user):
     users = ConfigService.get_users({'EsUsuarioSistema': True})
     return jsonify([{
         'Id': u.Id, 'Nombre': u.Nombre, 'Apellido': u.Apellido, 
-        'Correo': u.Correo, 'Rol': u.Rol.Nombre if u.Rol else 'Sin Rol',
+        'Correo': u.Correo, 'Celular': u.Celular, 'Rol': u.Rol.Nombre if u.Rol else 'Sin Rol',
         'Activo': u.Activo, 'CargoId': u.CargoId, 'AreaId': u.AreaId, 'SedeId': u.SedeId, 'RolId': u.RolId,
         'PermisosEspecificos': [p.Id for p in u.PermisosEspecificos]
     } for u in users]), 200
@@ -214,3 +219,245 @@ def update_catalog_item(current_user, catalog_name, item_id):
         return jsonify({'message': 'Catálogo no válido'}), 400
     except Exception as e:
         return jsonify({'message': str(e)}), 400
+
+# --- CONFIGURACIÓN DE RAM ---
+@config_bp.route('/tipos_ram', methods=['GET'])
+@token_required
+@requires_permission('catalogs:view')
+def get_tipos_ram(current_user):
+    from app.models.inventory_models import TipoRAM
+    try:
+        items = TipoRAM.query.filter_by(Activo=True).order_by(TipoRAM.Nombre).all()
+        return jsonify([{'Id': i.Id, 'Nombre': i.Nombre} for i in items])
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
+@config_bp.route('/tipos_ram', methods=['POST'])
+@token_required
+@requires_permission('catalogs:create')
+def create_tipo_ram(current_user):
+    from app.models.inventory_models import TipoRAM
+    from app.extensions import db
+    data = request.get_json()
+    try:
+        new_item = TipoRAM(Nombre=data['Nombre'])
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify({'message': 'Tipo RAM creado', 'Id': new_item.Id}), 201
+    except Exception as e:
+        return jsonify({'message': str(e)}), 400
+
+@config_bp.route('/capacidades_ram', methods=['GET'])
+@token_required
+@requires_permission('catalogs:view')
+def get_capacidades_ram(current_user):
+    from app.models.inventory_models import CapacidadRAM
+    try:
+        # Ordenar alfanuméricamente podría requerir lógica extra, por ahora alfabético
+        items = CapacidadRAM.query.filter_by(Activo=True).order_by(CapacidadRAM.Capacidad).all()
+        return jsonify([{'Id': i.Id, 'Nombre': i.Capacidad} for i in items])
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
+@config_bp.route('/capacidades_ram', methods=['POST'])
+@token_required
+@requires_permission('catalogs:create')
+def create_capacidad_ram(current_user):
+    from app.models.inventory_models import CapacidadRAM
+    from app.extensions import db
+    data = request.get_json()
+    try:
+        # Frontend envía 'Nombre', backend espera 'Capacidad'
+        new_item = CapacidadRAM(Capacidad=data['Nombre']) 
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify({'message': 'Capacidad RAM creada', 'Id': new_item.Id}), 201
+    except Exception as e:
+        return jsonify({'message': str(e)}), 400
+
+@config_bp.route('/velocidades_ram', methods=['GET'])
+@token_required
+@requires_permission('catalogs:view')
+def get_velocidades_ram(current_user):
+    from app.models.inventory_models import BusRAM
+    try:
+        query = BusRAM.query.filter_by(Activo=True)
+        if 'TipoRAMId' in request.args:
+            query = query.filter_by(TipoId=request.args['TipoRAMId'])
+        
+        items = query.order_by(BusRAM.Velocidad).all()
+        return jsonify([{'Id': i.Id, 'Nombre': i.Velocidad, 'TipoRAMId': i.TipoId, 'Activo': i.Activo} for i in items])
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
+@config_bp.route('/velocidades_ram', methods=['POST'])
+@token_required
+@requires_permission('catalogs:create')
+def create_velocidad_ram(current_user):
+    from app.models.inventory_models import BusRAM
+    from app.extensions import db
+    data = request.get_json()
+    try:
+        # Frontend envía 'Nombre' y 'TipoRAMId', backend espera 'Velocidad' y 'TipoId'
+        new_item = BusRAM(Velocidad=data['Nombre'], TipoId=data['TipoRAMId'])
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify({'message': 'Velocidad RAM creada', 'Id': new_item.Id}), 201
+    except Exception as e:
+        return jsonify({'message': str(e)}), 400
+
+@config_bp.route('/velocidades_ram/<int:id>', methods=['PUT'])
+@token_required
+@requires_permission('catalogs:create') # Reutilizamos permiso de crear por ahora
+def update_velocidad_ram(current_user, id):
+    from app.models.inventory_models import BusRAM
+    from app.extensions import db
+    data = request.get_json()
+    try:
+        item = BusRAM.query.get_or_404(id)
+        if 'Nombre' in data:
+            item.Velocidad = data['Nombre']
+        if 'Activo' in data:
+            item.Activo = data['Activo']
+            
+        db.session.commit()
+        return jsonify({'message': 'Velocidad actualizada'}), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 400
+        return jsonify({'message': 'Velocidad actualizada'}), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 400
+
+# --- ALMACENAMIENTO ---
+
+@config_bp.route('/tipos_almacenamiento', methods=['GET', 'POST'])
+@token_required
+def tipos_almacenamiento(current_user):
+    from app.models.inventory_models import TipoAlmacenamiento
+    from app.extensions import db
+    
+    if request.method == 'GET':
+        # Verificar permiso de lectura manualmente o separar endpoints
+        if not current_user.has_permission('catalogs:view'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        items = TipoAlmacenamiento.query.all()
+        return jsonify([{'Id': i.Id, 'Nombre': i.Nombre, 'Activo': i.Activo} for i in items])
+    
+    if request.method == 'POST':
+        if not current_user.has_permission('catalogs:create'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        data = request.get_json()
+        if not data or 'Nombre' not in data:
+            return jsonify({'message': 'Faltan datos'}), 400
+        
+        # Find or Create
+        existing = TipoAlmacenamiento.query.filter_by(Nombre=data['Nombre']).first()
+        if existing:
+            return jsonify({'message': 'Ya existe', 'Id': existing.Id}), 200
+            
+        new_item = TipoAlmacenamiento(Nombre=data['Nombre'])
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify({'message': 'Creado', 'Id': new_item.Id}), 201
+
+@config_bp.route('/capacidades_almacenamiento', methods=['GET', 'POST'])
+@token_required
+def capacidades_almacenamiento(current_user):
+    from app.models.inventory_models import CapacidadAlmacenamiento
+    from app.extensions import db
+    
+    if request.method == 'GET':
+        if not current_user.has_permission('catalogs:view'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        items = CapacidadAlmacenamiento.query.all()
+        return jsonify([{'Id': i.Id, 'Nombre': i.Capacidad, 'Activo': i.Activo} for i in items])
+    
+    if request.method == 'POST':
+        if not current_user.has_permission('catalogs:create'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        data = request.get_json()
+        if not data or 'Nombre' not in data:
+            return jsonify({'message': 'Faltan datos'}), 400
+            
+        existing = CapacidadAlmacenamiento.query.filter_by(Capacidad=data['Nombre']).first()
+        if existing:
+            return jsonify({'message': 'Ya existe', 'Id': existing.Id}), 200
+            
+        new_item = CapacidadAlmacenamiento(Capacidad=data['Nombre'])
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify({'message': 'Creado', 'Id': new_item.Id}), 201
+
+@config_bp.route('/protocolos_almacenamiento', methods=['GET', 'POST'])
+@token_required
+def protocolos_almacenamiento(current_user):
+    from app.models.inventory_models import ProtocoloAlmacenamiento
+    from app.extensions import db
+    
+    if request.method == 'GET':
+        if not current_user.has_permission('catalogs:view'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        query = ProtocoloAlmacenamiento.query
+        if 'TipoId' in request.args:
+            query = query.filter_by(TipoId=request.args['TipoId'])
+        items = query.all()
+        return jsonify([{'Id': i.Id, 'Nombre': i.Nombre, 'TipoId': i.TipoId, 'Activo': i.Activo} for i in items])
+    
+    if request.method == 'POST':
+        if not current_user.has_permission('catalogs:create'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        data = request.get_json()
+        new_item = ProtocoloAlmacenamiento(Nombre=data['Nombre'], TipoId=data['TipoId'])
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify({'message': 'Creado', 'Id': new_item.Id}), 201
+
+@config_bp.route('/protocolos_almacenamiento/<int:id>', methods=['PUT'])
+@token_required
+@requires_permission('catalogs:create')
+def update_protocolo_almacenamiento(current_user, id):
+    from app.models.inventory_models import ProtocoloAlmacenamiento
+    from app.extensions import db
+    data = request.get_json()
+    item = ProtocoloAlmacenamiento.query.get_or_404(id)
+    if 'Nombre' in data: item.Nombre = data['Nombre']
+    if 'Activo' in data: item.Activo = data['Activo']
+    db.session.commit()
+    return jsonify({'message': 'Actualizado'}), 200
+
+@config_bp.route('/factores_forma_almacenamiento', methods=['GET', 'POST'])
+@token_required
+def factores_forma_almacenamiento(current_user):
+    from app.models.inventory_models import FactorFormaAlmacenamiento
+    from app.extensions import db
+    
+    if request.method == 'GET':
+        if not current_user.has_permission('catalogs:view'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        query = FactorFormaAlmacenamiento.query
+        if 'TipoId' in request.args:
+            query = query.filter_by(TipoId=request.args['TipoId'])
+        items = query.all()
+        return jsonify([{'Id': i.Id, 'Nombre': i.Nombre, 'TipoId': i.TipoId, 'Activo': i.Activo} for i in items])
+    
+    if request.method == 'POST':
+        if not current_user.has_permission('catalogs:create'):
+            return jsonify({'message': 'Acceso denegado'}), 403
+        data = request.get_json()
+        new_item = FactorFormaAlmacenamiento(Nombre=data['Nombre'], TipoId=data['TipoId'])
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify({'message': 'Creado', 'Id': new_item.Id}), 201
+
+@config_bp.route('/factores_forma_almacenamiento/<int:id>', methods=['PUT'])
+@token_required
+@requires_permission('catalogs:create')
+def update_factor_forma_almacenamiento(current_user, id):
+    from app.models.inventory_models import FactorFormaAlmacenamiento
+    from app.extensions import db
+    data = request.get_json()
+    item = FactorFormaAlmacenamiento.query.get_or_404(id)
+    if 'Nombre' in data: item.Nombre = data['Nombre']
+    if 'Activo' in data: item.Activo = data['Activo']
+    db.session.commit()
+    return jsonify({'message': 'Actualizado'}), 200

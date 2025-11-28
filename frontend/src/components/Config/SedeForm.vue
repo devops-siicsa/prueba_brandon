@@ -29,7 +29,7 @@
                     <label class="text-caption font-weight-bold text-grey-darken-1 mb-1 d-block">EMPRESA ASOCIADA</label>
                     <v-autocomplete
                         v-model="formData.EmpresaId"
-                        :items="companies"
+                        :items="filteredCompanies"
                         item-title="RazonSocial"
                         item-value="Id"
                         placeholder="Seleccionar empresa..."
@@ -204,6 +204,10 @@ const loading = ref(false)
 const departments = ref([])
 const cities = ref([])
 const selectedDept = ref(null)
+
+const filteredCompanies = computed(() => {
+    return props.companies.filter(c => c.Activo && !c.EsCliente)
+})
 
 const formData = ref({
     EmpresaId: null,

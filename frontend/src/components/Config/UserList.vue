@@ -125,6 +125,7 @@
         v-model="showForm"
         :user="selectedUser"
         :allowed-roles="filterRoles"
+        :client-mode="clientMode"
         @save="handleSave" 
     />
   </v-dialog>
@@ -146,6 +147,10 @@ const props = defineProps({
         default: 'Mis Usuarios'
     },
     embedded: {
+        type: Boolean,
+        default: false
+    },
+    clientMode: {
         type: Boolean,
         default: false
     }

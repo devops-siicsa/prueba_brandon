@@ -10,6 +10,8 @@
             <div>
                 <h2 class="text-h6 font-weight-bold text-grey-darken-3" style="line-height: 1.2;">
                     {{ user ? 'Editar Usuario' : 'Registrar Nuevo Usuario' }}
+                    <span v-if="clientMode" class="text-caption text-primary ml-2">(Modo Cliente)</span>
+                    <span v-else class="text-caption text-grey ml-2">(Modo Sistema)</span>
                 </h2>
                 <p class="text-caption text-grey mt-1">
                     Complete la información para {{ user ? 'actualizar el' : 'dar de alta un nuevo' }} usuario.
@@ -122,7 +124,7 @@
                     <label class="text-caption font-weight-bold text-grey-darken-1 mb-1 d-block">SEDE ASIGNADA</label>
                     <v-autocomplete
                         v-model="formData.SedeId"
-                        :items="sedes"
+                        :items="filteredSedes"
                         item-title="NombreSede"
                         item-value="Id"
                         placeholder="Seleccionar sede..."
@@ -172,6 +174,7 @@
                             class="rounded-lg"
                             :rules="[v => !!v || 'Requerido para usuarios de sistema']"
                             hide-details="auto"
+                            @update:model-value="onRoleChange"
                         ></v-autocomplete>
                     </v-col>
 
@@ -398,6 +401,10 @@ const props = defineProps({
     allowedRoles: {
         type: Array,
         default: () => []
+    },
+    clientMode: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -471,6 +478,7 @@ const permissions = ref([])
 const groupedPermissions = ref([])
 const structuredPermissions = ref([]) // Nuevo ref para grid
 const sedes = ref([])
+const companies = ref([])
 const cargos = ref([])
 const areas = ref([])
 
@@ -503,12 +511,13 @@ const passwordRules = computed(() => {
 
 async function loadCatalogs() {
     try {
-        const [rolesRes, permsRes, sedesRes, cargosRes, areasRes] = await Promise.all([
+        const [rolesRes, permsRes, sedesRes, cargosRes, areasRes, companiesRes] = await Promise.all([
             axios.get('http://localhost:5000/api/config/roles', { withCredentials: true }),
             axios.get('http://localhost:5000/api/config/permissions', { withCredentials: true }),
             axios.get('http://localhost:5000/api/config/sedes', { withCredentials: true }),
             axios.get('http://localhost:5000/api/config/catalogs/cargos', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/config/catalogs/areas', { withCredentials: true })
+            axios.get('http://localhost:5000/api/config/catalogs/areas', { withCredentials: true }),
+            axios.get('http://localhost:5000/api/config/companies', { withCredentials: true })
         ])
         roles.value = rolesRes.data
         permissions.value = permsRes.data
@@ -575,10 +584,31 @@ async function loadCatalogs() {
         sedes.value = sedesRes.data
         cargos.value = cargosRes.data
         areas.value = areasRes.data
+        companies.value = companiesRes.data
     } catch (e) {
         console.error(e)
     }
 }
+
+const filteredSedes = computed(() => {
+    return sedes.value.filter(s => {
+        if (!s.Activo) return false
+        // Use loose equality (==) to handle potential string/number mismatch
+        const comp = companies.value.find(c => c.Id == s.EmpresaId)
+        
+        if (!comp) {
+            console.warn(`Sede ${s.NombreSede} has no company (Id: ${s.EmpresaId})`)
+            return false
+        }
+        
+        const isActive = comp.Activo
+        
+        // Filter based on clientMode prop
+        const matchesMode = props.clientMode ? comp.EsCliente : !comp.EsCliente
+
+        return matchesMode && isActive
+    })
+})
 
 // Helper para obtener ID por Código
 const getPermissionIdByCode = (code) => {
@@ -644,14 +674,21 @@ const isSuperAdmin = computed(() => {
     return selectedRol && selectedRol.Nombre === 'SUPER ADMINISTRADOR'
 })
 
-// Watcher para RolId: Si es Super Admin, asignar todos los permisos
-watch(() => formData.value.RolId, (newVal) => {
-    const selectedRol = roles.value.find(r => r.Id === newVal)
-    if (selectedRol && selectedRol.Nombre === 'SUPER ADMINISTRADOR') {
-        // Asignar TODOS los permisos
-        formData.value.PermisosEspecificos = permissions.value.map(p => p.Id)
+// Manejar cambio de rol
+const onRoleChange = (newRolId) => {
+    const selectedRol = roles.value.find(r => r.Id === newRolId)
+    if (selectedRol) {
+        if (selectedRol.Nombre === 'SUPER ADMINISTRADOR') {
+            // Asignar TODOS los permisos
+            formData.value.PermisosEspecificos = permissions.value.map(p => p.Id)
+        } else if (selectedRol.Permisos) {
+            // Asignar permisos del rol
+            formData.value.PermisosEspecificos = [...selectedRol.Permisos]
+        } else {
+            formData.value.PermisosEspecificos = []
+        }
     }
-})
+}
 
 async function save() {
     const { valid } = await form.value.validate()
@@ -697,6 +734,12 @@ watch(() => props.user, (val) => {
             Password: '',
             Activo: true
         }
+    }
+})
+
+watch(() => props.modelValue, (val) => {
+    if (val) {
+        loadCatalogs()
     }
 })
 

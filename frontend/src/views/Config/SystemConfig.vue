@@ -134,9 +134,9 @@
         />
     </v-dialog>
 
-    <v-dialog v-model="showProcessorConfig" fullscreen transition="dialog-bottom-transition">
-        <ProcessorConfig v-model="showProcessorConfig" />
-    </v-dialog>
+    <ProcessorConfig v-model="showProcessorConfig" />
+    <RamConfig v-model="showRamConfig" />
+    <StorageConfig v-model="showStorageConfig" />
 
     <v-dialog v-model="showFeatureDialog" max-width="600">
         <v-card>
@@ -174,6 +174,8 @@ import SedeList from '@/components/Config/SedeList.vue'
 import UserList from '@/components/Config/UserList.vue'
 import UnifiedCatalogList from '@/components/Config/UnifiedCatalogList.vue'
 import ProcessorConfig from '@/components/Config/ProcessorConfig.vue'
+import RamConfig from '@/components/Config/RamConfig.vue'
+import StorageConfig from '@/components/Config/StorageConfig.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -181,6 +183,8 @@ const router = useRouter()
 // Estado para diálogos
 const showUnifiedCatalog = ref(false)
 const showProcessorConfig = ref(false)
+const showRamConfig = ref(false)
+const showStorageConfig = ref(false)
 const currentCatalogName = ref('')
 const currentCatalogTitle = ref('')
 const currentCatalogIcon = ref('')
@@ -203,17 +207,17 @@ const companyItems = [
 
 // Items de Catálogos (Color base: teal)
 const catalogItems = [
-    { title: 'Estado Equipo', icon: 'mdi-toggle-switch', catalog: 'estados_equipo', description: 'Estados posibles de un equipo (Nuevo, Usado, etc).', color: 'teal' },
-    { title: 'Tipo Equipo', icon: 'mdi-laptop', catalog: 'tipos_equipo', description: 'Tipos de dispositivos (Laptop, Desktop, Móvil).', color: 'teal' },
-    { title: 'Fabricantes', icon: 'mdi-factory', catalog: 'fabricantes', description: 'Marcas y fabricantes de hardware.', color: 'teal' },
+    { title: 'Estado Equipo', icon: 'mdi-toggle-switch', action: 'catalog', catalog: 'estados_equipo', description: 'Estados posibles de un equipo (Nuevo, Usado, etc).', color: 'teal' },
+    { title: 'Tipo Equipo', icon: 'mdi-laptop', action: 'catalog', catalog: 'tipos_equipo', description: 'Tipos de dispositivos (Laptop, Desktop, Móvil).', color: 'teal' },
+    { title: 'Fabricantes', icon: 'mdi-factory', action: 'catalog', catalog: 'fabricantes', description: 'Marcas y fabricantes de hardware.', color: 'teal' },
     { title: 'Catálogo de Procesadores', icon: 'mdi-cpu-64-bit', action: 'processors', description: 'Configuración de Marcas, Tipos y Generaciones.', color: 'teal' },
-    { title: 'RAM', icon: 'mdi-memory', catalog: 'tipos_ram', color: 'teal' },
-    { title: 'Almacenamiento', icon: 'mdi-harddisk', catalog: 'tipos_almacenamiento', color: 'teal' },
-    { title: 'Puertos', icon: 'mdi-serial-port', catalog: 'puertos', description: 'Tipos de puertos y conexiones.', color: 'teal' },
-    { title: 'Sistema Operativo', icon: 'mdi-monitor', catalog: 'sistemas_operativos', description: 'Sistemas operativos soportados.', color: 'teal' },
-    { title: 'Ofimáticas', icon: 'mdi-file-document', catalog: 'ofimaticas', description: 'Suites de ofimática y versiones.', color: 'teal' },
-    { title: 'Antivirus', icon: 'mdi-shield-check', catalog: 'antivirus', description: 'Soluciones de seguridad y antivirus.', color: 'teal' },
-    { title: 'Aplicaciones', icon: 'mdi-apps', catalog: 'aplicaciones', description: 'Otras aplicaciones y software corporativo.', color: 'teal' },
+    { title: 'RAM', icon: 'mdi-memory', action: 'ram', description: 'Tipos, Capacidades y Velocidades.', color: 'teal' },
+    { title: 'Almacenamiento', icon: 'mdi-harddisk', action: 'storage', description: 'Discos, tipos y capacidades', color: 'teal' },
+    { title: 'Puertos', icon: 'mdi-serial-port', action: 'catalog', catalog: 'puertos', description: 'Tipos de puertos y conexiones.', color: 'teal' },
+    { title: 'Sistema Operativo', icon: 'mdi-monitor', action: 'catalog', catalog: 'sistemas_operativos', description: 'Sistemas operativos soportados.', color: 'teal' },
+    { title: 'Ofimáticas', icon: 'mdi-file-document', action: 'catalog', catalog: 'ofimaticas', description: 'Suites de ofimática y versiones.', color: 'teal' },
+    { title: 'Antivirus', icon: 'mdi-shield-check', action: 'catalog', catalog: 'antivirus', description: 'Soluciones de seguridad y antivirus.', color: 'teal' },
+    { title: 'Aplicaciones', icon: 'mdi-apps', action: 'catalog', catalog: 'aplicaciones', description: 'Otras aplicaciones y software corporativo.', color: 'teal' },
 ]
 
 function openSection(item) {
@@ -227,6 +231,10 @@ function openSection(item) {
         showUserList.value = true
     } else if (item.action === 'processors') {
         showProcessorConfig.value = true
+    } else if (item.action === 'ram') {
+        showRamConfig.value = true
+    } else if (item.action === 'storage') {
+        showStorageConfig.value = true
     } else {
         currentFeatureName.value = item.title
         showFeatureDialog.value = true

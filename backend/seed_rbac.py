@@ -108,6 +108,8 @@ ROLE_PERMISSIONS = {
         'dashboard:view_all',
         # Inventario
         'inventory:view_global', 'inventory:create',
+        # Catálogos (Necesario para crear equipos)
+        'catalogs:view',
         # Equipo (Operativo)
         'equipment:edit_hardware',
         'equipment:edit_software',
@@ -131,6 +133,8 @@ ROLE_PERMISSIONS = {
         'dashboard:view_self',
         # Inventario
         'inventory:view_self', 'inventory:create',
+        # Catálogos
+        'catalogs:view',
         # Equipo
         'equipment:edit_all', # Gestiona su propio inventario
         'history:view', 'attachments:view_all', 'attachments:download'
@@ -142,6 +146,8 @@ ROLE_PERMISSIONS = {
         'dashboard:view_self',
         # Inventario
         'inventory:view_self',
+        # Catálogos
+        'catalogs:view',
         # Equipo (Solo Lectura)
         'history:view',
         'attachments:view_all', 'attachments:download'

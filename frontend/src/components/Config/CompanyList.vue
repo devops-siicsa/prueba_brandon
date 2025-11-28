@@ -167,6 +167,9 @@ async function loadCompanies() {
 
 const filteredCompanies = computed(() => {
     return companies.value.filter(c => {
+        // Excluir clientes (EsCliente === true)
+        if (c.EsCliente) return false
+        
         const matchesSearch = (c.RazonSocial?.toLowerCase().includes(search.value.toLowerCase()) || 
                                c.NIT?.includes(search.value))
         const matchesStatus = statusFilter.value === 'all' 
