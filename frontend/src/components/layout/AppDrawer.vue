@@ -164,6 +164,10 @@ function logout() {
 .modern-drawer.v-navigation-drawer--temporary {
   background-color: #0f172a !important;
   z-index: 2000 !important; /* Higher z-index for mobile overlay */
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: auto !important; /* Allow browser to determine height based on top/bottom */
 }
 
 /* Logo Box */
