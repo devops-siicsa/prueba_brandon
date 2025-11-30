@@ -151,14 +151,19 @@ function logout() {
 </script>
 
 <style scoped>
-.modern-drawer {
-  background-color: #0f172a !important; /* Slate 900 */
+.modern-drawer:not(.v-navigation-drawer--temporary) {
+  background-color: #0f172a !important; /* Slate 900 - Darker, modern */
   border-right: 1px solid rgba(255, 255, 255, 0.05);
-  z-index: 1005 !important;
+  z-index: 1005 !important; /* Ensure it stays above standard content but below high-priority modals if needed */
   height: 100vh !important;
   position: fixed !important;
   top: 0 !important;
   bottom: 0 !important;
+}
+
+.modern-drawer.v-navigation-drawer--temporary {
+  background-color: #0f172a !important;
+  z-index: 2000 !important; /* Higher z-index for mobile overlay */
 }
 
 /* Logo Box */
