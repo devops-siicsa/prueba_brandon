@@ -448,7 +448,7 @@ const filteredVelocidades = computed(() => {
 })
 
 // API
-const API_URL = 'http://localhost:5000/api/config'
+const API_URL = '/api/config'
 
 async function loadAll() {
     loading.value = true

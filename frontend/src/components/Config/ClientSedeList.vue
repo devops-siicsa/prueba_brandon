@@ -1,6 +1,12 @@
 <template>
-  <v-dialog v-model="dialog" max-width="1100" height="auto" scrollable transition="dialog-bottom-transition">
-    <v-card class="rounded-xl elevation-24">
+  <v-dialog 
+    v-model="dialog" 
+    :max-width="isMobileDevice ? '100%' : '1100'" 
+    :fullscreen="isMobileDevice"
+    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    scrollable
+  >
+    <v-card class="rounded-xl elevation-24" :class="{'rounded-0': isMobileDevice}">
       <!-- Header Personalizado -->
       <div class="px-8 pt-8 pb-4 d-flex justify-space-between align-start">
         <div>
@@ -12,7 +18,7 @@
 
       <v-divider class="mx-8"></v-divider>
 
-      <v-card-text class="px-8 py-6 bg-grey-lighten-5">
+      <v-card-text class="px-8 py-6 bg-grey-lighten-5" :style="isMobileDevice ? 'height: calc(100vh - 140px);' : ''">
         <!-- Barra de Herramientas -->
         <v-row class="mb-6 align-center">
             <v-col cols="12" md="5">
@@ -108,27 +114,28 @@
                 </v-card>
             </v-col>
         </v-row>
-
       </v-card-text>
     </v-card>
 
-    <!-- Formulario Modal -->
+    <!-- Formulario de Sede -->
     <ClientSedeForm 
-        v-model="showForm"
+        v-model="showForm" 
         :sede="selectedSede" 
         :companies="companies"
+        :isMobileDevice="isMobileDevice"
         @save="handleSave" 
     />
   </v-dialog>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import ClientSedeForm from './ClientSedeForm.vue'
 
 const props = defineProps({
-    modelValue: Boolean
+    modelValue: Boolean,
+    isMobileDevice: Boolean
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -171,8 +178,8 @@ async function loadData() {
     loading.value = true
     try {
         const [sedesRes, companiesRes] = await Promise.all([
-            axios.get('http://localhost:5000/api/config/sedes', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/config/companies', { withCredentials: true })
+            axios.get('/api/config/sedes', { withCredentials: true }),
+            axios.get('/api/config/companies', { withCredentials: true })
         ])
         sedes.value = sedesRes.data
         companies.value = companiesRes.data

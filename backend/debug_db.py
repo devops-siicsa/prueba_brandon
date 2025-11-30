@@ -1,24 +1,13 @@
 from app import create_app
-from sqlalchemy import text
 from app.extensions import db
 
 app = create_app()
 with app.app_context():
     try:
-        print("--- INICIO DIAGNOSTICO ---")
-        print("1. Test Conexión SQL Pura")
-        db.session.execute(text("SELECT 1"))
-        print("   -> OK")
-        
-        print("2. Test Tabla Personas (SQL Puro)")
-        db.session.execute(text("SELECT TOP 1 * FROM Personas"))
-        print("   -> OK")
-        
-        print("3. Test ORM Persona")
-        from app.models.auth_models import Persona
-        p = Persona.query.first()
-        print(f"   -> OK: {p}")
-        
+        print("Intentando crear tablas...")
+        db.create_all()
+        print("Tablas creadas exitosamente.")
     except Exception as e:
-        print(f"--- ERROR DETECTADO ---")
-        print(e)
+        print(f"Error creando tablas: {e}")
+        import traceback
+        traceback.print_exc()

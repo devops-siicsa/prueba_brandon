@@ -65,6 +65,12 @@ class Fabricante(db.Model):
     Nombre = db.Column(db.String(50))
     Activo = db.Column(db.Boolean, default=True)
 
+class Modelo(db.Model):
+    __tablename__ = 'Modelos'
+    Id = db.Column(db.Integer, primary_key=True)
+    Nombre = db.Column(db.String(100))
+    Activo = db.Column(db.Boolean, default=True)
+
 class Puerto(db.Model):
     __tablename__ = 'Puertos'
     Id = db.Column(db.Integer, primary_key=True)

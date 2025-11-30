@@ -1,6 +1,12 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600" persistent>
-    <v-card class="rounded-xl elevation-0">
+  <v-dialog 
+    v-model="dialog" 
+    :max-width="isMobileDevice ? '100%' : '600'" 
+    :fullscreen="isMobileDevice"
+    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    persistent
+  >
+    <v-card class="rounded-xl elevation-0" :class="{'rounded-0': isMobileDevice}">
       <!-- Header -->
       <div class="px-6 pt-6 pb-2 d-flex align-center justify-space-between">
         <div class="d-flex align-center">
@@ -21,7 +27,7 @@
 
       <v-divider class="mx-6 my-2"></v-divider>
 
-      <v-card-text class="px-6 py-2 scroll-container" style="max-height: 60vh; overflow-y: auto;">
+      <v-card-text class="px-6 py-2 scroll-container" :style="isMobileDevice ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
         <v-form ref="form" @submit.prevent="save">
             <v-row dense>
                 <!-- Cliente (Empresa) -->
@@ -189,7 +195,8 @@ import axios from 'axios'
 const props = defineProps({
     modelValue: Boolean,
     sede: Object,
-    companies: Array
+    companies: Array,
+    isMobileDevice: Boolean
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
@@ -221,7 +228,7 @@ const formData = ref({
 
 async function loadDepartments() {
     try {
-        const res = await axios.get('http://localhost:5000/api/config/departments', { withCredentials: true })
+        const res = await axios.get('/api/config/departments', { withCredentials: true })
         departments.value = res.data
     } catch (e) {
         console.error(e)
@@ -234,7 +241,7 @@ async function loadCities(deptId) {
         return
     }
     try {
-        const res = await axios.get(`http://localhost:5000/api/config/cities/${deptId}`, { withCredentials: true })
+        const res = await axios.get(`/api/config/cities/${deptId}`, { withCredentials: true })
         cities.value = res.data
     } catch (e) {
         console.error(e)
@@ -249,8 +256,8 @@ async function save() {
     loading.value = true
     try {
         const url = props.sede 
-            ? `http://localhost:5000/api/config/sedes/${props.sede.Id}`
-            : 'http://localhost:5000/api/config/sedes'
+            ? `/api/config/sedes/${props.sede.Id}`
+            : '/api/config/sedes'
         
         const method = props.sede ? 'put' : 'post'
         

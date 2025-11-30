@@ -1,7 +1,7 @@
 from app.extensions import db
 from app.models.core_models import (
     Empresa, Sede, Area, Cargo, 
-    EstadoEquipo, TipoEquipo, Fabricante, Puerto, SistemaOperativo, Ofimatica, Antivirus, Aplicacion
+    EstadoEquipo, TipoEquipo, Fabricante, Modelo, Puerto, SistemaOperativo, Ofimatica, Antivirus, Aplicacion
 )
 from app.models.inventory_models import (
     MarcaProcesador, TipoProcesador, GeneracionProcesador,
@@ -18,6 +18,7 @@ CATALOG_MODELS = {
     'estados_equipo': EstadoEquipo,
     'tipos_equipo': TipoEquipo,
     'fabricantes': Fabricante,
+    'modelos': Modelo,
     'puertos': Puerto,
     'sistemas_operativos': SistemaOperativo,
     'ofimaticas': Ofimatica,

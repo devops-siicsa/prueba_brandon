@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
             try {
                 // Conexión real con backend
                 // Axios debe estar configurado con withCredentials: true para enviar/recibir cookies
-                const response = await axios.post('http://localhost:5000/api/auth/login', credentials, {
+                const response = await axios.post('/api/auth/login', credentials, {
                     withCredentials: true
                 })
 
@@ -50,13 +50,13 @@ export const useAuthStore = defineStore('auth', {
             this.isAuthenticated = false
             localStorage.removeItem('token')
             // Llamar al backend para limpiar cookie
-            axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true })
+            axios.post('/api/auth/logout', {}, { withCredentials: true })
         },
 
         async checkAuth() {
             if (this.isAuthenticated) return true
             try {
-                const response = await axios.get('http://localhost:5000/api/auth/me', { withCredentials: true })
+                const response = await axios.get('/api/auth/me', { withCredentials: true })
                 this.user = response.data
                 this.permissions = response.data.Permisos || []
                 this.isAuthenticated = true

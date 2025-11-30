@@ -17,5 +17,13 @@ export default defineConfig({
     },
     server: {
         port: 3000, // Correremos el frontend en el puerto 3000
+        allowedHosts: true, // Permitir acceso desde ngrok u otros hosts externos
+        proxy: {
+            '/api': {
+                target: 'http://localhost:5000',
+                changeOrigin: true,
+                secure: false,
+            }
+        }
     }
 })

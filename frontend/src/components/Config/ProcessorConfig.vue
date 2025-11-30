@@ -357,7 +357,7 @@ const filteredGeneracionesForForm = computed(() => {
 })
 
 // API
-const API_URL = 'http://localhost:5000/api/config/catalogs'
+const API_URL = '/api/config/catalogs'
 
 async function loadAll() {
     loading.value = true

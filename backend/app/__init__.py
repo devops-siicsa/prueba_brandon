@@ -12,7 +12,12 @@ def create_app(config_class=Config):
 
     # Inicializar extensiones con la app creada
     db.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+    
+    # Permitir CORS para localhost y dominios de ngrok
+    cors.init_app(app, resources={r"/api/*": {"origins": [
+        "http://localhost:3000",
+        r"https://.*\.ngrok-free\.dev"
+    ]}}, supports_credentials=True)
 
     # Registrar Blueprints
     from app.routes.auth_routes import auth_bp
@@ -20,6 +25,13 @@ def create_app(config_class=Config):
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(config_bp)
+
+    # Crear tablas si no existen (con manejo de errores para no bloquear inicio)
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            print(f"Error creating tables: {e}")
 
     # --- RUTA DE PRUEBA (HEALTH CHECK) ---
     @app.route('/health', methods=['GET'])

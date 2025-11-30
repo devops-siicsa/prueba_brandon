@@ -1,6 +1,12 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600" persistent>
-    <v-card class="rounded-xl elevation-0">
+  <v-dialog 
+    v-model="dialog" 
+    :max-width="isMobileDevice ? '100%' : '600'" 
+    :fullscreen="isMobileDevice"
+    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    persistent
+  >
+    <v-card class="rounded-xl elevation-0" :class="{'rounded-0': isMobileDevice}">
       <!-- Header -->
       <div class="px-6 pt-6 pb-2 d-flex align-center justify-space-between">
         <div class="d-flex align-center">
@@ -21,7 +27,7 @@
 
       <v-divider class="mx-6 my-2"></v-divider>
 
-      <v-card-text class="px-6 py-2 scroll-container" style="max-height: 60vh; overflow-y: auto;">
+      <v-card-text class="px-6 py-2 scroll-container" :style="isMobileDevice ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
         <v-form ref="form" @submit.prevent="save">
             <v-row dense>
                 <!-- NIT -->
@@ -184,7 +190,8 @@ import axios from 'axios'
 
 const props = defineProps({
     modelValue: Boolean,
-    company: Object
+    company: Object,
+    isMobileDevice: Boolean
 })
 
 const emit = defineEmits(['update:modelValue', 'saved'])
@@ -211,7 +218,7 @@ const saving = ref(false)
 
 async function loadDepartments() {
     try {
-        const res = await axios.get('http://localhost:5000/api/config/departments', { withCredentials: true })
+        const res = await axios.get('/api/config/departments', { withCredentials: true })
         departments.value = res.data
     } catch (e) {
         console.error(e)
@@ -224,7 +231,7 @@ async function loadCities(deptId) {
         return
     }
     try {
-        const res = await axios.get(`http://localhost:5000/api/config/cities/${deptId}`, { withCredentials: true })
+        const res = await axios.get(`/api/config/cities/${deptId}`, { withCredentials: true })
         cities.value = res.data
     } catch (e) {
         console.error(e)
@@ -235,8 +242,8 @@ async function save() {
     saving.value = true
     try {
         const url = props.company 
-            ? `http://localhost:5000/api/config/companies/${props.company.Id}`
-            : 'http://localhost:5000/api/config/companies'
+            ? `/api/config/companies/${props.company.Id}`
+            : '/api/config/companies'
         
         const method = props.company ? 'put' : 'post'
         

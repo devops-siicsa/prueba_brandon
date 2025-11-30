@@ -13,8 +13,8 @@ class Config:
     _db_port = os.getenv('DB_PORT', '1433')
     _db_name = os.getenv('DB_NAME', 'sistema_inventario')
     
-    # Driver: Intentamos obtenerlo de env, si no, usamos 'SQL Server' que sabemos que existe
-    _db_driver = os.getenv('DB_DRIVER', 'SQL Server')
+    # Driver: Usamos ODBC Driver 18 for SQL Server
+    _db_driver = os.getenv('DB_DRIVER', 'ODBC Driver 18 for SQL Server')
     
     # URI para SQLAlchemy
     # Nota: Para SQL Server, el formato host:port a veces requiere host,port o solo host si es default.

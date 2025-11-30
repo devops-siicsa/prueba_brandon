@@ -38,6 +38,11 @@ const routes = [
                 name: 'ClientConfig',
                 component: () => import('@/views/Config/ClientConfig.vue'),
                 meta: { requiresPermission: 'menu:view_client_config' }
+            },
+            {
+                path: 'inventory',
+                name: 'Inventory',
+                component: () => import('@/views/Inventory/InventoryView.vue')
             }
         ]
     }

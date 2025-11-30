@@ -1,0 +1,76 @@
+Traceback (most recent call last):
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\default.py", line 922, in do_execute
+    cursor.execute(statement, parameters)
+pyodbc.Error: ('HY104', '[HY104] [Microsoft][ODBC SQL Server Driver]Valor de precisión no válido (0) (SQLBindParameter)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\proyectos\sistema_inventario\backend\debug_db.py", line 4, in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+  File "C:\proyectos\sistema_inventario\backend\app\__init__.py", line 31, in create_app
+    db.create_all()
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\flask_sqlalchemy\extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\flask_sqlalchemy\extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\sql\schema.py", line 5828, in create_all
+    bind._run_ddl_visitor(
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 3243, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 2447, in _run_ddl_visitor
+    visitorcallable(self.dialect, self, **kwargs).traverse_single(element)
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\sql\visitors.py", line 671, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\sql\ddl.py", line 898, in visit_metadata
+    [t for t in tables if self._can_create_table(t)]
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\sql\ddl.py", line 863, in _can_create_table
+    return not self.checkfirst or not self.dialect.has_table(
+                                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\dialects\mssql\base.py", line 2892, in wrap
+    return _switch_db(
+           ^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\dialects\mssql\base.py", line 2916, in _switch_db
+    return fn(*arg, **kw)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\dialects\mssql\base.py", line 3305, in has_table
+    return self._internal_has_table(connection, tablename, owner, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _internal_has_table
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\reflection.py", line 88, in cache
+    return fn(self, con, *args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\dialects\mssql\base.py", line 3408, in _internal_has_table
+    c = connection.execute(s)
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 1416, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\sql\elements.py", line 516, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 1639, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 2343, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\PREVENTA\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlalchemy\engine\default.py", line 922, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.DBAPIError: (pyodbc.Error) ('HY104', '[HY104] [Microsoft][ODBC SQL Server Driver]Valor de precisión no válido (0) (SQLBindParameter)')
+[SQL: SELECT [INFORMATION_SCHEMA].[TABLES].[TABLE_NAME] 
+FROM [INFORMATION_SCHEMA].[TABLES] 
+WHERE ([INFORMATION_SCHEMA].[TABLES].[TABLE_TYPE] = CAST(? AS NVARCHAR(max)) OR [INFORMATION_SCHEMA].[TABLES].[TABLE_TYPE] = CAST(? AS NVARCHAR(max))) AND [INFORMATION_SCHEMA].[TABLES].[TABLE_NAME] = CAST(? AS NVARCHAR(max)) AND [INFORMATION_SCHEMA].[TABLES].[TABLE_SCHEMA] = CAST(? AS NVARCHAR(max))]
+[parameters: ('BASE TABLE', 'VIEW', 'RolPermisos', 'dbo')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)

@@ -70,7 +70,7 @@ const headers = [
 async function loadItems() {
     loading.value = true
     try {
-        const res = await axios.get(`http://localhost:5000/api/config/catalogs/${props.catalogName}`, { withCredentials: true })
+        const res = await axios.get(`/api/config/catalogs/${props.catalogName}`, { withCredentials: true })
         items.value = res.data
     } catch (e) {
         console.error("Error cargando catalogo", e)
@@ -85,7 +85,7 @@ async function saveItem() {
     try {
         // Ajuste simple: enviamos 'Nombre'. Si el backend espera 'Capacidad', el servicio debe manejarlo o el componente ser mas listo.
         // Por ahora asumo que la mayoría usa Nombre.
-        await axios.post(`http://localhost:5000/api/config/catalogs/${props.catalogName}`, {
+        await axios.post(`/api/config/catalogs/${props.catalogName}`, {
             Nombre: newItemName.value
         }, { withCredentials: true })
         

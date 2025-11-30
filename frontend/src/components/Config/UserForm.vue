@@ -1,6 +1,12 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600" persistent>
-    <v-card class="rounded-xl elevation-0">
+  <v-dialog 
+    v-model="dialog" 
+    :max-width="isMobileDevice ? '100%' : '600'" 
+    :fullscreen="isMobileDevice"
+    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    persistent
+  >
+    <v-card class="rounded-xl elevation-0" :class="{'rounded-0': isMobileDevice}">
       <!-- Header -->
       <div class="px-6 pt-6 pb-2 d-flex align-center justify-space-between">
         <div class="d-flex align-center">
@@ -9,12 +15,12 @@
             </div>
             <div>
                 <h2 class="text-h6 font-weight-bold text-grey-darken-3" style="line-height: 1.2;">
-                    {{ user ? 'Editar Usuario' : 'Registrar Nuevo Usuario' }}
+                    {{ user ? 'Editar Usuario' : 'Registrar Usuario' }}
                     <span v-if="clientMode" class="text-caption text-primary ml-2">(Modo Cliente)</span>
                     <span v-else class="text-caption text-grey ml-2">(Modo Sistema)</span>
                 </h2>
                 <p class="text-caption text-grey mt-1">
-                    Complete la información para {{ user ? 'actualizar el' : 'dar de alta un nuevo' }} usuario.
+                    {{ user ? 'Actualizar información' : 'Nuevo usuario' }}
                 </p>
             </div>
         </div>
@@ -23,7 +29,7 @@
 
       <v-divider class="mx-6 my-2"></v-divider>
 
-      <v-card-text class="px-6 py-2 scroll-container" style="max-height: 60vh; overflow-y: auto;">
+      <v-card-text class="px-6 py-2 scroll-container" :style="isMobileDevice ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
         <v-form ref="form" @submit.prevent="save">
             <v-row dense>
                 <!-- Nombre y Apellido -->
@@ -220,8 +226,14 @@
                     </v-col>
 
                     <!-- Modal de Selección de Permisos -->
-                    <v-dialog v-model="permissionsDialog" max-width="900" scrollable>
-                        <v-card class="rounded-xl bg-white">
+                    <v-dialog 
+                        v-model="permissionsDialog" 
+                        :max-width="isMobileDevice ? '100%' : '900'" 
+                        :fullscreen="isMobileDevice"
+                        :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+                        scrollable
+                    >
+                        <v-card class="rounded-xl bg-white" :class="{'rounded-0': isMobileDevice}">
                             <!-- Header Modal -->
                             <div class="px-5 py-4 d-flex align-center justify-space-between border-bottom">
                                 <div class="d-flex align-center">
@@ -236,7 +248,7 @@
                             
                             <v-divider></v-divider>
                             
-                            <v-card-text class="px-5 py-5 bg-grey-lighten-5" style="max-height: 75vh;">
+                            <v-card-text class="px-5 py-5 bg-grey-lighten-5" :style="isMobileDevice ? 'height: calc(100vh - 140px);' : 'max-height: 75vh;'">
                                 <v-row>
                                     <v-col cols="12" md="6" v-for="category in visibleCategories" :key="category.name">
                                         <v-card 
@@ -398,89 +410,26 @@ import axios from 'axios'
 const props = defineProps({
     modelValue: Boolean,
     user: Object,
-    allowedRoles: {
-        type: Array,
-        default: () => []
-    },
-    clientMode: {
-        type: Boolean,
-        default: false
-    }
+    isMobileDevice: Boolean,
+    clientMode: Boolean,
+    allowedRoles: Array
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
+
+const companies = ref([])
+const sedes = ref([])
+const cargos = ref([])
+const areas = ref([])
+const roles = ref([])
+const permissions = ref([])
+const structuredPermissions = ref([])
+const form = ref(null)
 
 const dialog = computed({
     get: () => props.modelValue,
     set: (val) => emit('update:modelValue', val)
 })
-
-// ... (refs existentes)
-
-// Roles filtrados según props
-const filteredRoles = computed(() => {
-    if (props.allowedRoles.length === 0) return roles.value
-    return roles.value.filter(r => props.allowedRoles.includes(r.Nombre))
-})
-
-// Determinar si es contexto de cliente (para ocultar permisos de sistema)
-const isClientContext = computed(() => {
-    return props.allowedRoles.length > 0 && props.allowedRoles.some(r => r.includes('CLIENTE'))
-})
-
-// Categorías visibles en el modal
-const visibleCategories = computed(() => {
-    if (!isClientContext.value) return structuredPermissions.value
-    
-    // Si es cliente, ocultar categorías de sistema global
-    // O mostrar solo las específicas
-    const allowedCategories = [
-        'Navegación / Menú Principal',
-        'Panel: Configuración Cliente',
-        'Inventario y Dashboard',
-        'Ficha de Equipo (Detalle)'
-    ]
-    
-    // Permisos específicos a ocultar en contexto cliente
-    const hiddenPermissions = [
-        'Ver Configuración del Sistema',
-        'Ver Dashboard Global (Todos)',
-        'Ver Inventario Global'
-    ]
-
-    return structuredPermissions.value
-        .filter(c => allowedCategories.includes(c.name))
-        .map(category => {
-            // Clonar la categoría para no mutar el original
-            const newCategory = { ...category }
-            
-            // Filtrar submodulos y sus permisos
-            newCategory.submodules = category.submodules.map(sub => ({
-                ...sub,
-                permissions: sub.permissions.filter(p => !hiddenPermissions.includes(p.Descripcion))
-            })).filter(sub => sub.permissions.length > 0) // Eliminar submodulos vacíos
-
-            // Recalcular allPermissions para la categoría filtrada
-            newCategory.allPermissions = newCategory.submodules.flatMap(s => s.permissions)
-
-            return newCategory
-        })
-        .filter(c => c.allPermissions.length > 0) // Eliminar categorías vacías
-})
-
-// ... (resto del código)
-
-const form = ref(null)
-const loading = ref(false)
-const permissionsDialog = ref(false) // Control del modal
-const roles = ref([])
-const permissions = ref([])
-const groupedPermissions = ref([])
-const structuredPermissions = ref([]) // Nuevo ref para grid
-const sedes = ref([])
-const companies = ref([])
-const cargos = ref([])
-const areas = ref([])
 
 // Helper para obtener nombre del permiso por ID
 const getPermissionName = (id) => {
@@ -503,6 +452,9 @@ const formData = ref({
     Activo: true
 })
 
+const loading = ref(false)
+const permissionsDialog = ref(false)
+
 const passwordRules = computed(() => {
     if (!formData.value.EsUsuarioSistema) return []
     if (props.user && !formData.value.Password) return [] // Editando y vacía = no cambiar
@@ -512,12 +464,12 @@ const passwordRules = computed(() => {
 async function loadCatalogs() {
     try {
         const [rolesRes, permsRes, sedesRes, cargosRes, areasRes, companiesRes] = await Promise.all([
-            axios.get('http://localhost:5000/api/config/roles', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/config/permissions', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/config/sedes', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/config/catalogs/cargos', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/config/catalogs/areas', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/config/companies', { withCredentials: true })
+            axios.get('/api/config/roles', { withCredentials: true }),
+            axios.get('/api/config/permissions', { withCredentials: true }),
+            axios.get('/api/config/sedes', { withCredentials: true }),
+            axios.get('/api/config/catalogs/cargos', { withCredentials: true }),
+            axios.get('/api/config/catalogs/areas', { withCredentials: true }),
+            axios.get('/api/config/companies', { withCredentials: true })
         ])
         roles.value = rolesRes.data
         permissions.value = permsRes.data
@@ -610,6 +562,57 @@ const filteredSedes = computed(() => {
     })
 })
 
+// Roles filtrados según props
+const filteredRoles = computed(() => {
+    if (props.allowedRoles.length === 0) return roles.value
+    return roles.value.filter(r => props.allowedRoles.includes(r.Nombre))
+})
+
+// Determinar si es contexto de cliente (para ocultar permisos de sistema)
+const isClientContext = computed(() => {
+    return props.allowedRoles.length > 0 && props.allowedRoles.some(r => r.includes('CLIENTE'))
+})
+
+// Categorías visibles en el modal
+const visibleCategories = computed(() => {
+    if (!isClientContext.value) return structuredPermissions.value
+    
+    // Si es cliente, ocultar categorías de sistema global
+    // O mostrar solo las específicas
+    const allowedCategories = [
+        'Navegación / Menú Principal',
+        'Panel: Configuración Cliente',
+        'Inventario y Dashboard',
+        'Ficha de Equipo (Detalle)'
+    ]
+    
+    // Permisos específicos a ocultar en contexto cliente
+    const hiddenPermissions = [
+        'Ver Configuración del Sistema',
+        'Ver Dashboard Global (Todos)',
+        'Ver Inventario Global'
+    ]
+
+    return structuredPermissions.value
+        .filter(c => allowedCategories.includes(c.name))
+        .map(category => {
+            // Clonar la categoría para no mutar el original
+            const newCategory = { ...category }
+            
+            // Filtrar submodulos y sus permisos
+            newCategory.submodules = category.submodules.map(sub => ({
+                ...sub,
+                permissions: sub.permissions.filter(p => !hiddenPermissions.includes(p.Descripcion))
+            })).filter(sub => sub.permissions.length > 0) // Eliminar submodulos vacíos
+
+            // Recalcular allPermissions para la categoría filtrada
+            newCategory.allPermissions = newCategory.submodules.flatMap(s => s.permissions)
+
+            return newCategory
+        })
+        .filter(c => c.allPermissions.length > 0) // Eliminar categorías vacías
+})
+
 // Helper para obtener ID por Código
 const getPermissionIdByCode = (code) => {
     const perm = permissions.value.find(p => p.Codigo === code)
@@ -697,8 +700,8 @@ async function save() {
     loading.value = true
     try {
         const url = props.user 
-            ? `http://localhost:5000/api/config/users/${props.user.Id}`
-            : 'http://localhost:5000/api/config/users'
+            ? `/api/config/users/${props.user.Id}`
+            : '/api/config/users'
         
         const method = props.user ? 'put' : 'post'
         

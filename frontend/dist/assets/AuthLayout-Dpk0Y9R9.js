@@ -1,0 +1,1 @@
+import{c as o,w as e,V as r,r as s,o as c,a,b as n}from"./index-C00rILNG.js";const i={__name:"AuthLayout",setup(_){return(p,u)=>{const t=s("router-view");return c(),o(r,null,{default:e(()=>[a(n,{class:"pa-0"},{default:e(()=>[a(t)]),_:1})]),_:1})}}};export{i as default};
