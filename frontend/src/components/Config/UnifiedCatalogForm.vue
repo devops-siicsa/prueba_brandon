@@ -1,12 +1,12 @@
 <template>
   <v-dialog 
     v-model="dialog" 
-    :max-width="isMobileDevice ? '100%' : '500'" 
-    :fullscreen="isMobileDevice"
-    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    :max-width="isMobileApp ? '100%' : '500'" 
+    :fullscreen="isMobileApp"
+    :transition="isMobileApp ? 'dialog-bottom-transition' : 'dialog-transition'"
     persistent
   >
-    <v-card class="rounded-xl" :class="{'rounded-0': isMobileDevice}">
+    <v-card class="rounded-xl" :class="{'rounded-0': isMobileApp}">
         <v-card-title class="px-6 pt-6 pb-2 d-flex align-center justify-space-between">
             <span class="text-h6 font-weight-bold text-grey-darken-3">
                 {{ item.Id ? 'Editar Registro' : 'Nuevo Registro' }}
@@ -75,12 +75,11 @@ const props = defineProps({
     catalogName: {
         type: String,
         required: true
-    },
-    isMobileDevice: Boolean
+    }
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
-// const { mobile } = useDisplay() // Removed in favor of prop
+const { isMobileApp } = useMobileDetection()
 
 const dialog = computed({
     get: () => props.modelValue,

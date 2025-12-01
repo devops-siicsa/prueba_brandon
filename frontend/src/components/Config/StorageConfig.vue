@@ -1,15 +1,15 @@
 <template>
-  <v-dialog v-model="dialog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1000px'" scrollable transition="dialog-bottom-transition">
-    <v-card class="bg-grey-lighten-5 rounded-xl" :height="isMobileDevice ? '100%' : '700'">
+  <v-dialog v-model="dialog" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1000px'" scrollable transition="dialog-bottom-transition">
+    <v-card class="bg-grey-lighten-5 rounded-xl" :height="isMobileApp ? '100%' : '700'">
       <!-- Header -->
-      <div :class="[isMobileDevice ? 'px-4 py-3' : 'px-8 pt-6 pb-6', 'bg-white elevation-0 border-bottom']">
+      <div :class="[isMobileApp ? 'px-4 py-3' : 'px-8 pt-6 pb-6', 'bg-white elevation-0 border-bottom']">
         <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center">
-                <div class="header-icon-box mr-4 bg-teal-lighten-5" :style="isMobileDevice ? 'width: 40px; height: 40px;' : ''">
-                    <v-icon color="teal-darken-1" :size="isMobileDevice ? 24 : 28">mdi-harddisk</v-icon>
+                <div class="header-icon-box mr-4 bg-teal-lighten-5" :style="isMobileApp ? 'width: 40px; height: 40px;' : ''">
+                    <v-icon color="teal-darken-1" :size="isMobileApp ? 24 : 28">mdi-harddisk</v-icon>
                 </div>
                 <div>
-                    <h2 :class="[isMobileDevice ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-0']">Almacenamiento</h2>
+                    <h2 :class="[isMobileApp ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-0']">Almacenamiento</h2>
                     <p class="text-caption text-grey">Gestiona tipos, protocolos y factores de forma.</p>
                 </div>
             </div>
@@ -18,7 +18,7 @@
 
         <!-- Toolbar -->
         <div class="mt-6 d-flex align-center flex-wrap gap-4">
-            <div :style="isMobileDevice ? 'width: 100%;' : 'width: 280px;'">
+            <div :style="isMobileApp ? 'width: 100%;' : 'width: 280px;'">
                 <v-text-field
                     v-model="search"
                     prepend-inner-icon="mdi-magnify"
@@ -31,13 +31,13 @@
                 ></v-text-field>
             </div>
             
-            <v-spacer v-if="!isMobileDevice"></v-spacer>
+            <v-spacer v-if="!isMobileApp"></v-spacer>
 
-            <div :class="isMobileDevice ? 'd-flex w-100 gap-2' : 'd-flex'">
+            <div :class="isMobileApp ? 'd-flex w-100 gap-2' : 'd-flex'">
                 <v-btn 
                     color="blue-grey-lighten-4" 
                     variant="flat"
-                    :class="[isMobileDevice ? 'flex-grow-1' : 'mr-2', 'text-blue-grey-darken-4 text-capitalize rounded-lg px-4']" 
+                    :class="[isMobileApp ? 'flex-grow-1' : 'mr-2', 'text-blue-grey-darken-4 text-capitalize rounded-lg px-4']" 
                     height="40"
                     prepend-icon="mdi-database-plus" 
                     elevation="0"
@@ -48,7 +48,7 @@
 
                 <v-btn 
                     color="#1e293b" 
-                    :class="[isMobileDevice ? 'flex-grow-1' : '', 'text-white text-capitalize rounded-lg px-6']" 
+                    :class="[isMobileApp ? 'flex-grow-1' : '', 'text-white text-capitalize rounded-lg px-6']" 
                     height="40"
                     prepend-icon="mdi-plus" 
                     elevation="0"
@@ -60,7 +60,7 @@
         </div>
       </div>
 
-      <v-container fluid :class="isMobileDevice ? 'pa-4' : 'pa-8'">
+      <v-container fluid :class="isMobileApp ? 'pa-4' : 'pa-8'">
         <!-- VISTA DE ESCRITORIO: Tabla -->
         <v-card v-if="!isMobileDevice" class="rounded-lg border-thin elevation-0 overflow-hidden">
             <v-data-table
@@ -450,11 +450,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
-    modelValue: Boolean,
-    isMobileDevice: Boolean
+    modelValue: Boolean
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update:modelValue'])
 

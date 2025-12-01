@@ -1,12 +1,12 @@
 <template>
   <v-dialog 
     v-model="dialog" 
-    :max-width="isMobileDevice ? '100%' : '1100'" 
-    :fullscreen="isMobileDevice"
-    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    :max-width="isMobileApp ? '100%' : '1100'" 
+    :fullscreen="isMobileApp"
+    :transition="isMobileApp ? 'dialog-bottom-transition' : 'dialog-transition'"
     scrollable
   >
-    <v-card class="rounded-xl elevation-24" :class="{'rounded-0': isMobileDevice}">
+    <v-card class="rounded-xl elevation-24" :class="{'rounded-0': isMobileApp}">
       <!-- Header Personalizado -->
       <div class="px-8 pt-8 pb-4 d-flex justify-space-between align-start">
         <div>
@@ -18,7 +18,7 @@
 
       <v-divider class="mx-8"></v-divider>
 
-      <v-card-text class="px-8 py-6 bg-grey-lighten-5" :style="isMobileDevice ? 'height: calc(100vh - 140px);' : ''">
+      <v-card-text class="px-8 py-6 bg-grey-lighten-5" :style="isMobileApp ? 'height: calc(100vh - 140px);' : ''">
         <!-- Barra de Herramientas -->
         <v-row class="mb-6 align-center">
             <v-col cols="12" md="5">
@@ -128,26 +128,26 @@
         </v-row>
       </v-card-text>
     </v-card>
-
-    <!-- Formulario de Cliente -->
-    <ClientForm 
-        v-model="showForm" 
-        :company="selectedCompany" 
-        :isMobileDevice="isMobileDevice"
-        @saved="loadCompanies" 
-    />
   </v-dialog>
+
+  <ClientForm 
+    v-model="showForm" 
+    :company="selectedCompany" 
+    @saved="loadCompanies" 
+  />
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import ClientForm from './ClientForm.vue'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
-    modelValue: Boolean,
-    isMobileDevice: Boolean
+    modelValue: Boolean
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update:modelValue'])
 

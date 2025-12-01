@@ -2,12 +2,11 @@
   <v-app>
     <AppDrawer 
       v-model="drawer" 
-      :mobile="isVisualMobile" 
-      @toggle-debug="toggleDebug"
+      :mobile="isMobileApp" 
     />
 
     <AppBar 
-      :mobile="isVisualMobile"
+      :mobile="isMobileApp"
       @toggle-drawer="drawer = !drawer" 
     />
     
@@ -15,8 +14,8 @@
       <v-container fluid class="pa-6">
         
         <router-view 
-          :is-mobile-device="isVisualMobile"
-          :is-functional-mobile="isFunctionalMobile"
+          :is-mobile-device="isMobileApp"
+          :is-functional-mobile="isMobileApp"
         ></router-view>
 
       </v-container>
@@ -25,49 +24,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import AppDrawer from '@/components/layout/AppDrawer.vue'
 import AppBar from '@/components/layout/AppBar.vue'
-import { useDisplay } from 'vuetify'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
-const { platform, mobile } = useDisplay()
-const forceMobile = ref(null) 
+// Usamos la nueva lógica centralizada
+const { isMobileApp } = useMobileDetection()
 
-// -------------------------------------------------------------
-// VARIABLE 1: LÓGICA DE HARDWARE (Adaptive)
-// Define: "¿Soy un teléfono real con cámara?"
-// Esto controla si muestras CAMARA o EXCEL
-// -------------------------------------------------------------
-const isFunctionalMobile = computed(() => {
-    if (forceMobile.value !== null) return forceMobile.value
-    // Detecta solo el SO (Android/iOS)
-    return platform.android || platform.ios
-})
+// El drawer inicia cerrado si es móvil/tablet, abierto si es escritorio
+const drawer = ref(!isMobileApp.value)
 
-// -------------------------------------------------------------
-// VARIABLE 2: LÓGICA VISUAL (Responsive Layout)
-// Define: "¿Debo mostrar el menú hamburguesa?"
-// CORRECCIÓN AQUÍ: Esto debe depender del ANCHO (mobile.value), 
-// no del sistema operativo.
-// -------------------------------------------------------------
-const isVisualMobile = computed(() => {
-    // Si la pantalla es < 1280px (o breakpoint configurado), es visualmente móvil.
-    // Esto asegura que en PC con ventana pequeña, el menú se oculte.
-    return mobile.value
-})
-
-const drawer = ref(!isVisualMobile.value)
-
-// Watcher: Si la pantalla se achica (visual), el menú reacciona
-watch(isVisualMobile, (val) => {
+// Si cambia el tipo de dispositivo (ej: rotación o cambio de user agent simulado), ajustamos el drawer
+watch(isMobileApp, (val) => {
     drawer.value = !val
 })
-
-function toggleDebug() {
-    if (forceMobile.value === null) {
-        forceMobile.value = !isFunctionalMobile.value
-    } else {
-        forceMobile.value = !forceMobile.value
-    }
-}
 </script>

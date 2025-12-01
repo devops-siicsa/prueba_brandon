@@ -36,3 +36,12 @@ export function useMobileDetection() {
         platform
     }
 }
+//<!-- DEBUG INFO: REMOVE AFTER VERIFICATION --> (Esto les puede servir para depurar)
+//             <div class="text-caption text-red mt-4 border pa-2 rounded bg-grey-lighten-4">
+//                <strong>Debug Mobile Detection:</strong><br>
+//                isMobileApp: {{ isMobileApp }}<br>
+//                Android: {{ platform.android }}<br>
+//                iOS: {{ platform.ios }}<br>
+//                Mac: {{ platform.mac }}<br>
+//                TouchPoints: {{ navigator?.maxTouchPoints }}
+//             </div>

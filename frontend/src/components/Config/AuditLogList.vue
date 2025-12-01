@@ -1,14 +1,14 @@
 <template>
     <v-card class="h-100 d-flex flex-column bg-grey-lighten-5 rounded-xl">
         <!-- Header Premium -->
-        <div :class="[isMobileDevice ? 'px-4 py-4' : 'px-8 pt-6 pb-6', 'bg-white elevation-0 border-bottom']">
+        <div :class="[isMobileApp ? 'px-4 py-4' : 'px-8 pt-6 pb-6', 'bg-white elevation-0 border-bottom']">
             <div class="d-flex align-center justify-space-between">
                 <div class="d-flex align-center">
-                    <div class="header-icon-box mr-4 bg-orange-lighten-5" :style="isMobileDevice ? 'width: 40px; height: 40px;' : ''">
-                        <v-icon color="orange-darken-2" :size="isMobileDevice ? 24 : 28">mdi-file-eye</v-icon>
+                    <div class="header-icon-box mr-4 bg-orange-lighten-5" :style="isMobileApp ? 'width: 40px; height: 40px;' : ''">
+                        <v-icon color="orange-darken-2" :size="isMobileApp ? 24 : 28">mdi-file-eye</v-icon>
                     </div>
                     <div>
-                        <h2 :class="[isMobileDevice ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-0']">Log de Auditoría</h2>
+                        <h2 :class="[isMobileApp ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-0']">Log de Auditoría</h2>
                         <p class="text-caption text-grey">Historial detallado de cambios en el sistema.</p>
                     </div>
                 </div>
@@ -29,7 +29,7 @@
 
         <!-- Content -->
         <v-card-text class="pa-0 flex-grow-1 overflow-auto">
-            <v-container fluid :class="isMobileDevice ? 'pa-4' : 'pa-8'">
+            <v-container fluid :class="isMobileApp ? 'pa-4' : 'pa-8'">
                 <!-- Filters Section -->
                 <div class="mb-6">
                     <v-row dense>
@@ -154,7 +154,7 @@
                 </div>
 
                 <!-- Table Card (Desktop) -->
-                <v-card v-if="!isMobileDevice" class="rounded-lg border-thin elevation-0 overflow-hidden">
+                <v-card v-if="!isMobileApp" class="rounded-lg border-thin elevation-0 overflow-hidden">
                     <v-data-table-server
                         v-model:items-per-page="itemsPerPage"
                         v-model:page="currentPage"
@@ -282,11 +282,11 @@
         </v-card-text>
 
         <!-- Dialogo de Detalle (Estilo Premium) -->
-        <v-dialog v-model="detailDialog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '600'">
-            <v-card class="rounded-xl" :height="isMobileDevice ? '100%' : 'auto'">
-                <v-card-title :class="[isMobileDevice ? 'px-4 py-3' : 'px-6 pt-6 pb-4', 'd-flex align-start justify-space-between bg-white']">
+        <v-dialog v-model="detailDialog" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '600'">
+            <v-card class="rounded-xl" :height="isMobileApp ? '100%' : 'auto'">
+                <v-card-title :class="[isMobileApp ? 'px-4 py-3' : 'px-6 pt-6 pb-4', 'd-flex align-start justify-space-between bg-white']">
                     <div>
-                        <span :class="[isMobileDevice ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-blue-grey-darken-4']">
+                        <span :class="[isMobileApp ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-blue-grey-darken-4']">
                             Detalle del Cambio
                         </span>
                         <p class="text-caption text-grey mt-1">Información completa de la auditoría.</p>
@@ -294,9 +294,9 @@
                     <v-btn icon="mdi-close" variant="text" color="grey" density="comfortable" @click="detailDialog = false"></v-btn>
                 </v-card-title>
                 
-                <v-divider :class="[isMobileDevice ? 'mx-4' : 'mx-6', 'opacity-10 mb-4']"></v-divider>
+                <v-divider :class="[isMobileApp ? 'mx-4' : 'mx-6', 'opacity-10 mb-4']"></v-divider>
 
-                <v-card-text :class="[isMobileDevice ? 'px-4' : 'px-6', 'py-0 mb-6']">
+                <v-card-text :class="[isMobileApp ? 'px-4' : 'px-6', 'py-0 mb-6']">
                     <div v-if="selectedItem">
                         <div class="d-flex mb-6 bg-grey-lighten-5 pa-4 rounded-lg border-thin flex-wrap">
                             <div class="w-50 mb-2 mb-sm-0">
@@ -329,7 +329,7 @@
                         </v-code>
                     </div>
                 </v-card-text>
-                <v-card-actions :class="[isMobileDevice ? 'px-4 pb-4' : 'px-6 pb-6', 'pt-0']">
+                <v-card-actions :class="[isMobileApp ? 'px-4 pb-4' : 'px-6 pb-6', 'pt-0']">
                     <v-spacer></v-spacer>
                     <v-btn 
                         color="#1e293b" 
@@ -337,7 +337,7 @@
                         class="text-white text-capitalize rounded-lg px-6"
                         height="44"
                         @click="detailDialog = false"
-                        :block="isMobileDevice"
+                        :block="isMobileApp"
                     >
                         Cerrar
                     </v-btn>
@@ -351,11 +351,13 @@
 import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
-    modelValue: Boolean,
-    isMobileDevice: Boolean
+    modelValue: Boolean
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update:modelValue'])
 

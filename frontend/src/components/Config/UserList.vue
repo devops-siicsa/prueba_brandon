@@ -1,17 +1,17 @@
 <template>
-  <v-card :class="['h-100', 'elevation-0', 'bg-grey-lighten-5', isMobileDevice ? 'rounded-0' : 'rounded-xl']">
+  <v-card :class="['h-100', 'elevation-0', 'bg-grey-lighten-5', isMobileApp ? 'rounded-0' : 'rounded-xl']">
     <!-- Header Personalizado -->
-    <div :class="[isMobileDevice ? 'px-4 py-3' : 'px-6 py-4', 'd-flex justify-space-between align-center bg-white border-b']">
+    <div :class="[isMobileApp ? 'px-4 py-3' : 'px-6 py-4', 'd-flex justify-space-between align-center bg-white border-b']">
       <div>
-          <h2 :class="[isMobileDevice ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3']">{{ title }}</h2>
+          <h2 :class="[isMobileApp ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3']">{{ title }}</h2>
           <p class="text-caption text-grey">Gestiona el acceso y los permisos de los usuarios.</p>
       </div>
       <v-btn icon="mdi-close" variant="text" color="grey" @click="$emit('update:modelValue', false)"></v-btn>
     </div>
 
-    <v-card-text :class="[isMobileDevice ? 'px-3 py-4' : 'px-4 py-6 px-md-8']">
+    <v-card-text :class="[isMobileApp ? 'px-3 py-4' : 'px-4 py-6 px-md-8']">
       <!-- Barra de Herramientas -->
-      <v-row class="mb-4 align-center" :dense="isMobileDevice">
+      <v-row class="mb-4 align-center" :dense="isMobileApp">
           <v-col cols="12" md="5">
               <v-text-field
                   v-model="search"
@@ -24,7 +24,7 @@
                   class="rounded-lg"
               ></v-text-field>
           </v-col>
-          <v-spacer v-if="!isMobileDevice"></v-spacer>
+          <v-spacer v-if="!isMobileApp"></v-spacer>
           <v-col cols="12" md="auto">
               <v-btn 
                   color="#1e293b" 
@@ -47,10 +47,10 @@
 
       <!-- Estado Vacío (Empty State) -->
       <div v-else-if="filteredUsers.length === 0" class="d-flex flex-column align-center justify-center py-12 text-center">
-          <div class="empty-state-icon mb-6" :style="isMobileDevice ? 'width: 72px; height: 72px;' : ''">
-              <v-icon :size="isMobileDevice ? 36 : 48" color="primary">mdi-account-off</v-icon>
-              <div class="plus-badge" :style="isMobileDevice ? 'width: 24px; height: 24px;' : ''">
-                  <v-icon :size="isMobileDevice ? 14 : 16" color="white">mdi-plus</v-icon>
+          <div class="empty-state-icon mb-6" :style="isMobileApp ? 'width: 72px; height: 72px;' : ''">
+              <v-icon :size="isMobileApp ? 36 : 48" color="primary">mdi-account-off</v-icon>
+              <div class="plus-badge" :style="isMobileApp ? 'width: 24px; height: 24px;' : ''">
+                  <v-icon :size="isMobileApp ? 14 : 16" color="white">mdi-plus</v-icon>
               </div>
           </div>
           
@@ -72,7 +72,7 @@
       </div>
 
       <!-- Listado de Usuarios (Grid) -->
-      <v-row v-else :dense="isMobileDevice">
+      <v-row v-else :dense="isMobileApp">
           <v-col cols="12" sm="6" md="4" lg="3" v-for="user in filteredUsers" :key="user.Id">
               <v-card 
                   hover 
@@ -80,7 +80,7 @@
                   class="user-card border-0 elevation-1 h-100 rounded-lg"
               >
                   <div class="card-status-strip" :class="user.Activo ? 'bg-success' : 'bg-grey'"></div>
-                  <v-card-text :class="isMobileDevice ? 'pa-3' : 'pa-4'">
+                  <v-card-text :class="isMobileApp ? 'pa-3' : 'pa-4'">
                       <div class="d-flex align-center mb-2">
                           <v-avatar color="blue-lighten-5" size="40" class="mr-3">
                               <span class="text-primary font-weight-bold">{{ getInitials(user) }}</span>
@@ -122,7 +122,6 @@
         :user="selectedUser"
         :allowed-roles="filterRoles"
         :client-mode="clientMode"
-        :is-mobile-device="isMobileDevice"
         @save="handleSave" 
     />
   </v-card>
@@ -132,6 +131,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import UserForm from './UserForm.vue'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     modelValue: Boolean,
@@ -150,11 +150,11 @@ const props = defineProps({
     clientMode: {
         type: Boolean,
         default: false
-    },
-    isMobileDevice: Boolean
+    }
 })
 
 const emit = defineEmits(['update:modelValue'])
+const { isMobileApp } = useMobileDetection()
 
 const dialog = computed({
     get: () => props.modelValue,

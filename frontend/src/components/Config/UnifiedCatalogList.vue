@@ -1,22 +1,22 @@
 <template>
-  <v-card :class="['h-100', 'elevation-0', 'bg-grey-lighten-5', isMobileDevice ? 'rounded-0' : 'rounded-xl']">
+  <v-card :class="['h-100', 'elevation-0', 'bg-grey-lighten-5', isMobileApp ? 'rounded-0' : 'rounded-xl']">
     <!-- Header Personalizado -->
-    <div :class="[isMobileDevice ? 'px-4 py-3' : 'px-6 py-4', 'd-flex justify-space-between align-center bg-white border-b']">
+    <div :class="[isMobileApp ? 'px-4 py-3' : 'px-6 py-4', 'd-flex justify-space-between align-center bg-white border-b']">
       <div class="d-flex align-center">
-          <div class="header-icon-box mr-4" :style="isMobileDevice ? 'width: 36px; height: 36px;' : ''">
-              <v-icon color="primary" :size="isMobileDevice ? 20 : 24">{{ icon }}</v-icon>
+          <div class="header-icon-box mr-4" :style="isMobileApp ? 'width: 36px; height: 36px;' : ''">
+              <v-icon color="primary" :size="isMobileApp ? 20 : 24">{{ icon }}</v-icon>
           </div>
           <div>
-              <h2 :class="[isMobileDevice ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-1']">{{ title }}</h2>
+              <h2 :class="[isMobileApp ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-1']">{{ title }}</h2>
               <p class="text-caption text-grey">{{ description }}</p>
           </div>
       </div>
       <v-btn icon="mdi-close" variant="text" color="grey" @click="$emit('update:modelValue', false)"></v-btn>
     </div>
 
-    <v-card-text :class="[isMobileDevice ? 'px-3 py-4' : 'px-4 py-6 px-md-8']">
+    <v-card-text :class="[isMobileApp ? 'px-3 py-4' : 'px-4 py-6 px-md-8']">
       <!-- Barra de Herramientas -->
-      <v-row class="mb-4 align-center" :dense="isMobileDevice">
+      <v-row class="mb-4 align-center" :dense="isMobileApp">
           <v-col cols="12" md="4">
               <v-text-field
                   v-model="search"
@@ -43,7 +43,7 @@
               ></v-select>
           </v-col>
 
-          <v-spacer v-if="!isMobileDevice"></v-spacer>
+          <v-spacer v-if="!isMobileApp"></v-spacer>
           <v-col cols="12" md="auto">
               <v-btn 
                   color="#1e293b" 
@@ -60,7 +60,7 @@
       </v-row>
 
       <!-- VISTA DE ESCRITORIO: Tabla de Items -->
-      <v-card v-if="!isMobileDevice" class="rounded-lg border-0 elevation-1" :loading="loading">
+      <v-card v-if="!isMobileApp" class="rounded-lg border-0 elevation-1" :loading="loading">
           <v-data-table
               :headers="headers"
               :items="filteredItems"
@@ -163,7 +163,6 @@
         v-model="formDialog" 
         :item="editedItem" 
         :catalog-name="catalogName"
-        :isMobileDevice="isMobileDevice"
         @save="loadItems" 
     />
   </v-card>
@@ -173,6 +172,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import UnifiedCatalogForm from './UnifiedCatalogForm.vue'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     modelValue: Boolean,
@@ -191,9 +191,10 @@ const props = defineProps({
     description: {
         type: String,
         default: ''
-    },
-    isMobileDevice: Boolean
+    }
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update:modelValue'])
 

@@ -66,25 +66,21 @@
     </v-dialog>
 
     <!-- Diálogo de Gestión de Contactos -->
-    <v-dialog v-model="showContactsDialog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
+    <v-dialog v-model="showContactsDialog" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
         <UserList 
             v-model="showContactsDialog"
             :filter-roles="['ADMINISTRADOR CLIENTE', 'SOPORTE CLIENTE', 'AUDITOR EXTERNO']"
             title="Gestión de Contactos"
             client-mode
-            :is-mobile-device="isMobileDevice"
+            :is-mobile-device="isMobileApp"
         />
     </v-dialog>
 
     <!-- Diálogo de Gestión de Clientes -->
-    <v-dialog v-model="showClientsDialog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <ClientList v-model="showClientsDialog" :is-mobile-device="isMobileDevice" />
-    </v-dialog>
+    <ClientList v-model="showClientsDialog" />
 
     <!-- Diálogo de Gestión de Sedes de Clientes -->
-    <v-dialog v-model="showClientSedesDialog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <ClientSedeList v-model="showClientSedesDialog" :is-mobile-device="isMobileDevice" />
-    </v-dialog>
+    <ClientSedeList v-model="showClientSedesDialog" />
 
   </v-container>
 </template>
@@ -95,10 +91,9 @@ import { useRouter } from 'vue-router'
 import UserList from '@/components/Config/UserList.vue'
 import ClientList from '@/components/Config/ClientList.vue'
 import ClientSedeList from '@/components/Config/ClientSedeList.vue'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
-const props = defineProps({
-  isMobileDevice: Boolean
-})
+const { isMobileApp } = useMobileDetection()
 
 const router = useRouter()
 

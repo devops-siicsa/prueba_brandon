@@ -1,12 +1,12 @@
 <template>
   <v-dialog 
     v-model="dialog" 
-    :max-width="isMobileDevice ? '100%' : '600'" 
-    :fullscreen="isMobileDevice"
-    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    :max-width="isMobileApp ? '100%' : '600'" 
+    :fullscreen="isMobileApp"
+    :transition="isMobileApp ? 'dialog-bottom-transition' : 'dialog-transition'"
     persistent
   >
-    <v-card class="rounded-xl elevation-0" :class="{'rounded-0': isMobileDevice}">
+    <v-card class="rounded-xl elevation-0" :class="{'rounded-0': isMobileApp}">
       <!-- Header -->
       <div class="px-6 pt-6 pb-2 d-flex align-center justify-space-between">
         <div class="d-flex align-center">
@@ -27,7 +27,7 @@
 
       <v-divider class="mx-6 my-2"></v-divider>
 
-      <v-card-text class="px-6 py-2 scroll-container" :style="isMobileDevice ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
+      <v-card-text class="px-6 py-2 scroll-container" :style="isMobileApp ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
         <v-form ref="form" @submit.prevent="save">
             <v-row dense>
                 <!-- NIT -->
@@ -187,12 +187,14 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     modelValue: Boolean,
-    company: Object,
-    isMobileDevice: Boolean
+    company: Object
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update:modelValue', 'saved'])
 

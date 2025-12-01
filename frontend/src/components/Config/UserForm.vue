@@ -1,12 +1,12 @@
 <template>
   <v-dialog 
     v-model="dialog" 
-    :max-width="isMobileDevice ? '100%' : '600'" 
-    :fullscreen="isMobileDevice"
-    :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+    :max-width="isMobileApp ? '100%' : '600'" 
+    :fullscreen="isMobileApp"
+    :transition="isMobileApp ? 'dialog-bottom-transition' : 'dialog-transition'"
     persistent
   >
-    <v-card class="rounded-xl elevation-0" :class="{'rounded-0': isMobileDevice}">
+    <v-card class="rounded-xl elevation-0" :class="{'rounded-0': isMobileApp}">
       <!-- Header -->
       <div class="px-6 pt-6 pb-2 d-flex align-center justify-space-between">
         <div class="d-flex align-center">
@@ -29,7 +29,7 @@
 
       <v-divider class="mx-6 my-2"></v-divider>
 
-      <v-card-text class="px-6 py-2 scroll-container" :style="isMobileDevice ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
+      <v-card-text class="px-6 py-2 scroll-container" :style="isMobileApp ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
         <v-form ref="form" @submit.prevent="save">
             <v-row dense>
                 <!-- Documento, Nombre y Apellido -->
@@ -242,12 +242,12 @@
                     <!-- Modal de Selección de Permisos -->
                     <v-dialog 
                         v-model="permissionsDialog" 
-                        :max-width="isMobileDevice ? '100%' : '900'" 
-                        :fullscreen="isMobileDevice"
-                        :transition="isMobileDevice ? 'dialog-bottom-transition' : 'dialog-transition'"
+                        :max-width="isMobileApp ? '100%' : '900'" 
+                        :fullscreen="isMobileApp"
+                        :transition="isMobileApp ? 'dialog-bottom-transition' : 'dialog-transition'"
                         scrollable
                     >
-                        <v-card class="rounded-xl bg-white" :class="{'rounded-0': isMobileDevice}">
+                        <v-card class="rounded-xl bg-white" :class="{'rounded-0': isMobileApp}">
                             <!-- Header Modal -->
                             <div class="px-5 py-4 d-flex align-center justify-space-between border-bottom">
                                 <div class="d-flex align-center">
@@ -262,7 +262,7 @@
                             
                             <v-divider></v-divider>
                             
-                            <v-card-text class="px-5 py-5 bg-grey-lighten-5" :style="isMobileDevice ? 'height: calc(100vh - 140px);' : 'max-height: 75vh;'">
+                            <v-card-text class="px-5 py-5 bg-grey-lighten-5" :style="isMobileApp ? 'height: calc(100vh - 140px);' : 'max-height: 75vh;'">
                                 <v-row>
                                     <v-col cols="12" md="6" v-for="category in visibleCategories" :key="category.name">
                                         <v-card 
@@ -421,15 +421,17 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 
+import { useMobileDetection } from '@/composables/useMobileDetection'
+
 const props = defineProps({
     modelValue: Boolean,
     user: Object,
-    isMobileDevice: Boolean,
     clientMode: Boolean,
     allowedRoles: Array
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
+const { isMobileApp } = useMobileDetection()
 
 const companies = ref([])
 const sedes = ref([])

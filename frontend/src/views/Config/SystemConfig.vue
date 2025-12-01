@@ -130,20 +130,20 @@
     </div>
 
     <!-- DIÁLOGOS -->
-    <v-dialog v-model="showUnifiedCatalog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
+    <v-dialog v-model="showUnifiedCatalog" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
         <UnifiedCatalogList 
             v-model="showUnifiedCatalog" 
             :catalog-name="currentCatalogName"
             :title="currentCatalogTitle"
             :icon="currentCatalogIcon"
             :description="currentCatalogDescription"
-            :is-mobile-device="isMobileDevice"
+           
         />
     </v-dialog>
 
-    <ProcessorConfig v-model="showProcessorConfig" :is-mobile-device="isMobileDevice" />
-    <RamConfig v-model="showRamConfig" :is-mobile-device="isMobileDevice" />
-    <StorageConfig v-model="showStorageConfig" :is-mobile-device="isMobileDevice" />
+    <ProcessorConfig v-model="showProcessorConfig" />
+    <RamConfig v-model="showRamConfig" />
+    <StorageConfig v-model="showStorageConfig" />
 
     <v-dialog v-model="showFeatureDialog" max-width="600">
         <v-card class="rounded-xl">
@@ -159,28 +159,28 @@
     </v-dialog>
 
     <!-- PANTALLAS COMPLETAS (Listados) -->
-    <v-dialog v-model="showCompanyList" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <CompanyList v-model="showCompanyList" :is-mobile-device="isMobileDevice" />
+    <v-dialog v-model="showCompanyList" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
+        <CompanyList v-model="showCompanyList" />
     </v-dialog>
 
-    <v-dialog v-model="showSedeList" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <SedeList v-model="showSedeList" :is-mobile-device="isMobileDevice" />
+    <v-dialog v-model="showSedeList" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
+        <SedeList v-model="showSedeList" />
     </v-dialog>
 
-    <v-dialog v-model="showUserList" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <UserList v-model="showUserList" :is-mobile-device="isMobileDevice" />
+    <v-dialog v-model="showUserList" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
+        <UserList v-model="showUserList" />
     </v-dialog>
 
-    <v-dialog v-model="showAreaList" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <AreaList v-model="showAreaList" :is-mobile-device="isMobileDevice" />
+    <v-dialog v-model="showAreaList" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
+        <AreaList v-model="showAreaList" />
     </v-dialog>
 
-    <v-dialog v-model="showCargoList" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <CargoList v-model="showCargoList" :is-mobile-device="isMobileDevice" />
+    <v-dialog v-model="showCargoList" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
+        <CargoList v-model="showCargoList" />
     </v-dialog>
 
-    <v-dialog v-model="showAuditLog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
-        <AuditLogList v-model="showAuditLog" :is-mobile-device="isMobileDevice" />
+    <v-dialog v-model="showAuditLog" :fullscreen="isMobileApp" :max-width="isMobileApp ? '100%' : '1200px'" transition="dialog-bottom-transition">
+        <AuditLogList v-model="showAuditLog" />
     </v-dialog>
   </v-container>
 </template>
@@ -198,11 +198,9 @@ import ProcessorConfig from '@/components/Config/ProcessorConfig.vue'
 import RamConfig from '@/components/Config/RamConfig.vue'
 import StorageConfig from '@/components/Config/StorageConfig.vue'
 import { useRouter } from 'vue-router'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
-const props = defineProps({
-  isMobileDevice: Boolean
-})
-
+const { isMobileApp } = useMobileDetection()
 const router = useRouter()
 
 // Estado para diálogos
