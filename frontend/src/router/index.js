@@ -25,7 +25,7 @@ const routes = [
             {
                 path: 'dashboard',
                 name: 'Dashboard',
-                component: () => import('@/views/Dashboard/DashboardHome.vue')
+                component: () => import('@/views/General/UnderConstruction.vue')
             },
             {
                 path: 'config/system',
@@ -41,8 +41,18 @@ const routes = [
             },
             {
                 path: 'inventory',
-                name: 'Inventory',
+                name: 'InventoryHome',
+                component: () => import('@/views/Dashboard/DashboardHome.vue')
+            },
+            {
+                path: 'inventory/list',
+                name: 'InventoryList',
                 component: () => import('@/views/Inventory/InventoryView.vue')
+            },
+            {
+                path: 'inventory/equipment/:id',
+                name: 'EquipmentDetail',
+                component: () => import('@/views/Inventory/EquipmentDetail.vue')
             }
         ]
     }

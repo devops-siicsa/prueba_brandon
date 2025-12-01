@@ -23,10 +23,12 @@ def create_app(config_class=Config):
     from app.routes.auth_routes import auth_bp
     from app.routes.config_routes import config_bp
     from app.routes.audit_routes import audit_bp
+    from app.routes.inventory_routes import inventory_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(config_bp)
     app.register_blueprint(audit_bp)
+    app.register_blueprint(inventory_bp)
 
     # Registrar Hooks de Auditoría
     from app.audit_hooks import register_audit_hooks
