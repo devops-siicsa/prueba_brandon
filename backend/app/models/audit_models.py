@@ -9,7 +9,7 @@ class AuditoriaLog(db.Model):
     RegistroId = db.Column(db.Integer)
     Accion = db.Column(db.String(20)) # CREAR, EDITAR, ELIMINAR
     UsuarioId = db.Column(db.Integer, db.ForeignKey('Personas.Id'))
-    Fecha = db.Column(db.DateTime, default=datetime.utcnow)
+    Fecha = db.Column(db.DateTime, default=datetime.now)
     
     DetalleCambio = db.Column(db.String(None)) # NVARCHAR(MAX)
     CampoAfectado = db.Column(db.String(100))

@@ -1,15 +1,15 @@
 <template>
-  <v-dialog v-model="dialog" max-width="900" scrollable transition="dialog-bottom-transition">
-    <v-card class="bg-grey-lighten-5 rounded-xl" height="600">
+  <v-dialog v-model="dialog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '900px'" scrollable transition="dialog-bottom-transition">
+    <v-card class="bg-grey-lighten-5 rounded-xl" :height="isMobileDevice ? '100%' : '600'">
       <!-- Header -->
-      <div class="px-8 pt-6 pb-6 bg-white elevation-0 border-bottom">
+      <div :class="[isMobileDevice ? 'px-4 py-3' : 'px-8 pt-6 pb-6', 'bg-white elevation-0 border-bottom']">
         <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center">
-                <div class="header-icon-box mr-4 bg-blue-grey-lighten-5">
-                    <v-icon color="blue-grey-darken-1" size="28">mdi-cpu-64-bit</v-icon>
+                <div class="header-icon-box mr-4 bg-blue-grey-lighten-5" :style="isMobileDevice ? 'width: 40px; height: 40px;' : ''">
+                    <v-icon color="blue-grey-darken-1" :size="isMobileDevice ? 24 : 28">mdi-cpu-64-bit</v-icon>
                 </div>
                 <div>
-                    <h2 class="text-h6 font-weight-bold text-grey-darken-3 mb-0">Procesadores</h2>
+                    <h2 :class="[isMobileDevice ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-0']">Procesadores</h2>
                     <p class="text-caption text-grey">Gestiona las especificaciones de CPUs disponibles.</p>
                 </div>
             </div>
@@ -18,7 +18,7 @@
 
         <!-- Toolbar -->
         <div class="mt-6 d-flex align-center flex-wrap gap-4">
-            <div style="width: 280px;">
+            <div :style="isMobileDevice ? 'width: 100%;' : 'width: 280px;'">
                 <v-text-field
                     v-model="search"
                     prepend-inner-icon="mdi-magnify"
@@ -31,7 +31,7 @@
                 ></v-text-field>
             </div>
             
-            <div style="width: 200px;">
+            <div :style="isMobileDevice ? 'width: 100%;' : 'width: 200px;'">
                 <v-select
                     v-model="filterMarca"
                     :items="marcas"
@@ -47,7 +47,7 @@
                 ></v-select>
             </div>
 
-            <div style="width: 220px;">
+            <div :style="isMobileDevice ? 'width: 100%;' : 'width: 220px;'">
                 <v-select
                     v-model="filterTipo"
                     :items="tipos"
@@ -63,10 +63,11 @@
                 ></v-select>
             </div>
 
-            <v-spacer></v-spacer>
+            <v-spacer v-if="!isMobileDevice"></v-spacer>
 
             <v-btn 
                 color="#1e293b" 
+                :block="isMobileDevice"
                 class="text-white text-capitalize rounded-lg px-6" 
                 height="40"
                 prepend-icon="mdi-plus" 
@@ -78,8 +79,9 @@
         </div>
       </div>
 
-      <v-container fluid class="pa-8">
-        <v-card class="rounded-lg border-thin elevation-0 overflow-hidden">
+      <v-container fluid :class="isMobileDevice ? 'pa-4' : 'pa-8'">
+        <!-- VISTA DE ESCRITORIO: Tabla -->
+        <v-card v-if="!isMobileDevice" class="rounded-lg border-thin elevation-0 overflow-hidden">
             <v-data-table
                 :headers="headers"
                 :items="tableItems"
@@ -146,6 +148,68 @@
                 </template>
             </v-data-table>
         </v-card>
+
+        <!-- VISTA MÓVIL: Lista de Tarjetas -->
+        <div v-else>
+             <!-- Estado Vacío Móvil -->
+            <div v-if="tableItems.length === 0" class="d-flex flex-column align-center justify-center py-12 text-center">
+                <div class="empty-state-icon mb-6" style="width: 72px; height: 72px; background-color: #eceff1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <v-icon size="36" color="blue-grey-lighten-2">mdi-cpu-64-bit</v-icon>
+                </div>
+                <h3 class="text-subtitle-1 font-weight-bold text-grey-darken-3 mb-2">No se encontraron procesadores</h3>
+                <v-btn color="blue-grey-darken-3" variant="tonal" class="text-capitalize rounded-lg" prepend-icon="mdi-plus" @click="openCreateDialog">
+                    Agregar nuevo
+                </v-btn>
+            </div>
+
+            <v-row v-else dense>
+                <v-col cols="12" v-for="item in tableItems" :key="item.Id">
+                    <v-card hover @click="editItem(item)" class="border-thin elevation-0 rounded-lg">
+                        <div class="d-flex">
+                            <!-- Brand Strip -->
+                            <div :class="`bg-${getBrandColor(item.Marca)}`" style="width: 4px;"></div>
+                            
+                            <div class="pa-3 flex-grow-1">
+                                <div class="d-flex justify-space-between align-start mb-1">
+                                    <div>
+                                        <div class="text-subtitle-2 font-weight-bold text-grey-darken-3">
+                                            {{ item.Generacion }}
+                                        </div>
+                                        <div class="text-caption text-grey-darken-1">
+                                            {{ item.Tipo }}
+                                        </div>
+                                    </div>
+                                    <v-chip
+                                        size="x-small"
+                                        :color="getBrandColor(item.Marca)"
+                                        variant="flat"
+                                        class="font-weight-bold"
+                                        :class="`bg-${getBrandColor(item.Marca)}-lighten-5 text-${getBrandColor(item.Marca)}-darken-2`"
+                                    >
+                                        {{ item.Marca }}
+                                    </v-chip>
+                                </div>
+
+                                <v-divider class="my-2 border-opacity-50"></v-divider>
+
+                                <div class="d-flex justify-space-between align-center">
+                                    <span class="text-caption text-grey font-weight-medium">ID: {{ String(item.Id).padStart(3, '0') }}</span>
+                                    
+                                    <v-chip 
+                                        color="emerald" 
+                                        class="bg-green-lighten-5 text-green-darken-1 font-weight-bold"
+                                        size="x-small" 
+                                        variant="flat"
+                                    >
+                                        Activo
+                                    </v-chip>
+                                </div>
+                            </div>
+                        </div>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </div>
       </v-container>
     </v-card>
 
@@ -273,7 +337,8 @@ import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
-    modelValue: Boolean
+    modelValue: Boolean,
+    isMobileDevice: Boolean
 })
 
 const emit = defineEmits(['update:modelValue'])

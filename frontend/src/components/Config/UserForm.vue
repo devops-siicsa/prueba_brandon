@@ -32,7 +32,21 @@
       <v-card-text class="px-6 py-2 scroll-container" :style="isMobileDevice ? 'height: calc(100vh - 140px); overflow-y: auto;' : 'max-height: 60vh; overflow-y: auto;'">
         <v-form ref="form" @submit.prevent="save">
             <v-row dense>
-                <!-- Nombre y Apellido -->
+                <!-- Documento, Nombre y Apellido -->
+                <v-col cols="12">
+                    <label class="text-caption font-weight-bold text-grey-darken-1 mb-1 d-block">DOCUMENTO DE IDENTIDAD</label>
+                    <v-text-field 
+                        v-model="formData.Documento" 
+                        placeholder="Ej. 1234567890" 
+                        variant="outlined" 
+                        density="compact"
+                        prepend-inner-icon="mdi-card-account-details-outline"
+                        bg-color="grey-lighten-5"
+                        class="rounded-lg"
+                        :rules="[v => !!v || 'Requerido']"
+                        hide-details="auto"
+                    ></v-text-field>
+                </v-col>
                 <v-col cols="12" md="6">
                     <label class="text-caption font-weight-bold text-grey-darken-1 mb-1 d-block">NOMBRE</label>
                     <v-text-field 
@@ -438,6 +452,7 @@ const getPermissionName = (id) => {
 }
 
 const formData = ref({
+    Documento: '',
     Nombre: '',
     Apellido: '',
     Correo: '',
@@ -725,6 +740,7 @@ watch(() => props.user, (val) => {
         }
     } else {
         formData.value = {
+            Documento: '',
             Nombre: '',
             Apellido: '',
             Correo: '',

@@ -35,7 +35,12 @@ export const useAuthStore = defineStore('auth', {
                 this.user = response.data.user
                 this.permissions = response.data.user.Permisos || []
                 this.isAuthenticated = true
-                // No guardamos token en localStorage, está en cookie HttpOnly
+
+                // Fix: Save token for components that need it (like AuditLogList)
+                if (response.data.token) {
+                    this.token = response.data.token
+                    localStorage.setItem('token', response.data.token)
+                }
 
                 return { success: true }
             } catch (error) {

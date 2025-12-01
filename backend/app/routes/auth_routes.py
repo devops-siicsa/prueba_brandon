@@ -48,6 +48,7 @@ def login():
     
     response = make_response(jsonify({
         'message': 'Login exitoso',
+        'token': result['token'], # Add token here for frontend usage
         'user': {
             'Nombre': result['user'].Nombre,
             'Apellido': result['user'].Apellido,
@@ -118,6 +119,32 @@ def verify_2fa():
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
+    # Auditoría de Logout
+    try:
+        token = request.cookies.get('auth_token')
+        if token:
+            payload = jwt.decode(token, os.getenv('SECRET_KEY', 'dev_key'), algorithms=['HS256'])
+            user_id = payload.get('sub')
+            
+            if user_id:
+                from app.models.audit_models import AuditoriaLog
+                from sqlalchemy import insert
+                from datetime import datetime
+                
+                stmt = insert(AuditoriaLog).values(
+                    TablaAfectada='Personas',
+                    RegistroId=user_id,
+                    Accion='LOGOUT',
+                    UsuarioId=user_id,
+                    Fecha=datetime.now(),
+                    DetalleCambio="Cierre de Sesión",
+                    ValorDespues="Logout"
+                )
+                db.session.execute(stmt)
+                db.session.commit()
+    except Exception as e:
+        print(f"Error auditable logout: {e}")
+
     response = make_response(jsonify({'message': 'Sesión cerrada'}))
     response.set_cookie('auth_token', '', expires=0)
     return response

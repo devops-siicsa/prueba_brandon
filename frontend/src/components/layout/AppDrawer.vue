@@ -146,7 +146,7 @@ function navigate(path) {
 
 function logout() {
     authStore.logout()
-    router.push('/login')
+    router.push('/auth/login')
 }
 </script>
 

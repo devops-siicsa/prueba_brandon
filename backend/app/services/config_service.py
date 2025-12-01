@@ -167,6 +167,7 @@ class ConfigService:
         new_user = Persona(
             Nombre=data['Nombre'],
             Apellido=data['Apellido'],
+            Documento=data.get('Documento'),
             Correo=data['Correo'],
             Celular=data.get('Celular'),
             CargoId=data.get('CargoId'),
@@ -198,6 +199,7 @@ class ConfigService:
 
         user.Nombre = data.get('Nombre', user.Nombre)
         user.Apellido = data.get('Apellido', user.Apellido)
+        user.Documento = data.get('Documento', user.Documento)
         user.Celular = data.get('Celular', user.Celular)
         user.CargoId = data.get('CargoId', user.CargoId)
         user.AreaId = data.get('AreaId', user.AreaId)

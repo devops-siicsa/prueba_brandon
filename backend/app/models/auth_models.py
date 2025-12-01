@@ -41,6 +41,7 @@ class Persona(db.Model):
     Nombre = db.Column(db.String(100), nullable=False)
     Apellido = db.Column(db.String(100), nullable=False)
     Correo = db.Column(db.String(150), unique=True, nullable=False)
+    Documento = db.Column(db.String(20), nullable=True) # Cédula/NIT
     Celular = db.Column(db.String(20), default='57')
     
     # Claves foráneas

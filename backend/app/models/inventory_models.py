@@ -95,7 +95,7 @@ class Equipo(db.Model):
     NombreEnRed = db.Column(db.String(100))
     UltimoMantenimiento = db.Column(db.DateTime)
     
-    FechaCreacion = db.Column(db.DateTime, default=datetime.utcnow)
+    FechaCreacion = db.Column(db.DateTime, default=datetime.now)
     CreadoPorId = db.Column(db.Integer)
 
 class EquipoProcesador(db.Model):
@@ -127,7 +127,7 @@ class EquipoAplicacion(db.Model):
     EquipoId = db.Column(db.Integer, db.ForeignKey('Equipos.Id'))
     NombreAplicacion = db.Column(db.String(150))
     Version = db.Column(db.String(50))
-    FechaInstalacion = db.Column(db.DateTime, default=datetime.utcnow)
+    FechaInstalacion = db.Column(db.DateTime, default=datetime.now)
 
 class EquipoAdjunto(db.Model):
     __tablename__ = 'EquipoAdjuntos'
@@ -135,4 +135,4 @@ class EquipoAdjunto(db.Model):
     EquipoId = db.Column(db.Integer, db.ForeignKey('Equipos.Id'))
     TipoArchivo = db.Column(db.String(20))
     RutaArchivo = db.Column(db.String(500))
-    FechaSubida = db.Column(db.DateTime, default=datetime.utcnow)
+    FechaSubida = db.Column(db.DateTime, default=datetime.now)

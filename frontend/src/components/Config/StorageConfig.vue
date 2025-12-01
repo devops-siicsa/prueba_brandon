@@ -1,15 +1,15 @@
 <template>
-  <v-dialog v-model="dialog" max-width="1000" scrollable transition="dialog-bottom-transition">
-    <v-card class="bg-grey-lighten-5 rounded-xl" height="700">
+  <v-dialog v-model="dialog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1000px'" scrollable transition="dialog-bottom-transition">
+    <v-card class="bg-grey-lighten-5 rounded-xl" :height="isMobileDevice ? '100%' : '700'">
       <!-- Header -->
-      <div class="px-8 pt-6 pb-6 bg-white elevation-0 border-bottom">
+      <div :class="[isMobileDevice ? 'px-4 py-3' : 'px-8 pt-6 pb-6', 'bg-white elevation-0 border-bottom']">
         <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center">
-                <div class="header-icon-box mr-4 bg-teal-lighten-5">
-                    <v-icon color="teal-darken-1" size="28">mdi-harddisk</v-icon>
+                <div class="header-icon-box mr-4 bg-teal-lighten-5" :style="isMobileDevice ? 'width: 40px; height: 40px;' : ''">
+                    <v-icon color="teal-darken-1" :size="isMobileDevice ? 24 : 28">mdi-harddisk</v-icon>
                 </div>
                 <div>
-                    <h2 class="text-h6 font-weight-bold text-grey-darken-3 mb-0">Almacenamiento</h2>
+                    <h2 :class="[isMobileDevice ? 'text-subtitle-1' : 'text-h6', 'font-weight-bold text-grey-darken-3 mb-0']">Almacenamiento</h2>
                     <p class="text-caption text-grey">Gestiona tipos, protocolos y factores de forma.</p>
                 </div>
             </div>
@@ -18,7 +18,7 @@
 
         <!-- Toolbar -->
         <div class="mt-6 d-flex align-center flex-wrap gap-4">
-            <div style="width: 280px;">
+            <div :style="isMobileDevice ? 'width: 100%;' : 'width: 280px;'">
                 <v-text-field
                     v-model="search"
                     prepend-inner-icon="mdi-magnify"
@@ -31,35 +31,38 @@
                 ></v-text-field>
             </div>
             
-            <v-spacer></v-spacer>
+            <v-spacer v-if="!isMobileDevice"></v-spacer>
 
-            <v-btn 
-                color="blue-grey-lighten-4" 
-                variant="flat"
-                class="text-blue-grey-darken-4 text-capitalize rounded-lg px-4 mr-2" 
-                height="40"
-                prepend-icon="mdi-database-plus" 
-                elevation="0"
-                @click="openCapacityDialog"
-            >
-            Capacidad
-            </v-btn>
+            <div :class="isMobileDevice ? 'd-flex w-100 gap-2' : 'd-flex'">
+                <v-btn 
+                    color="blue-grey-lighten-4" 
+                    variant="flat"
+                    :class="[isMobileDevice ? 'flex-grow-1' : 'mr-2', 'text-blue-grey-darken-4 text-capitalize rounded-lg px-4']" 
+                    height="40"
+                    prepend-icon="mdi-database-plus" 
+                    elevation="0"
+                    @click="openCapacityDialog"
+                >
+                Capacidad
+                </v-btn>
 
-            <v-btn 
-                color="#1e293b" 
-                class="text-white text-capitalize rounded-lg px-6" 
-                height="40"
-                prepend-icon="mdi-plus" 
-                elevation="0"
-                @click="openCreateDialog"
-            >
-            Tipo
-            </v-btn>
+                <v-btn 
+                    color="#1e293b" 
+                    :class="[isMobileDevice ? 'flex-grow-1' : '', 'text-white text-capitalize rounded-lg px-6']" 
+                    height="40"
+                    prepend-icon="mdi-plus" 
+                    elevation="0"
+                    @click="openCreateDialog"
+                >
+                Tipo
+                </v-btn>
+            </div>
         </div>
       </div>
 
-      <v-container fluid class="pa-8">
-        <v-card class="rounded-lg border-thin elevation-0 overflow-hidden">
+      <v-container fluid :class="isMobileDevice ? 'pa-4' : 'pa-8'">
+        <!-- VISTA DE ESCRITORIO: Tabla -->
+        <v-card v-if="!isMobileDevice" class="rounded-lg border-thin elevation-0 overflow-hidden">
             <v-data-table
                 :headers="headers"
                 :items="tableItems"
@@ -131,6 +134,64 @@
                 </template>
             </v-data-table>
         </v-card>
+
+        <!-- VISTA MÓVIL: Lista de Tarjetas -->
+        <div v-else>
+             <!-- Estado Vacío Móvil -->
+            <div v-if="tableItems.length === 0" class="d-flex flex-column align-center justify-center py-12 text-center">
+                <div class="empty-state-icon mb-6" style="width: 72px; height: 72px; background-color: #e8eaf6; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <v-icon size="36" color="indigo-lighten-2">mdi-harddisk</v-icon>
+                </div>
+                <h3 class="text-subtitle-1 font-weight-bold text-grey-darken-3 mb-2">No se encontraron tipos</h3>
+                <v-btn color="indigo-darken-3" variant="tonal" class="text-capitalize rounded-lg" prepend-icon="mdi-plus" @click="openCreateDialog">
+                    Agregar nuevo
+                </v-btn>
+            </div>
+
+            <v-row v-else dense>
+                <v-col cols="12" v-for="item in tableItems" :key="item.Id">
+                    <v-card hover @click="editItem(null, { item })" class="border-thin elevation-0 rounded-lg">
+                        <div class="d-flex align-center pa-3">
+                            <!-- Icono -->
+                            <div class="mr-3">
+                                <v-avatar color="indigo-lighten-5" size="40" class="rounded-lg">
+                                    <v-icon color="indigo-darken-1" size="20">mdi-harddisk</v-icon>
+                                </v-avatar>
+                            </div>
+                            
+                            <!-- Info -->
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <div class="d-flex align-center mb-1">
+                                    <span class="text-subtitle-2 font-weight-bold text-grey-darken-3 text-truncate mr-2">
+                                        {{ item.Tipo }}
+                                    </span>
+                                    <v-chip size="x-small" :color="item.Activo ? 'success' : 'grey'" variant="flat" class="font-weight-bold">
+                                        {{ item.Activo ? 'Activo' : 'Inactivo' }}
+                                    </v-chip>
+                                </div>
+                                
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    <span v-if="item.Protocolos.length > 0" class="text-caption text-grey mr-1">
+                                        {{ item.Protocolos.length }} Protocolos
+                                    </span>
+                                    <span v-if="item.Factores.length > 0" class="text-caption text-grey">
+                                        {{ item.Factores.length }} Factores
+                                    </span>
+                                    <span v-if="item.Protocolos.length === 0 && item.Factores.length === 0" class="text-caption text-grey font-italic">
+                                        Sin configuración
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Chevron -->
+                            <div class="ml-2">
+                                <v-icon color="grey-lighten-1">mdi-chevron-right</v-icon>
+                            </div>
+                        </div>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </div>
       </v-container>
     </v-card>
 
@@ -390,7 +451,17 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
-const dialog = defineModel({ default: false })
+const props = defineProps({
+    modelValue: Boolean,
+    isMobileDevice: Boolean
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const dialog = computed({
+    get: () => props.modelValue,
+    set: (val) => emit('update:modelValue', val)
+})
 
 // Data
 const tipos = ref([])

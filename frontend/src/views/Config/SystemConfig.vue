@@ -141,9 +141,9 @@
         />
     </v-dialog>
 
-    <ProcessorConfig v-model="showProcessorConfig" />
-    <RamConfig v-model="showRamConfig" />
-    <StorageConfig v-model="showStorageConfig" />
+    <ProcessorConfig v-model="showProcessorConfig" :is-mobile-device="isMobileDevice" />
+    <RamConfig v-model="showRamConfig" :is-mobile-device="isMobileDevice" />
+    <StorageConfig v-model="showStorageConfig" :is-mobile-device="isMobileDevice" />
 
     <v-dialog v-model="showFeatureDialog" max-width="600">
         <v-card class="rounded-xl">
@@ -178,6 +178,10 @@
     <v-dialog v-model="showCargoList" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
         <CargoList v-model="showCargoList" :is-mobile-device="isMobileDevice" />
     </v-dialog>
+
+    <v-dialog v-model="showAuditLog" :fullscreen="isMobileDevice" :max-width="isMobileDevice ? '100%' : '1200px'" transition="dialog-bottom-transition">
+        <AuditLogList v-model="showAuditLog" :is-mobile-device="isMobileDevice" />
+    </v-dialog>
   </v-container>
 </template>
 
@@ -188,6 +192,7 @@ import SedeList from '@/components/Config/SedeList.vue'
 import UserList from '@/components/Config/UserList.vue'
 import AreaList from '@/components/Config/AreaList.vue'
 import CargoList from '@/components/Config/CargoList.vue'
+import AuditLogList from '@/components/Config/AuditLogList.vue'
 import UnifiedCatalogList from '@/components/Config/UnifiedCatalogList.vue'
 import ProcessorConfig from '@/components/Config/ProcessorConfig.vue'
 import RamConfig from '@/components/Config/RamConfig.vue'
@@ -215,6 +220,7 @@ const showSedeList = ref(false)
 const showUserList = ref(false)
 const showAreaList = ref(false)
 const showCargoList = ref(false)
+const showAuditLog = ref(false)
 const showFeatureDialog = ref(false)
 const currentFeatureName = ref('')
 
@@ -252,8 +258,7 @@ function openCatalog(item) {
 }
 
 function openAudit() {
-    currentFeatureName.value = 'Auditoría'
-    showFeatureDialog.value = true
+    showAuditLog.value = true
 }
 
 function openSection(item) {

@@ -22,9 +22,15 @@ def create_app(config_class=Config):
     # Registrar Blueprints
     from app.routes.auth_routes import auth_bp
     from app.routes.config_routes import config_bp
+    from app.routes.audit_routes import audit_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(config_bp)
+    app.register_blueprint(audit_bp)
+
+    # Registrar Hooks de Auditoría
+    from app.audit_hooks import register_audit_hooks
+    register_audit_hooks(app)
 
     # Crear tablas si no existen (con manejo de errores para no bloquear inicio)
     with app.app_context():

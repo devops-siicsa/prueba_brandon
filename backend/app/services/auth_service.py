@@ -44,8 +44,8 @@ class AuthService:
             return {"success": False, "message": "Credenciales inválidas"}
 
         # 2. Verificar Bloqueo
-        if user.BloqueoHasta and user.BloqueoHasta > datetime.utcnow():
-            minutes_left = (user.BloqueoHasta - datetime.utcnow()).seconds // 60
+        if user.BloqueoHasta and user.BloqueoHasta > datetime.now():
+            minutes_left = (user.BloqueoHasta - datetime.now()).seconds // 60
             return {"success": False, "message": f"Cuenta bloqueada temporalmente. Intente en {minutes_left} minutos."}
 
         # 3. Verificar Contraseña
@@ -53,7 +53,7 @@ class AuthService:
             # Manejo de Intentos Fallidos
             user.IntentosFallidos += 1
             if user.IntentosFallidos >= 3:
-                user.BloqueoHasta = datetime.utcnow() + timedelta(minutes=15)
+                user.BloqueoHasta = datetime.now() + timedelta(minutes=15)
                 user.IntentosFallidos = 0 # Reiniciamos contador para el siguiente ciclo de bloqueo
                 db.session.commit()
                 return {"success": False, "message": "Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos."}
@@ -63,7 +63,15 @@ class AuthService:
 
         # 4. Login Exitoso (Parcial o Total)
         user.IntentosFallidos = 0
-        user.UltimoLogin = datetime.utcnow()
+        user.UltimoLogin = datetime.now()
+        
+        # Set current_user in flask.g so audit hooks can capture the user ID for this update
+        try:
+            from flask import g
+            g.current_user = user
+        except ImportError:
+            pass
+
         db.session.commit()
         
         if user.TwoFactorEnabled and user.TwoFactorSecret:
@@ -89,8 +97,8 @@ class AuthService:
     def generate_token(user_id, temp=False):
         try:
             payload = {
-                'exp': datetime.utcnow() + timedelta(days=7 if not temp else 0), # 7 días normal
-                'iat': datetime.utcnow(),
+                'exp': datetime.now() + timedelta(days=7 if not temp else 0), # 7 días normal
+                'iat': datetime.now(),
                 'sub': str(user_id),
                 'type': 'temp' if temp else 'access'
             }
@@ -100,6 +108,7 @@ class AuthService:
                 algorithm='HS256'
             )
         except Exception as e:
+            print(f"Error generating token: {e}")
             return str(e)
             
     @staticmethod
