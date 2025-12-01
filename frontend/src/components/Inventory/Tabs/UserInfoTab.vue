@@ -1,147 +1,269 @@
 <template>
-    <v-row>
-        <v-col cols="12" md="6">
-            <v-card class="border-thin elevation-0 rounded-lg h-100">
-                <v-card-title class="text-subtitle-1 font-weight-bold text-grey-darken-3 px-4 pt-4">
-                    Información del Usuario
-                </v-card-title>
-                <v-card-text class="pa-4">
-                    <v-row dense>
-                        <v-col cols="12">
-                            <v-text-field
-                                :model-value="equipo.UsuarioNombre"
-                                label="Usuario Asignado"
-                                variant="outlined"
-                                density="comfortable"
-                                bg-color="grey-lighten-5"
-                                :readonly="!isEditing"
-                                hide-details="auto"
-                                class="mb-3"
-                            ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" md="6">
-                            <v-text-field
-                                :model-value="equipo.Cargo"
-                                label="Cargo"
-                                variant="outlined"
-                                density="comfortable"
-                                bg-color="grey-lighten-5"
-                                :readonly="!isEditing"
-                                hide-details="auto"
-                                class="mb-3"
-                            ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" md="6">
-                            <v-text-field
-                                :model-value="equipo.Area"
-                                label="Área"
-                                variant="outlined"
-                                density="comfortable"
-                                bg-color="grey-lighten-5"
-                                :readonly="!isEditing"
-                                hide-details="auto"
-                                class="mb-3"
-                            ></v-text-field>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-text-field
-                                :model-value="equipo.Correo"
-                                label="Correo Electrónico"
-                                variant="outlined"
-                                density="comfortable"
-                                bg-color="grey-lighten-5"
-                                :readonly="!isEditing"
-                                hide-details="auto"
-                                class="mb-3"
-                                prepend-inner-icon="mdi-email"
-                            ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" md="6">
-                            <v-text-field
-                                :model-value="equipo.Telefono"
-                                label="Teléfono"
-                                variant="outlined"
-                                density="comfortable"
-                                bg-color="grey-lighten-5"
-                                :readonly="!isEditing"
-                                hide-details="auto"
-                                prepend-inner-icon="mdi-phone"
-                            ></v-text-field>
-                        </v-col>
-                    </v-row>
-                </v-card-text>
-            </v-card>
+    <v-row class="position-relative">
+        <!-- Vertical Divider (Desktop only) -->
+        <div v-if="modern" class="d-none d-md-block position-absolute bg-gradient-vertical" style="left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); z-index: 1;"></div>
+
+        <!-- User Info Section -->
+        <v-col cols="12" md="6" :class="modern ? 'pr-md-12' : ''">
+            <div class="d-flex align-center gap-3 mb-8">
+                <div class="rounded-circle bg-blue-lighten-5 d-flex align-center justify-center text-primary font-weight-bold" style="width: 32px; height: 32px; font-size: 14px;">1</div>
+                <h3 class="text-h6 font-weight-bold text-grey-darken-3">Datos del Responsable</h3>
+            </div>
+
+            <div class="mb-6 group">
+                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Usuario Asignado</label>
+                <v-text-field
+                    :model-value="equipo.UsuarioNombre"
+                    :label="modern ? undefined : 'Usuario Asignado'"
+                    :placeholder="modern ? 'Escribir nombre...' : undefined"
+                    :variant="modern ? 'solo' : 'outlined'"
+                    :flat="modern"
+                    :readonly="!isEditing"
+                    hide-details="auto"
+                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                    prepend-inner-icon="mdi-account"
+                    @update:model-value="$emit('update', 'UsuarioNombre', $event)"
+                ></v-text-field>
+            </div>
+
+            <v-row dense class="mb-6">
+                <v-col cols="12" md="6">
+                    <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Cargo</label>
+                    <v-text-field
+                        :model-value="equipo.Cargo"
+                        :label="modern ? undefined : 'Cargo'"
+                        :placeholder="modern ? 'Ej. Analista' : undefined"
+                        :variant="modern ? 'solo' : 'outlined'"
+                        :flat="modern"
+                        :readonly="!isEditing"
+                        hide-details="auto"
+                        :class="['rounded-xl', modern ? 'modern-input' : '']"
+                        prepend-inner-icon="mdi-briefcase"
+                        @update:model-value="$emit('update', 'Cargo', $event)"
+                    ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                    <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Área</label>
+                    <v-text-field
+                        :model-value="equipo.Area"
+                        :label="modern ? undefined : 'Área'"
+                        :placeholder="modern ? 'Ej. IT' : undefined"
+                        :variant="modern ? 'solo' : 'outlined'"
+                        :flat="modern"
+                        :readonly="!isEditing"
+                        hide-details="auto"
+                        :class="['rounded-xl', modern ? 'modern-input' : '']"
+                        prepend-inner-icon="mdi-layers"
+                        @update:model-value="$emit('update', 'Area', $event)"
+                    ></v-text-field>
+                </v-col>
+            </v-row>
+
+            <div class="mb-6">
+                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Correo Electrónico</label>
+                <v-text-field
+                    :model-value="equipo.Correo"
+                    :label="modern ? undefined : 'Correo Electrónico'"
+                    :placeholder="modern ? 'usuario@empresa.com' : undefined"
+                    :variant="modern ? 'solo' : 'outlined'"
+                    :flat="modern"
+                    :readonly="!isEditing"
+                    hide-details="auto"
+                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                    prepend-inner-icon="mdi-email"
+                    @update:model-value="$emit('update', 'Correo', $event)"
+                ></v-text-field>
+            </div>
+
+            <div class="mb-6">
+                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Teléfono / Extensión</label>
+                <v-text-field
+                    :model-value="equipo.Telefono"
+                    :label="modern ? undefined : 'Teléfono / Extensión'"
+                    :placeholder="modern ? '(+57) 300 ...' : undefined"
+                    :variant="modern ? 'solo' : 'outlined'"
+                    :flat="modern"
+                    :readonly="!isEditing"
+                    hide-details="auto"
+                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                    prepend-inner-icon="mdi-phone"
+                    @update:model-value="$emit('update', 'Telefono', $event)"
+                ></v-text-field>
+            </div>
         </v-col>
 
-        <v-col cols="12" md="6">
-            <v-card class="border-thin elevation-0 rounded-lg h-100">
-                <v-card-title class="text-subtitle-1 font-weight-bold text-grey-darken-3 px-4 pt-4">
-                    Ubicación
-                </v-card-title>
-                <v-card-text class="pa-4">
-                    <v-row dense>
-                        <v-col cols="12">
-                            <v-select
-                                :model-value="equipo.SedeId"
-                                label="Sede"
-                                :items="sedes"
-                                item-title="NombreSede"
-                                item-value="Id"
-                                variant="outlined"
-                                density="comfortable"
-                                bg-color="grey-lighten-5"
-                                :readonly="!isEditing"
-                                hide-details="auto"
-                                class="mb-3"
-                            ></v-select>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-text-field
-                                :model-value="equipo.Ciudad"
-                                label="Ciudad"
-                                variant="outlined"
-                                density="comfortable"
-                                bg-color="grey-lighten-4"
-                                readonly
-                                hide-details="auto"
-                                hint="Automático según la sede"
-                                persistent-hint
-                            ></v-text-field>
-                        </v-col>
-                    </v-row>
-                </v-card-text>
-            </v-card>
+        <!-- Location Section -->
+        <v-col cols="12" md="6" :class="modern ? 'pl-md-12' : ''">
+            <div class="d-flex align-center gap-3 mb-8">
+                <div class="rounded-circle bg-blue-lighten-5 d-flex align-center justify-center text-primary font-weight-bold" style="width: 32px; height: 32px; font-size: 14px;">2</div>
+                <h3 class="text-h6 font-weight-bold text-grey-darken-3">Localización Física</h3>
+            </div>
+
+            <!-- Card de Ubicación destacada -->
+            <div class="bg-gradient-location rounded-3xl pa-8 border border-blue-lighten-4 shadow-inner-custom">
+                <div class="mb-8">
+                    <label v-if="modern" class="d-block text-caption font-weight-bold text-blue-darken-3 text-uppercase mb-2 ml-1 opacity-60 tracking-wider">Sede Principal</label>
+                    <v-select
+                        :model-value="equipo.SedeId"
+                        :label="modern ? undefined : 'Sede Principal'"
+                        :placeholder="modern ? 'Seleccione una sede...' : undefined"
+                        :items="sedes"
+                        item-title="NombreSede"
+                        item-value="Id"
+                        :variant="modern ? 'solo' : 'outlined'"
+                        :flat="modern"
+                        bg-color="white"
+                        :readonly="!isEditing"
+                        hide-details="auto"
+                        :class="['rounded-xl', modern ? 'modern-select' : '']"
+                        prepend-inner-icon="mdi-office-building"
+                        menu-icon="mdi-chevron-down"
+                        @update:model-value="updateSede"
+                    ></v-select>
+                </div>
+
+                <div class="mb-6">
+                    <label v-if="modern" class="d-block text-caption font-weight-bold text-blue-darken-3 text-uppercase mb-2 ml-1 opacity-60 tracking-wider">Ciudad</label>
+                    <v-text-field
+                        :model-value="equipo.Ciudad"
+                        :label="modern ? undefined : 'Ciudad'"
+                        :variant="modern ? 'solo' : 'outlined'"
+                        :flat="modern"
+                        bg-color="white"
+                        readonly
+                        hide-details="auto"
+                        :class="['rounded-xl', modern ? 'modern-input' : '']"
+                        prepend-inner-icon="mdi-map-marker"
+                    ></v-text-field>
+                </div>
+
+                <div class="d-flex align-start gap-3 pa-4 bg-blue-lighten-4 rounded-xl">
+                    <div class="rounded-circle bg-primary mt-1.5" style="width: 6px; height: 6px; min-width: 6px;"></div>
+                    <p class="text-caption text-blue-darken-3 mb-0" style="line-height: 1.6;">
+                        La ciudad se completará automáticamente al seleccionar la sede. Si necesita agregar una nueva sede, contacte al administrador.
+                    </p>
+                </div>
+            </div>
         </v-col>
     </v-row>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
     equipo: Object,
-    isEditing: Boolean
+    isEditing: Boolean,
+    modern: Boolean
 })
 
 const emit = defineEmits(['update'])
 const sedes = ref([])
 
 async function loadSedes() {
+    // Strict filtering: Do not load if no Company ID is provided
+    if (!props.equipo.EmpresaId) {
+        sedes.value = []
+        return
+    }
+
     try {
-        // TODO: Filter by company if needed
-        const res = await axios.get('/api/config/sedes', { withCredentials: true })
+        const params = { EmpresaId: props.equipo.EmpresaId }
+        const res = await axios.get('/api/config/sedes', { 
+            withCredentials: true,
+            params: params
+        })
         sedes.value = res.data
     } catch (e) {
         console.error(e)
     }
 }
 
+function updateSede(sedeId) {
+    emit('update', 'SedeId', sedeId)
+    
+    const selectedSede = sedes.value.find(s => s.Id === sedeId)
+    if (selectedSede) {
+        emit('update', 'Ciudad', selectedSede.Ciudad)
+    }
+}
+
+watch(() => props.equipo.EmpresaId, (newVal) => {
+    if (newVal) {
+        loadSedes()
+    }
+})
+
 onMounted(() => {
+    // Initial load if ID is already present
     loadSedes()
 })
 </script>
 
 <style scoped>
-.border-thin { border: 1px solid rgba(0,0,0,0.08) !important; }
+.gap-3 { gap: 12px; }
+.rounded-xl { border-radius: 12px !important; }
+.rounded-3xl { border-radius: 24px !important; }
+.opacity-60 { opacity: 0.6; }
+.tracking-wider { letter-spacing: 0.05em; }
+
+.bg-gradient-vertical {
+    background: linear-gradient(to bottom, transparent, #e2e8f0, transparent);
+}
+
+.bg-gradient-location {
+    background: linear-gradient(to bottom right, rgba(239, 246, 255, 0.8), #ffffff); /* from-blue-50/80 to-white */
+}
+
+.shadow-inner-custom {
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+}
+
+/* Modern Input Styles - Pixel Perfect Match */
+:deep(.modern-input .v-field),
+:deep(.modern-select .v-field) {
+    border-radius: 12px !important;
+    background-color: #f9fafb !important; /* bg-gray-50 */
+    transition: all 0.2s ease-in-out;
+    border: 1px solid transparent;
+    box-shadow: none;
+    color: #111827 !important; /* text-gray-900 (Sharp Black) */
+}
+
+:deep(.modern-input input),
+:deep(.modern-select .v-select__selection-text) {
+    color: #111827 !important; /* Ensure text is sharp black */
+    font-weight: 500; /* Slightly bolder text */
+}
+
+:deep(.modern-input .v-field:hover),
+:deep(.modern-select .v-field:hover) {
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+:deep(.modern-input .v-field--focused),
+:deep(.modern-select .v-field--focused) {
+    background-color: #ffffff !important;
+    border-color: #bfdbfe !important; /* blue-200 */
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important; /* ring-4 ring-blue-500/10 */
+}
+
+/* Icon Styling */
+:deep(.modern-input .v-field__prepend-inner > .v-icon),
+:deep(.modern-select .v-field__prepend-inner > .v-icon) {
+    color: #9ca3af !important; /* text-gray-400 */
+    opacity: 1;
+    transition: color 0.2s;
+}
+
+:deep(.modern-input .v-field--focused .v-field__prepend-inner > .v-icon),
+:deep(.modern-select .v-field--focused .v-field__prepend-inner > .v-icon) {
+    color: #2563eb !important; /* text-blue-600 */
+}
+
+:deep(.modern-select .v-field__append-inner) {
+    color: #9ca3af !important;
+}
 </style>

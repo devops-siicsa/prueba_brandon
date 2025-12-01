@@ -20,7 +20,10 @@ def get_equipos(current_user):
         
         if empresa_id:
             query = query.filter_by(EmpresaId=empresa_id)
-        # TODO: Agregar más filtros según necesidad (Serial, Codigo, etc.)
+        
+        codigo = request.args.get('CodigoEquipo')
+        if codigo:
+            query = query.filter_by(CodigoEquipo=codigo)
             
         equipos = query.order_by(Equipo.FechaCreacion.desc()).all()
         

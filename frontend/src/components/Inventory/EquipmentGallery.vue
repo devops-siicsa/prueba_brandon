@@ -146,13 +146,11 @@ const filteredEquipos = computed(() => {
 })
 
 function goToDetail(equipo) {
-    // Navigate to detail view (to be implemented)
-    console.log("Go to detail", equipo.Id)
-    // router.push({ name: 'EquipmentDetail', params: { id: equipo.Id } })
+    router.push({ name: 'EquipmentDetail', params: { id: equipo.Id } })
 }
 
 function goToCreate() {
-    console.log("Go to create")
+    router.push({ name: 'EquipmentCreate', query: { companyId: props.companyId } })
 }
 
 watch(() => props.companyId, () => {

@@ -70,10 +70,22 @@ def get_sedes(current_user):
         filters['EmpresaId'] = empresa_id
         
     sedes = ConfigService.get_sedes(filters)
-    return jsonify([{
-        'Id': s.Id, 'NombreSede': s.NombreSede, 'EmpresaId': s.EmpresaId,
-        'Direccion': s.Direccion, 'Telefono': s.Telefono, 'Activo': s.Activo, 'CiudadId': s.CiudadId
-    } for s in sedes]), 200
+    # Enrich with City name (this could be optimized with a join in the service/query)
+    from app.models.core_models import Ciudad
+    result = []
+    for s in sedes:
+        ciudad_nombre = ''
+        if s.CiudadId:
+            ciudad = Ciudad.query.get(s.CiudadId)
+            if ciudad:
+                ciudad_nombre = ciudad.Nombre
+        
+        result.append({
+            'Id': s.Id, 'NombreSede': s.NombreSede, 'EmpresaId': s.EmpresaId,
+            'Direccion': s.Direccion, 'Telefono': s.Telefono, 'Activo': s.Activo, 
+            'CiudadId': s.CiudadId, 'Ciudad': ciudad_nombre
+        })
+    return jsonify(result), 200
 
 @config_bp.route('/sedes', methods=['POST'])
 @token_required

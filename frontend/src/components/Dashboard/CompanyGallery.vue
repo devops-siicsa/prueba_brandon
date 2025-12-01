@@ -124,15 +124,19 @@ const filteredCompanies = computed(() => {
             c.NIT?.includes(term)
         )
         
-        // Only Active companies usually shown in Dashboard? Or all? 
-        // Requirement says "muestra todas la empresas". Let's show active ones primarily or all.
-        // Assuming Active for operation.
         return matches && c.Activo
     })
 })
 
 function goToInventory(company) {
-    router.push({ name: 'InventoryList', query: { companyId: company.Id, companyName: company.RazonSocial } })
+    localStorage.setItem('selectedCompanyId', company.Id)
+    router.push({ 
+        name: 'InventoryList', 
+        query: { 
+            companyId: company.Id,
+            companyName: company.RazonSocial 
+        } 
+    })
 }
 
 onMounted(() => {

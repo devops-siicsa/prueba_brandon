@@ -55,6 +55,12 @@ const routes = [
                 component: () => import('@/views/Inventory/EquipmentDetail.vue')
             }
         ]
+    },
+    {
+        path: '/inventory/create',
+        name: 'EquipmentCreate',
+        component: () => import('@/views/Inventory/EquipmentCreate.vue'),
+        meta: { requiresAuth: true }
     }
 ]
 
