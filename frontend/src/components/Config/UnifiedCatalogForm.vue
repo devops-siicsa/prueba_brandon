@@ -63,8 +63,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useDisplay } from 'vuetify'
 import axios from 'axios'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     modelValue: Boolean,

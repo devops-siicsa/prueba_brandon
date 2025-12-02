@@ -70,8 +70,20 @@
                             </span>
                             <span class="dot-separator bg-grey-lighten-1"></span>
                             <span class="text-caption font-weight-medium text-grey-lighten-1 text-uppercase tracking-wider">Registro de Activos</span>
+                            
+                            <!-- Offline Indicator Badge -->
+                            <v-fade-transition>
+                                <div v-if="offlineReady" class="d-flex align-center gap-2 ml-2 bg-green-lighten-5 text-green-darken-1 px-3 py-1 rounded-pill border border-green-lighten-4">
+                                    <v-icon icon="mdi-cloud-check" size="14"></v-icon>
+                                    <span class="text-caption font-weight-bold tracking-wide text-uppercase" style="font-size: 10px;">Offline Activo</span>
+                                </div>
+                                <div v-else-if="catalogsLoading" class="d-flex align-center gap-2 ml-2 bg-blue-lighten-5 text-blue-darken-1 px-3 py-1 rounded-pill border border-blue-lighten-4">
+                                    <v-icon icon="mdi-cloud-sync" size="14" style="animation: spin 2s linear infinite;"></v-icon>
+                                    <span class="text-caption font-weight-bold tracking-wide text-uppercase" style="font-size: 10px;">Sincronizando...</span>
+                                </div>
+                            </v-fade-transition>
                         </div>
-                        <h1 class="text-h3 font-weight-black text-corporate-blue mb-3 tracking-tight">
+                        <h1 class="text-h4 font-weight-bold text-corporate-blue mb-2 tracking-tight">
                             Nuevo Equipo
                         </h1>
                         <p class="text-h6 text-grey-darken-1 font-weight-regular" style="max-width: 600px; line-height: 1.6;">
@@ -160,22 +172,60 @@
 
             </div>
         </main>
+
+
+        <v-snackbar
+            v-model="showDraftSnackbar"
+            color="info"
+            timeout="4000"
+            location="bottom right"
+        >
+            Borrador restaurado automáticamente.
+            <template v-slot:actions>
+                <v-btn color="white" variant="text" @click="showDraftSnackbar = false">
+                    Cerrar
+                </v-btn>
+            </template>
+        </v-snackbar>
+
+        <v-snackbar
+            v-model="showQueueSnackbar"
+            color="warning"
+            timeout="4000"
+            location="bottom right"
+        >
+            Guardado en cola offline. Se subirá cuando haya internet.
+            <template v-slot:actions>
+                <v-btn color="white" variant="text" @click="showQueueSnackbar = false">
+                    Cerrar
+                </v-btn>
+            </template>
+        </v-snackbar>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import GeneralInfoTab from '@/components/Inventory/Tabs/GeneralInfoTab.vue'
 import UserInfoTab from '@/components/Inventory/Tabs/UserInfoTab.vue'
 import HardwareTab from '@/components/Inventory/Tabs/HardwareTab.vue'
 import SoftwareTab from '@/components/Inventory/Tabs/SoftwareTab.vue'
+import { syncService } from '@/services/syncService'
+import { draftService } from '@/services/draftService'
+import { useCatalogsStore } from '@/stores/catalogs'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const route = useRoute()
+const catalogsStore = useCatalogsStore()
+const { offlineReady, loading: catalogsLoading } = storeToRefs(catalogsStore)
+
 const saving = ref(false)
 const activeSection = ref('user')
+const showDraftSnackbar = ref(false)
+const showQueueSnackbar = ref(false)
 
 const steps = [
     { id: 'user', label: 'Usuario', icon: 'mdi-account', index: 1 },
@@ -202,12 +252,52 @@ const equipo = reactive({
     Almacenamiento: []
 })
 
-onMounted(() => {
+// Auto-save draft
+let draftTimeout = null
+watch(equipo, (newVal) => {
+    if (draftTimeout) clearTimeout(draftTimeout)
+    draftTimeout = setTimeout(async () => {
+        try {
+            // Convert reactive object to plain object for storage
+            const dataToSave = JSON.parse(JSON.stringify(newVal))
+            await draftService.saveDraft('new_equipment_draft', dataToSave)
+            // console.log('Draft saved')
+        } catch (e) {
+            console.error('Error saving draft', e)
+        }
+    }, 1000)
+}, { deep: true })
+
+onMounted(async () => {
+    // Pre-fetch ALL catalogs for offline support
+    catalogsStore.fetchCatalogs([
+        // General
+        'estadosEquipo', 'tiposEquipo', 'fabricantes',
+        // Hardware
+        'marcasProcesador', 'tiposProcesador', 'generacionesProcesador',
+        'tiposRam', 'capacidadesRam', 'busesRam',
+        'tiposAlmacenamiento', 'capacidadesAlmacenamiento', 'protocolosAlmacenamiento', 'factoresFormaAlmacenamiento',
+        // Software
+        'sistemasOperativos', 'ofimaticas', 'antivirus'
+    ])
+
     const storedCompanyId = localStorage.getItem('selectedCompanyId')
     if (route.query.companyId) {
         equipo.EmpresaId = parseInt(route.query.companyId)
     } else if (storedCompanyId) {
         equipo.EmpresaId = parseInt(storedCompanyId)
+    }
+
+    // Check for draft
+    try {
+        const draft = await draftService.getDraft('new_equipment_draft')
+        if (draft) {
+            // Restore draft
+            Object.assign(equipo, draft)
+            showDraftSnackbar.value = true
+        }
+    } catch (e) {
+        console.error('Error restoring draft', e)
     }
 })
 
@@ -259,11 +349,45 @@ function isStepComplete(stepId) {
 async function saveEquipo() {
     saving.value = true
     try {
+        // Check if offline
+        if (!navigator.onLine) {
+            throw new Error('OFFLINE')
+        }
+
         const res = await axios.post('/api/inventory/equipos', equipo, { withCredentials: true })
+        
+        // Clear draft on success
+        await draftService.deleteDraft('new_equipment_draft')
+        
         router.push({ name: 'EquipmentDetail', params: { id: res.data.Id } })
     } catch (e) {
-        console.error("Error creating equipment", e)
-        alert(e.response?.data?.message || "Error al crear el equipo")
+        // Handle offline or network error
+        if (e.message === 'OFFLINE' || e.code === 'ERR_NETWORK' || !e.response) {
+            try {
+                // Save to offline queue
+                const dataToSave = JSON.parse(JSON.stringify(equipo))
+                await syncService.addToQueue(dataToSave)
+                
+                // Clear draft
+                await draftService.deleteDraft('new_equipment_draft')
+                
+                // Show feedback and reset form (or redirect)
+                showQueueSnackbar.value = true
+                
+                // Reset form for next entry (optional, or redirect to list)
+                // For now, we'll redirect to inventory home to show it's "done"
+                setTimeout(() => {
+                    router.push({ name: 'InventoryHome' })
+                }, 2000)
+                
+            } catch (queueError) {
+                console.error("Error adding to queue", queueError)
+                alert("Error al guardar en modo offline")
+            }
+        } else {
+            console.error("Error creating equipment", e)
+            alert(e.response?.data?.message || "Error al crear el equipo")
+        }
     } finally {
         saving.value = false
     }
@@ -420,4 +544,9 @@ function goBack() {
     to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 .animate-fade-in-up { animation: fadeInUp 0.7s ease-out; }
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 </style>

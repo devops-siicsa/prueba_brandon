@@ -140,8 +140,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useCatalogsStore } from '@/stores/catalogs'
 
 const props = defineProps({
     equipo: Object,
@@ -150,27 +151,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update'])
 
-const sistemasOperativos = ref([])
-const ofimaticas = ref([])
-const antivirus = ref([])
-
-async function loadCatalogs() {
-    try {
-        const [resSO, resOfi, resAV] = await Promise.all([
-            axios.get('/api/config/catalogs/sistemas_operativos', { withCredentials: true }),
-            axios.get('/api/config/catalogs/ofimaticas', { withCredentials: true }),
-            axios.get('/api/config/catalogs/antivirus', { withCredentials: true })
-        ])
-        sistemasOperativos.value = resSO.data
-        ofimaticas.value = resOfi.data
-        antivirus.value = resAV.data
-    } catch (e) {
-        console.error(e)
-    }
-}
+const catalogsStore = useCatalogsStore()
+const { sistemasOperativos, ofimaticas, antivirus } = storeToRefs(catalogsStore)
 
 onMounted(() => {
-    loadCatalogs()
+    catalogsStore.fetchCatalogs(['sistemasOperativos', 'ofimaticas', 'antivirus'])
 })
 </script>
 

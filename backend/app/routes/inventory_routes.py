@@ -8,6 +8,8 @@ inventory_bp = Blueprint('inventory', __name__, url_prefix='/api/inventory')
 
 # --- EQUIPOS ---
 
+from app.models.core_models import Empresa
+
 @inventory_bp.route('/equipos', methods=['GET'])
 @token_required
 def get_equipos(current_user):
@@ -16,21 +18,22 @@ def get_equipos(current_user):
         empresa_id = request.args.get('EmpresaId')
         sede_id = request.args.get('SedeId')
         
-        query = Equipo.query
+        query = db.session.query(Equipo, Empresa.RazonSocial).outerjoin(Empresa, Equipo.EmpresaId == Empresa.Id)
         
         if empresa_id:
-            query = query.filter_by(EmpresaId=empresa_id)
+            query = query.filter(Equipo.EmpresaId == empresa_id)
         
         codigo = request.args.get('CodigoEquipo')
         if codigo:
-            query = query.filter_by(CodigoEquipo=codigo)
+            query = query.filter(Equipo.CodigoEquipo == codigo)
             
-        equipos = query.order_by(Equipo.FechaCreacion.desc()).all()
+        results = query.order_by(Equipo.FechaCreacion.desc()).all()
         
         return jsonify([{
             'Id': e.Id,
             'CodigoEquipo': e.CodigoEquipo,
             'EmpresaId': e.EmpresaId,
+            'EmpresaNombre': empresa_nombre,
             'UsuarioAsignadoId': e.UsuarioAsignadoId,
             'EstadoEquipoId': e.EstadoEquipoId,
             'TipoEquipoId': e.TipoEquipoId,
@@ -38,7 +41,7 @@ def get_equipos(current_user):
             'Modelo': e.Modelo,
             'Serial': e.Serial,
             'FechaCreacion': e.FechaCreacion.isoformat() if e.FechaCreacion else None
-        } for e in equipos]), 200
+        } for e, empresa_nombre in results]), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 

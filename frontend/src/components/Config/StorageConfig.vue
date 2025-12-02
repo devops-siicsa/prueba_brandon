@@ -62,7 +62,7 @@
 
       <v-container fluid :class="isMobileApp ? 'pa-4' : 'pa-8'">
         <!-- VISTA DE ESCRITORIO: Tabla -->
-        <v-card v-if="!isMobileDevice" class="rounded-lg border-thin elevation-0 overflow-hidden">
+        <v-card v-if="!isMobileApp" class="rounded-lg border-thin elevation-0 overflow-hidden">
             <v-data-table
                 :headers="headers"
                 :items="tableItems"
