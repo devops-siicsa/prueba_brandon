@@ -99,6 +99,7 @@ class Aplicacion(db.Model):
     __tablename__ = 'Aplicaciones'
     Id = db.Column(db.Integer, primary_key=True)
     Nombre = db.Column(db.String(100))
+    Version = db.Column(db.String(50))
     Activo = db.Column(db.Boolean, default=True)
 
 

@@ -338,7 +338,7 @@ Pantalla se visibiliza en forma de card en listado
 orden mas reciente primero (Arriba)
 Este contiene todos los cambios que se realizaron automaticamente pero tambien tendra un boton para agregar un comentario u observaciones
 Cambios que se toman automaticamente:
-Ejemplo card
+Ejemplo card:
 -----------------------------------------------------------------------------------------
 |25/Nov/2025 03:04.12 (hh:mm.ss)				Realizo: Julio Garcia	|
 |											|

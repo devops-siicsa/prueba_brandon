@@ -24,6 +24,7 @@ def get_audit_logs(current_user):
         user_id = request.args.get('userId')
         action = request.args.get('action')
         table = request.args.get('table')
+        record_id = request.args.get('recordId') # New parameter
         date_from = request.args.get('dateFrom')
         date_to = request.args.get('dateTo')
 
@@ -38,6 +39,8 @@ def get_audit_logs(current_user):
             query = query.filter(AuditoriaLog.Accion == action)
         if table:
             query = query.filter(AuditoriaLog.TablaAfectada.ilike(f"%{table}%"))
+        if record_id:
+            query = query.filter(AuditoriaLog.RegistroId == record_id)
         if date_from:
             query = query.filter(AuditoriaLog.Fecha >= date_from)
         if date_to:
@@ -120,6 +123,41 @@ def get_audit_logs(current_user):
     except Exception as e:
         print(f"Error fetching audit logs: {e}")
         return jsonify({'message': 'Error al obtener logs de auditoría'}), 500
+
+@audit_bp.route('/comments', methods=['POST'])
+@token_required
+def add_audit_comment(current_user):
+    try:
+        data = request.json
+        
+        # Validar datos
+        if not data.get('recordId') or not data.get('table') or not data.get('comment'):
+            return jsonify({'message': 'Faltan datos requeridos'}), 400
+
+        from app.extensions import db
+        from datetime import datetime
+
+        new_log = AuditoriaLog(
+            TablaAfectada=data['table'],
+            RegistroId=data['recordId'],
+            Accion='COMENTARIO',
+            UsuarioId=current_user.Id,
+            Fecha=datetime.now(),
+            DetalleCambio=data['comment'],
+            CampoAfectado='Observación Manual',
+            ValorAntes=None,
+            ValorDespues=None
+        )
+
+        db.session.add(new_log)
+        db.session.commit()
+
+        return jsonify({'message': 'Comentario agregado correctamente', 'id': new_log.Id}), 201
+
+    except Exception as e:
+        print(f"Error adding audit comment: {e}")
+        db.session.rollback()
+        return jsonify({'message': 'Error al agregar comentario'}), 500
 
 @audit_bp.route('/filters', methods=['GET'])
 @token_required

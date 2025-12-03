@@ -131,16 +131,16 @@
                                 <HardwareTab :equipo="equipo" :is-editing="true" />
                             </v-window-item>
                             <v-window-item value="software">
-                                <SoftwareTab :equipo="equipo" :is-editing="true" @update="updateEquipoField" />
+                                <SoftwareTab :equipo="equipo" :is-editing="true" :modern="true" @update="updateEquipoField" />
                             </v-window-item>
                             <v-window-item value="apps">
-                                <div class="text-center py-12 text-grey">Módulo de Aplicativos en construcción</div>
+                                <AppsTab :equipo="equipo" :is-editing="true" :modern="true" @update="updateEquipoField" />
                             </v-window-item>
                             <v-window-item value="files">
-                                <div class="text-center py-12 text-grey">Módulo de Adjuntos en construcción</div>
+                                <AttachmentsTab :equipo="equipo" :is-editing="true" :modern="true" @update="updateEquipoField" />
                             </v-window-item>
                             <v-window-item value="history">
-                                <div class="text-center py-12 text-grey">El historial se generará automáticamente.</div>
+                                <HistoryTab :equipo="equipo" :is-editing="true" @update="updateEquipoField" />
                             </v-window-item>
                          </v-window>
                     </div>
@@ -172,7 +172,6 @@
 
             </div>
         </main>
-
 
         <v-snackbar
             v-model="showDraftSnackbar"
@@ -212,6 +211,9 @@ import GeneralInfoTab from '@/components/Inventory/Tabs/GeneralInfoTab.vue'
 import UserInfoTab from '@/components/Inventory/Tabs/UserInfoTab.vue'
 import HardwareTab from '@/components/Inventory/Tabs/HardwareTab.vue'
 import SoftwareTab from '@/components/Inventory/Tabs/SoftwareTab.vue'
+import AppsTab from '@/components/Inventory/Tabs/AppsTab.vue'
+import AttachmentsTab from '@/components/Inventory/Tabs/AttachmentsTab.vue'
+import HistoryTab from '@/components/Inventory/Tabs/HistoryTab.vue'
 import { syncService } from '@/services/syncService'
 import { draftService } from '@/services/draftService'
 import { useCatalogsStore } from '@/stores/catalogs'
@@ -278,7 +280,9 @@ onMounted(async () => {
         'tiposRam', 'capacidadesRam', 'busesRam',
         'tiposAlmacenamiento', 'capacidadesAlmacenamiento', 'protocolosAlmacenamiento', 'factoresFormaAlmacenamiento',
         // Software
-        'sistemasOperativos', 'ofimaticas', 'antivirus'
+        'sistemasOperativos', 'ofimaticas', 'antivirus',
+        // Apps
+        'aplicativos'
     ])
 
     const storedCompanyId = localStorage.getItem('selectedCompanyId')

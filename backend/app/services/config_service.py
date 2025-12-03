@@ -33,7 +33,8 @@ CATALOG_MODELS = {
     'capacidades_almacenamiento': CapacidadAlmacenamiento,
     'protocolos_almacenamiento': ProtocoloAlmacenamiento,
     'factores_forma_almacenamiento': FactorFormaAlmacenamiento,
-    'aplicaciones': Aplicacion
+    'aplicaciones': Aplicacion,
+    'aplicativos': Aplicacion
 }
 
 class ConfigService:

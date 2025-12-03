@@ -23,6 +23,7 @@ export const useCatalogsStore = defineStore('catalogs', {
         sistemasOperativos: [],
         ofimaticas: [],
         antivirus: [],
+        aplicativos: [], // New catalog for Apps
 
         loading: false,
         offlineReady: false
@@ -63,7 +64,8 @@ export const useCatalogsStore = defineStore('catalogs', {
                     factoresFormaAlmacenamiento: '/api/config/factores_forma_almacenamiento',
                     sistemasOperativos: '/api/config/catalogs/sistemas_operativos',
                     ofimaticas: '/api/config/catalogs/ofimaticas',
-                    antivirus: '/api/config/catalogs/antivirus'
+                    antivirus: '/api/config/catalogs/antivirus',
+                    aplicativos: '/api/config/catalogs/aplicativos' // New endpoint
                 }
 
                 keys.forEach(key => {
@@ -85,9 +87,39 @@ export const useCatalogsStore = defineStore('catalogs', {
             } finally {
                 this.loading = false
                 // If we have data, we are ready for offline
-                if (this.estadosEquipo.length > 0 || this.tiposEquipo.length > 0 || this.fabricantes.length > 0) {
+                if (
+                    this.estadosEquipo.length > 0 ||
+                    this.tiposEquipo.length > 0 ||
+                    this.fabricantes.length > 0 ||
+                    this.sistemasOperativos.length > 0 ||
+                    this.ofimaticas.length > 0 ||
+                    this.antivirus.length > 0 ||
+                    this.aplicativos.length > 0
+                ) {
                     this.offlineReady = true
                 }
+            }
+        },
+
+        async createAplicativo(nombre, version) {
+            try {
+                // Optimistic update
+                const tempId = Date.now()
+                const newApp = { Id: tempId, Nombre: nombre, Version: version }
+                this.aplicativos.push(newApp)
+
+                // API Call
+                // const res = await axios.post('/api/config/catalogs/aplicativos', { Nombre: nombre, Version: version })
+                // Replace temp with real data
+                // const index = this.aplicativos.findIndex(a => a.Id === tempId)
+                // if (index !== -1) this.aplicativos[index] = res.data
+
+                // For now, just save to local storage to simulate persistence
+                localStorage.setItem('catalog_aplicativos', JSON.stringify(this.aplicativos))
+                return newApp
+            } catch (e) {
+                console.error('Error creating app', e)
+                throw e
             }
         }
     }
