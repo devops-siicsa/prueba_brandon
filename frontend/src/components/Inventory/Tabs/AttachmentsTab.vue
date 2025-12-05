@@ -26,33 +26,41 @@
 
                 <!-- Action Buttons -->
                 <v-btn
-                    v-if="isMobileApp"
+                    v-if="isMobileApp && files.length > 0"
                     color="white"
-                    prepend-icon="mdi-camera"
-                    class="text-capitalize rounded-xl border-thin"
+                    :prepend-icon="!isMobileApp ? 'mdi-camera' : undefined"
+                    class="rounded-xl border-thin"
                     elevation="0"
                     height="44"
+                    min-width="44"
+                    :class="isMobileApp ? 'px-0' : 'text-capitalize'"
                     @click="triggerCamera"
                 >
-                    Tomar Foto
+                    <v-icon v-if="isMobileApp">mdi-camera</v-icon>
+                    <span v-else>Tomar Foto</span>
                 </v-btn>
 
                 <v-btn
+                    v-if="!isMobileApp || files.length > 0"
                     color="corporate-blue"
-                    prepend-icon="mdi-paperclip"
-                    class="text-capitalize rounded-xl font-weight-bold px-6 text-white"
+                    :prepend-icon="!isMobileApp ? 'mdi-paperclip' : undefined"
+                    class="rounded-xl font-weight-bold ml-auto text-white"
                     elevation="0"
                     height="44"
+                    :min-width="isMobileApp ? '44' : undefined"
+                    :class="isMobileApp ? 'px-0' : 'text-capitalize px-6'"
                     @click="triggerFileInput"
                 >
-                    Agregar Archivos
+                    <v-icon v-if="isMobileApp">mdi-paperclip</v-icon>
+                    <span v-else>Agregar Archivos</span>
                 </v-btn>
             </div>
         </div>
 
         <!-- Main Content -->
         <div 
-            class="flex-grow-1 overflow-y-auto custom-scrollbar pr-2 position-relative"
+            class="flex-grow-1 overflow-y-auto custom-scrollbar position-relative"
+            :class="isMobileApp ? 'pr-0' : 'pr-2'"
             @dragover.prevent="isDragging = true"
             @dragleave.prevent="isDragging = false"
             @drop.prevent="handleDrop"
@@ -71,8 +79,8 @@
                 </div>
             </v-fade-transition>
             
-            <!-- Empty State -->
-            <div v-if="files.length === 0" class="d-flex flex-column align-center justify-center h-75 text-grey border-dashed rounded-xl ma-2 transition-all" :class="{'bg-grey-lighten-5': isDragging}">
+            <!-- Empty State (Desktop) -->
+            <div v-if="files.length === 0 && !isMobileApp" class="d-flex flex-column align-center justify-center h-75 text-grey border-dashed rounded-xl ma-2 transition-all" :class="{'bg-grey-lighten-5': isDragging}">
                 <div class="bg-white elevation-1 rounded-circle pa-6 mb-4">
                     <v-icon size="48" color="primary">mdi-cloud-upload-outline</v-icon>
                 </div>
@@ -82,10 +90,25 @@
                     color="primary"
                     variant="flat"
                     class="text-capitalize rounded-lg px-6"
+                    :height="isMobileApp ? '56' : '44'"
                     @click="triggerFileInput"
                 >
                     Seleccionar Archivos
                 </v-btn>
+            </div>
+
+            <!-- Mobile Empty State (Simpler) -->
+            <div v-else-if="files.length === 0 && isMobileApp" class="d-flex flex-column align-center justify-center h-50 text-grey ma-4">
+                <v-icon size="64" color="grey-lighten-2">mdi-image-multiple-outline</v-icon>
+                <div class="text-subtitle-1 text-grey-darken-1 font-weight-bold mt-4">Sin Adjuntos</div>
+                <div class="d-flex gap-3 mt-4">
+                    <v-btn color="white" border class="rounded-lg text-capitalize" @click="triggerCamera">
+                        <v-icon start>mdi-camera</v-icon> Cámara
+                    </v-btn>
+                    <v-btn color="primary" class="rounded-lg text-capitalize" @click="triggerFileInput">
+                        <v-icon start>mdi-paperclip</v-icon> Archivos
+                    </v-btn>
+                </div>
             </div>
 
             <!-- Gallery Grid -->
@@ -141,7 +164,7 @@
                                 </div>
 
                                 <!-- Footer Info -->
-                                <div class="pa-3 bg-white rounded-b-xl border-t-thin">
+                                <div class="bg-white rounded-b-xl border-t-thin" :class="isMobileApp ? 'pa-2' : 'pa-3'">
                                     <div class="text-caption font-weight-bold text-truncate text-grey-darken-3" :title="file.name">
                                         {{ file.name }}
                                     </div>
@@ -261,6 +284,14 @@ function getFileIcon(file) {
         case 'txt': return 'mdi-file-document-outline'
         case 'zip': 
         case 'rar': return 'mdi-folder-zip-outline'
+        case 'mp4':
+        case 'mov':
+        case 'avi':
+        case 'mkv': return 'mdi-file-video-outline'
+        case 'ppt':
+        case 'pptx': return 'mdi-file-powerpoint-box'
+        case 'mp3':
+        case 'wav': return 'mdi-file-music-outline'
         default: return 'mdi-file-outline'
     }
 }
@@ -275,6 +306,14 @@ function getFileIconColor(file) {
         case 'xlsx': return 'green'
         case 'zip': 
         case 'rar': return 'orange'
+        case 'mp4':
+        case 'mov':
+        case 'avi':
+        case 'mkv': return 'purple'
+        case 'ppt':
+        case 'pptx': return 'orange-darken-1'
+        case 'mp3':
+        case 'wav': return 'teal'
         default: return 'grey'
     }
 }

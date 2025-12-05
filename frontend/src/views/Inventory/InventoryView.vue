@@ -43,22 +43,18 @@
         </div>
 
         <!-- Gallery -->
-        <EquipmentGallery :is-mobile-device="isMobileDevice" :company-id="companyId" />
+        <EquipmentGallery :company-id="companyId" />
     </div>
   </v-container>
 </template>
 
 <script setup>
 import EquipmentGallery from '@/components/Inventory/EquipmentGallery.vue'
-import { useDisplay } from 'vuetify'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCatalogsStore } from '@/stores/catalogs'
 import { storeToRefs } from 'pinia'
-import { onMounted } from 'vue'
 
-const { mobile } = useDisplay()
-const isMobileDevice = computed(() => mobile.value)
 const route = useRoute()
 const router = useRouter()
 const catalogsStore = useCatalogsStore()

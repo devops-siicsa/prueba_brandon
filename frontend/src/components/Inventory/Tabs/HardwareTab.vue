@@ -1,9 +1,9 @@
 <template>
-    <v-row>
+    <v-row :no-gutters="isMobileApp">
         <!-- PROCESADOR -->
         <v-col cols="12">
             <v-card class="rounded-xl border-thin elevation-0 mb-6">
-                <v-card-item class="py-4 px-6 bg-grey-lighten-5 border-b-thin">
+                <v-card-item class="py-4 bg-grey-lighten-5 border-b-thin" :class="isMobileApp ? 'px-4' : 'px-6'">
                     <template v-slot:prepend>
                         <v-avatar color="blue-grey-lighten-5" size="40" class="mr-2">
                             <v-icon color="blue-grey-darken-1" size="24">mdi-cpu-64-bit</v-icon>
@@ -17,7 +17,7 @@
                     </v-card-subtitle>
                 </v-card-item>
                 
-                <v-card-text class="pa-6">
+                <v-card-text :class="isMobileApp ? 'px-3 py-4' : 'pa-6'">
                     <div v-if="equipo.Procesadores && equipo.Procesadores.length > 0">
                         <v-row>
                             <v-col cols="12" md="4">
@@ -28,7 +28,7 @@
                                     item-title="Nombre"
                                     item-value="Id"
                                     variant="outlined"
-                                    density="comfortable"
+                                    :density="isMobileApp ? undefined : 'comfortable'"
                                     color="blue-grey"
                                     bg-color="white"
                                     :readonly="!isEditing"
@@ -45,7 +45,7 @@
                                     item-title="Nombre"
                                     item-value="Id"
                                     variant="outlined"
-                                    density="comfortable"
+                                    :density="isMobileApp ? undefined : 'comfortable'"
                                     color="blue-grey"
                                     bg-color="white"
                                     :readonly="!isEditing"
@@ -63,7 +63,7 @@
                                     item-title="Nombre"
                                     item-value="Id"
                                     variant="outlined"
-                                    density="comfortable"
+                                    :density="isMobileApp ? undefined : 'comfortable'"
                                     color="blue-grey"
                                     bg-color="white"
                                     :readonly="!isEditing"
@@ -85,7 +85,7 @@
         <!-- RAM -->
         <v-col cols="12" md="6">
             <v-card class="rounded-xl border-thin elevation-0 mb-6 h-100 d-flex flex-column">
-                <v-card-item class="py-4 px-6 bg-grey-lighten-5 border-b-thin">
+                <v-card-item class="py-4 bg-grey-lighten-5 border-b-thin" :class="isMobileApp ? 'px-4' : 'px-6'">
                     <template v-slot:prepend>
                         <v-avatar color="teal-lighten-5" size="40" class="mr-2">
                             <v-icon color="teal-darken-1" size="24">mdi-memory</v-icon>
@@ -103,13 +103,14 @@
                             prepend-icon="mdi-plus"
                             @click="addRamSlot"
                             class="text-none font-weight-bold"
+                            :disabled="!canAddRamSlot"
                         >
                             Agregar Slot
                         </v-btn>
                     </template>
                 </v-card-item>
 
-                <v-card-text class="pa-6 flex-grow-1">
+                <v-card-text class="flex-grow-1" :class="isMobileApp ? 'px-3 py-4' : 'pa-6'">
                     <div v-if="equipo.MemoriasRAM && equipo.MemoriasRAM.length > 0" class="d-flex flex-column gap-4">
                         <v-scale-transition group>
                             <div 
@@ -122,7 +123,7 @@
                                         Slot {{ index + 1 }}
                                     </v-chip>
                                     <v-btn 
-                                        v-if="isEditing" 
+                                        v-if="isEditing && index > 0" 
                                         icon="mdi-delete-outline" 
                                         variant="text" 
                                         color="error" 
@@ -138,26 +139,14 @@
                                             :items="tiposRam"
                                             item-title="Nombre"
                                             item-value="Id"
-                                            density="comfortable" 
-                                            label="Tipo" 
+                                            :density="isMobileApp ? undefined : 'comfortable'" 
+                                            label="Tipo*" 
                                             variant="outlined" 
                                             hide-details="auto"
                                             color="teal"
                                             prepend-inner-icon="mdi-memory"
+                                            :rules="[v => !!v || ' ']"
                                             @update:model-value="onRamTypeChange(slot)"
-                                        ></v-select>
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <v-select 
-                                            v-model="slot.CapacidadId"
-                                            :items="capacidadesRam"
-                                            item-title="Nombre"
-                                            item-value="Id"
-                                            density="comfortable" 
-                                            label="Capacidad" 
-                                            variant="outlined" 
-                                            hide-details="auto"
-                                            color="teal"
                                         ></v-select>
                                     </v-col>
                                     <v-col cols="6">
@@ -166,12 +155,28 @@
                                             :items="getFilteredBuses(slot.TipoId)"
                                             item-title="Nombre"
                                             item-value="Id"
-                                            density="comfortable" 
-                                            label="Bus" 
+                                            :density="isMobileApp ? undefined : 'comfortable'" 
+                                            label="Bus*" 
                                             variant="outlined" 
                                             hide-details="auto"
                                             color="teal"
                                             :disabled="!slot.TipoId"
+                                            :rules="[v => !!v || ' ']"
+                                        ></v-select>
+                                    </v-col>
+                                    <v-col cols="6" v-if="!isBusNA(slot)">
+                                        <v-select 
+                                            v-model="slot.CapacidadId"
+                                            :items="capacidadesRam"
+                                            item-title="Nombre"
+                                            item-value="Id"
+                                            :density="isMobileApp ? undefined : 'comfortable'" 
+                                            label="Capacidad*" 
+                                            variant="outlined" 
+                                            hide-details="auto"
+                                            color="teal"
+                                            :disabled="!slot.TipoId"
+                                            :rules="[v => !!v || ' ']"
                                         ></v-select>
                                     </v-col>
                                 </v-row>
@@ -189,7 +194,7 @@
         <!-- ALMACENAMIENTO -->
         <v-col cols="12" md="6">
             <v-card class="rounded-xl border-thin elevation-0 mb-6 h-100 d-flex flex-column">
-                <v-card-item class="py-4 px-6 bg-grey-lighten-5 border-b-thin">
+                <v-card-item class="py-4 bg-grey-lighten-5 border-b-thin" :class="isMobileApp ? 'px-4' : 'px-6'">
                     <template v-slot:prepend>
                         <v-avatar color="indigo-lighten-5" size="40" class="mr-2">
                             <v-icon color="indigo-darken-1" size="24">mdi-harddisk</v-icon>
@@ -207,13 +212,14 @@
                             prepend-icon="mdi-plus"
                             @click="addStorageSlot"
                             class="text-none font-weight-bold"
+                            :disabled="!canAddStorageSlot"
                         >
                             Agregar Disco
                         </v-btn>
                     </template>
                 </v-card-item>
 
-                <v-card-text class="pa-6 flex-grow-1">
+                <v-card-text class="flex-grow-1" :class="isMobileApp ? 'px-3 py-4' : 'pa-6'">
                     <div v-if="equipo.Almacenamiento && equipo.Almacenamiento.length > 0" class="d-flex flex-column gap-4">
                         <v-scale-transition group>
                             <div 
@@ -226,7 +232,7 @@
                                         Disco {{ index + 1 }}
                                     </v-chip>
                                     <v-btn 
-                                        v-if="isEditing" 
+                                        v-if="isEditing && index > 0" 
                                         icon="mdi-delete-outline" 
                                         variant="text" 
                                         color="error" 
@@ -242,26 +248,14 @@
                                             :items="tiposAlmacenamiento"
                                             item-title="Nombre"
                                             item-value="Id"
-                                            density="comfortable" 
-                                            label="Tipo" 
+                                            :density="isMobileApp ? undefined : 'comfortable'" 
+                                            label="Tipo*" 
                                             variant="outlined" 
                                             hide-details="auto"
                                             color="indigo"
                                             prepend-inner-icon="mdi-harddisk"
+                                            :rules="[v => !!v || ' ']"
                                             @update:model-value="onStorageTypeChange(disk)"
-                                        ></v-select>
-                                    </v-col>
-                                    <v-col cols="12" md="6">
-                                        <v-select 
-                                            v-model="disk.CapacidadId"
-                                            :items="capacidadesAlmacenamiento"
-                                            item-title="Nombre"
-                                            item-value="Id"
-                                            density="comfortable" 
-                                            label="Capacidad" 
-                                            variant="outlined" 
-                                            hide-details="auto"
-                                            color="indigo"
                                         ></v-select>
                                     </v-col>
                                     <v-col cols="12" md="6">
@@ -270,13 +264,14 @@
                                             :items="getFilteredProtocols(disk.TipoId)"
                                             item-title="Nombre"
                                             item-value="Id"
-                                            density="comfortable" 
-                                            label="Protocolo" 
+                                            :density="isMobileApp ? undefined : 'comfortable'" 
+                                            label="Protocolo*" 
                                             variant="outlined" 
                                             hide-details="auto"
                                             color="indigo"
                                             prepend-inner-icon="mdi-connection"
                                             :disabled="!disk.TipoId"
+                                            :rules="[v => !getFilteredProtocols(disk.TipoId).length || !!v || ' ']"
                                         ></v-select>
                                     </v-col>
                                     <v-col cols="12" md="6">
@@ -285,13 +280,29 @@
                                             :items="getFilteredFormFactors(disk.TipoId)"
                                             item-title="Nombre"
                                             item-value="Id"
-                                            density="comfortable" 
-                                            label="Factor Forma" 
+                                            :density="isMobileApp ? undefined : 'comfortable'" 
+                                            label="Factor Forma*" 
                                             variant="outlined" 
                                             hide-details="auto"
                                             color="indigo"
                                             prepend-inner-icon="mdi-ruler-square"
                                             :disabled="!disk.TipoId"
+                                            :rules="[v => !getFilteredFormFactors(disk.TipoId).length || !!v || ' ']"
+                                        ></v-select>
+                                    </v-col>
+                                    <v-col cols="12" md="6">
+                                        <v-select 
+                                            v-model="disk.CapacidadId"
+                                            :items="capacidadesAlmacenamiento"
+                                            item-title="Nombre"
+                                            item-value="Id"
+                                            :density="isMobileApp ? undefined : 'comfortable'" 
+                                            label="Capacidad*" 
+                                            variant="outlined" 
+                                            hide-details="auto"
+                                            color="indigo"
+                                            :disabled="!disk.TipoId"
+                                            :rules="[v => !!v || ' ']"
                                         ></v-select>
                                     </v-col>
                                 </v-row>
@@ -312,11 +323,14 @@
 import { onMounted, computed } from 'vue'
 import { useCatalogsStore } from '@/stores/catalogs'
 import { storeToRefs } from 'pinia'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     equipo: Object,
     isEditing: Boolean
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const catalogsStore = useCatalogsStore()
 const { 
@@ -393,6 +407,34 @@ function onStorageTypeChange(disk) {
     disk.FactorFormaId = null
 }
 
+function isBusNA(slot) {
+    if (!slot.VelocidadId || !busesRam.value) return false
+    const bus = busesRam.value.find(b => b.Id === slot.VelocidadId)
+    return bus && (bus.Nombre.toUpperCase() === 'N/A' || bus.Nombre.toUpperCase() === 'NA')
+}
+
+const canAddRamSlot = computed(() => {
+    if (!props.equipo.MemoriasRAM || props.equipo.MemoriasRAM.length === 0) return false
+    const firstSlot = props.equipo.MemoriasRAM[0]
+    return !!firstSlot.TipoId && !!firstSlot.VelocidadId && (isBusNA(firstSlot) || !!firstSlot.CapacidadId)
+})
+
+const canAddStorageSlot = computed(() => {
+    if (!props.equipo.Almacenamiento || props.equipo.Almacenamiento.length === 0) return false
+    const firstDisk = props.equipo.Almacenamiento[0]
+    if (!firstDisk.TipoId || !firstDisk.CapacidadId) return false
+    
+    // Check Protocol if available
+    const protocols = getFilteredProtocols(firstDisk.TipoId)
+    if (protocols.length > 0 && !firstDisk.ProtocoloId) return false
+    
+    // Check Form Factor if available
+    const formFactors = getFilteredFormFactors(firstDisk.TipoId)
+    if (formFactors.length > 0 && !firstDisk.FactorFormaId) return false
+    
+    return true
+})
+
 onMounted(() => {
     catalogsStore.fetchCatalogs([
         'marcasProcesador', 'tiposProcesador', 'generacionesProcesador',
@@ -419,4 +461,18 @@ onMounted(() => {
 <style scoped>
 .border-thin { border: 1px solid rgba(0,0,0,0.08) !important; }
 .gap-4 { gap: 16px; }
+
+/* Error State Styling - Red Shadow instead of Text */
+:deep(.v-field--error) {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important; /* red-500 with opacity */
+    border-color: #ef4444 !important;
+}
+:deep(.v-field--error .v-field__outline) {
+    color: #ef4444 !important;
+}
+:deep(.v-input--error .v-input__details) {
+    display: none !important;
+}
+
+
 </style>

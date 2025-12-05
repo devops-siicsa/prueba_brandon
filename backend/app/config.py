@@ -24,3 +24,19 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev_key')
+
+    # CORS Configuration
+    @staticmethod
+    def get_cors_origins():
+        origins_str = os.getenv('CORS_ORIGINS', 'http://localhost:3000')
+        origins = []
+        for origin in origins_str.split(','):
+            origin = origin.strip()
+            if origin.startswith('regex:'):
+                import re
+                origins.append(re.compile(origin[6:]))
+            else:
+                origins.append(origin)
+        return origins
+
+    CORS_ORIGINS = get_cors_origins()

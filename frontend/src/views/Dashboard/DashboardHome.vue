@@ -15,16 +15,12 @@
         </div>
 
         <!-- Gallery -->
-        <CompanyGallery :is-mobile-device="isMobileDevice" />
+        <CompanyGallery />
     </div>
   </v-container>
 </template>
 
 <script setup>
 import CompanyGallery from '@/components/Dashboard/CompanyGallery.vue'
-import { useDisplay } from 'vuetify'
-import { computed } from 'vue'
 
-const { mobile } = useDisplay()
-const isMobileDevice = computed(() => mobile.value)
 </script>

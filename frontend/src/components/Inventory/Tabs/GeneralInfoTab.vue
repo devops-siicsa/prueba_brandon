@@ -1,27 +1,31 @@
 <template>
-    <v-row class="position-relative">
+    <v-row class="position-relative" :no-gutters="isMobileApp">
         <v-col cols="12" md="12">
             <!-- Section 1: Datos del Equipo -->
             <v-card class="mb-6 rounded-xl border-thin shadow-sm" elevation="0">
-                <v-card-text class="pa-6">
+                <v-card-text :class="mobile ? 'px-3 py-4' : 'pa-6'">
                     <div class="d-flex align-center gap-3 mb-6">
-                        <div class="rounded-circle bg-corporate-blue d-flex align-center justify-center text-white font-weight-bold shadow-md" style="width: 32px; height: 32px; font-size: 14px;">1</div>
+                        <div class="rounded-circle bg-corporate-blue d-flex align-center justify-center text-white font-weight-bold shadow-md" :style="{ width: mobile ? '28px' : '32px', height: mobile ? '28px' : '32px', fontSize: mobile ? '12px' : '14px' }">1</div>
                         <h3 class="text-h6 font-weight-bold text-grey-darken-3">Datos del Equipo</h3>
                     </div>
 
                     <v-row dense>
                         <v-col cols="12" md="6">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Código de Inventario</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Código de Inventario <span class="text-error">*</span></label>
                             <v-text-field
                                 :model-value="equipo.CodigoEquipo"
-                                :label="modern ? undefined : 'Código de Inventario'"
+                                :label="modern ? undefined : 'Código de Inventario*'"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : '']"
+                                :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-barcode"
                                 :append-inner-icon="isMobileApp ? 'mdi-qrcode-scan' : undefined"
+                                :rules="[v => !!v || ' ']"
                                 @click:append-inner="openCamera('CodigoEquipo')"
                                 @update:model-value="handleCodeUpdate"
                             ></v-text-field>
@@ -40,10 +44,13 @@
                             </v-expand-transition>
                         </v-col>
                         <v-col cols="12" md="6">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Estado del Equipo</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Estado del Equipo <span class="text-error">*</span></label>
                             <v-select
                                 :model-value="equipo.EstadoEquipoId"
-                                :label="modern ? undefined : 'Estado del Equipo'"
+                                :label="modern ? undefined : 'Estado del Equipo*'"
                                 :items="estados"
                                 item-title="Nombre"
                                 item-value="Id"
@@ -51,7 +58,8 @@
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-select' : '']"
+                                :class="['rounded-xl', modern ? 'modern-select' : '', isMobileApp ? 'mobile-input' : '']"
+                                :rules="[v => !!v || ' ']"
                                 @update:model-value="$emit('update', 'EstadoEquipoId', $event)"
                             >
                                 <template v-slot:prepend-inner>
@@ -61,10 +69,13 @@
                         </v-col>
                         
                         <v-col cols="12" md="6" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Tipo de Equipo</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Tipo de Equipo <span class="text-error">*</span></label>
                             <v-select
                                 :model-value="equipo.TipoEquipoId"
-                                :label="modern ? undefined : 'Tipo de Equipo'"
+                                :label="modern ? undefined : 'Tipo de Equipo*'"
                                 :items="tipos"
                                 item-title="Nombre"
                                 item-value="Id"
@@ -72,16 +83,20 @@
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-select' : '']"
+                                :class="['rounded-xl', modern ? 'modern-select' : '', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-devices"
+                                :rules="[v => !!v || ' ']"
                                 @update:model-value="$emit('update', 'TipoEquipoId', $event)"
                             ></v-select>
                         </v-col>
-                        <v-col cols="12" md="6" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Fabricante</label>
+                        <v-col cols="12" md="6" class="mt-4" v-if="!isClon">
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Fabricante <span class="text-error">*</span></label>
                             <v-select
                                 :model-value="equipo.FabricanteId"
-                                :label="modern ? undefined : 'Fabricante'"
+                                :label="modern ? undefined : 'Fabricante*'"
                                 :items="fabricantes"
                                 item-title="Nombre"
                                 item-value="Id"
@@ -89,39 +104,48 @@
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-select' : '']"
+                                :class="['rounded-xl', modern ? 'modern-select' : '', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-domain"
+                                :rules="[v => !!v || ' ']"
                                 @update:model-value="$emit('update', 'FabricanteId', $event)"
                             ></v-select>
                         </v-col>
 
-                        <v-col cols="12" md="6" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Modelo</label>
+                        <v-col cols="12" md="6" class="mt-4" v-if="!isClon">
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Modelo <span class="text-error">*</span></label>
                             <v-text-field
                                 :model-value="equipo.Modelo"
-                                :label="modern ? undefined : 'Modelo'"
+                                :label="modern ? undefined : 'Modelo*'"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : '']"
+                                :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-tag-text-outline"
+                                :rules="[v => !!v || ' ']"
                                 @update:model-value="$emit('update', 'Modelo', $event)"
                             ></v-text-field>
                         </v-col>
-                        <v-col cols="12" md="6" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Serial</label>
+                        <v-col cols="12" md="6" class="mt-4" v-if="!isClon">
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Serial <span class="text-error">*</span></label>
                             <v-text-field
                                 :model-value="equipo.Serial"
-                                :label="modern ? undefined : 'Serial'"
+                                :label="modern ? undefined : 'Serial*'"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : '']"
+                                :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-fingerprint"
                                 :append-inner-icon="photoPreview ? 'mdi-paperclip' : 'mdi-camera'"
                                 :append-inner-icon-color="photoPreview ? 'primary' : undefined"
+                                :rules="[v => !!v || ' ']"
                                 @click:append-inner="handlePhotoClick"
                                 @update:model-value="$emit('update', 'Serial', $event)"
                             ></v-text-field>
@@ -132,9 +156,9 @@
 
             <!-- Section 2: Propiedad y Adquisición -->
             <v-card class="rounded-xl border-thin shadow-sm" elevation="0">
-                <v-card-text class="pa-6">
+                <v-card-text :class="mobile ? 'px-3 py-4' : 'pa-6'">
                     <div class="d-flex align-center gap-3 mb-6">
-                        <div class="rounded-circle bg-corporate-blue d-flex align-center justify-center text-white font-weight-bold shadow-md" style="width: 32px; height: 32px; font-size: 14px;">2</div>
+                        <div class="rounded-circle bg-corporate-blue d-flex align-center justify-center text-white font-weight-bold shadow-md" :style="{ width: mobile ? '28px' : '32px', height: mobile ? '28px' : '32px', fontSize: mobile ? '12px' : '14px' }">2</div>
                         <h3 class="text-h6 font-weight-bold text-grey-darken-3">Propiedad y Adquisición</h3>
                     </div>
 
@@ -161,30 +185,38 @@
                         
                         <template v-if="!equipo.EsPropio">
                             <v-col cols="12" md="4">
-                                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Proveedor Alquiler</label>
+                                <label v-if="modern" 
+                                    class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                    :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                                >Proveedor Alquiler <span class="text-error">*</span></label>
                                 <v-text-field
                                     :model-value="equipo.ProveedorAlquiler"
-                                    :label="modern ? undefined : 'Proveedor Alquiler'"
+                                    :label="modern ? undefined : 'Proveedor Alquiler*'"
                                     :variant="modern ? 'solo' : 'outlined'"
                                     :flat="modern"
                                     :readonly="!isEditing"
                                     hide-details="auto"
-                                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                                     prepend-inner-icon="mdi-store"
+                                    :rules="[v => !!v || ' ']"
                                     @update:model-value="$emit('update', 'ProveedorAlquiler', $event)"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="12" md="4">
-                                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Código Alquiler</label>
+                                <label v-if="modern" 
+                                    class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                    :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                                >Código Alquiler <span class="text-error">*</span></label>
                                 <v-text-field
                                     :model-value="equipo.CodigoAlquiler"
-                                    :label="modern ? undefined : 'Código Alquiler'"
+                                    :label="modern ? undefined : 'Código Alquiler*'"
                                     :variant="modern ? 'solo' : 'outlined'"
                                     :flat="modern"
                                     :readonly="!isEditing"
                                     hide-details="auto"
-                                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                                     prepend-inner-icon="mdi-file-document-outline"
+                                    :rules="[v => !!v || ' ']"
                                     @update:model-value="$emit('update', 'CodigoAlquiler', $event)"
                                 ></v-text-field>
                             </v-col>
@@ -258,6 +290,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useDisplay } from 'vuetify'
 import axios from 'axios'
 import { storeToRefs } from 'pinia'
 import { useMobileDetection } from '@/composables/useMobileDetection'
@@ -271,6 +304,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update'])
+const { mobile } = useDisplay()
 const { isMobileApp, platform } = useMobileDetection()
 const catalogsStore = useCatalogsStore()
 const { estadosEquipo: estados, tiposEquipo: tipos, fabricantes } = storeToRefs(catalogsStore)
@@ -377,6 +411,12 @@ const statusIconColor = computed(() => {
     return 'grey'
 })
 
+const isClon = computed(() => {
+    if (!props.equipo.TipoEquipoId || !tipos.value) return false
+    const tipo = tipos.value.find(t => t.Id === props.equipo.TipoEquipoId)
+    return tipo && tipo.Nombre.toLowerCase().includes('clon')
+})
+
 onMounted(() => {
     catalogsStore.fetchCatalogs(['estadosEquipo', 'tiposEquipo', 'fabricantes'])
     
@@ -398,9 +438,9 @@ onMounted(() => {
 :deep(.modern-input .v-field),
 :deep(.modern-select .v-field) {
     border-radius: 12px !important;
-    background-color: #f3f4f6 !important; /* bg-gray-100 - Slightly darker than before */
+    background-color: #f3f4f6 !important; /* bg-gray-100 */
     transition: all 0.2s ease-in-out;
-    border: 1px solid #e5e7eb !important; /* border-gray-200 - Visible border */
+    border: 1px solid #e5e7eb !important; /* border-gray-200 */
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     color: #111827 !important; /* text-gray-900 */
 }
@@ -422,7 +462,20 @@ onMounted(() => {
 :deep(.modern-select .v-field--focused) {
     background-color: #ffffff !important;
     border-color: #3b82f6 !important; /* blue-500 */
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important; /* Stronger ring */
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Mobile Input Optimizations */
+:deep(.mobile-input .v-field) {
+    min-height: 56px !important;
+    border-radius: 16px !important;
+}
+
+:deep(.mobile-input input),
+:deep(.mobile-select .v-select__selection-text) {
+    font-size: 1.1rem !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
 }
 
 /* Icon Styling */
@@ -442,4 +495,16 @@ onMounted(() => {
 .bg-corporate-blue { background-color: #223551 !important; }
 .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; }
 .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; }
+
+/* Error State Styling - Red Shadow instead of Text */
+:deep(.v-field--error) {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important; /* red-500 with opacity */
+    border-color: #ef4444 !important;
+}
+:deep(.v-field--error .v-field__outline) {
+    color: #ef4444 !important;
+}
+:deep(.v-input--error .v-input__details) {
+    display: none !important;
+}
 </style>

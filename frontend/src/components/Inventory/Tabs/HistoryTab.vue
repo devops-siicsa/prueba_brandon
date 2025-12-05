@@ -7,17 +7,21 @@
             </h3>
             <v-btn
                 color="#223551"
-                prepend-icon="mdi-comment-plus-outline"
-                class="text-capitalize rounded-lg px-4"
+                :prepend-icon="!isMobileApp ? 'mdi-comment-plus-outline' : undefined"
+                class="text-capitalize rounded-lg"
+                :class="isMobileApp ? 'px-0' : 'px-4'"
                 elevation="0"
+                :height="isMobileApp ? '44' : '44'"
+                :min-width="isMobileApp ? '44' : undefined"
                 @click="handleAddComment"
             >
-                Agregar Observación
+                <v-icon v-if="isMobileApp">mdi-comment-plus-outline</v-icon>
+                <span v-else>Agregar Observación</span>
             </v-btn>
         </div>
 
         <!-- Timeline Content -->
-        <div class="flex-grow-1 overflow-y-auto custom-scrollbar pa-4">
+        <div class="flex-grow-1 overflow-y-auto custom-scrollbar" :class="isMobileApp ? 'pa-2' : 'pa-4'">
             
             <!-- Loading State -->
             <div v-if="loading" class="d-flex justify-center py-8">
@@ -115,7 +119,7 @@
         <!-- Add Comment Dialog -->
         <v-dialog 
             v-model="showCommentDialog" 
-            :fullscreen="isDialogMaximized"
+            :fullscreen="isDialogMaximized || isMobileApp"
             :max-width="isDialogMaximized ? undefined : 800"
             transition="dialog-bottom-transition"
         >
@@ -124,6 +128,7 @@
                     <span>Agregar Observación</span>
                     <div class="d-flex align-center gap-2">
                         <v-btn 
+                            v-if="!isMobileApp"
                             icon 
                             variant="text" 
                             color="grey-darken-1" 
@@ -191,11 +196,14 @@ import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     equipo: Object,
     isEditing: Boolean
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const logs = ref([])
 const loading = ref(false)

@@ -1,9 +1,9 @@
 <template>
-    <v-row class="position-relative">
+    <v-row class="position-relative" :no-gutters="isMobileApp">
         <!-- Section 1: Sistema Operativo -->
         <v-col cols="12" md="6">
             <v-card class="mb-4 rounded-xl border-thin shadow-sm" elevation="0">
-                <v-card-text class="pa-6">
+                <v-card-text :class="isMobileApp ? 'px-3 py-4' : 'pa-6'">
                     <div class="d-flex align-center gap-3 mb-6">
                         <div class="rounded-circle bg-corporate-blue d-flex align-center justify-center text-white font-weight-bold shadow-md" style="width: 32px; height: 32px; font-size: 14px;">1</div>
                         <h3 class="text-h6 font-weight-bold text-grey-darken-3">Sistema Operativo</h3>
@@ -11,10 +11,13 @@
 
                     <v-row dense>
                         <v-col cols="12">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Sistema Operativo</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Sistema Operativo*</label>
                             <v-autocomplete
                                 :model-value="equipo.SistemaOperativoId"
-                                :label="modern ? undefined : 'Sistema Operativo'"
+                                :label="modern ? undefined : 'Sistema Operativo*'"
                                 :items="sistemasOperativos"
                                 item-title="Nombre"
                                 item-value="Id"
@@ -22,43 +25,52 @@
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-microsoft-windows"
                                 @update:model-value="$emit('update', 'SistemaOperativoId', $event)"
                                 auto-select-first
+                                :rules="[v => !!v || ' ']"
                             ></v-autocomplete>
                         </v-col>
                         
                         <!-- Campo para Licencia (Windows/Otros) -->
                         <v-col cols="12" v-if="!isLinuxOrMac" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Licencia / Serial SO</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Licencia / Serial SO*</label>
                             <v-text-field
                                 :model-value="equipo.LicenciaSO"
-                                :label="modern ? undefined : 'Licencia / Serial SO'"
+                                :label="modern ? undefined : 'Licencia / Serial SO*'"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-key-variant"
                                 @update:model-value="$emit('update', 'LicenciaSO', $event)"
+                                :rules="[v => !!v || ' ']"
                             ></v-text-field>
                         </v-col>
 
                         <!-- Campo para Distribución (Linux/Mac) -->
                         <v-col cols="12" v-if="isLinuxOrMac" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Distribución</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Distribución*</label>
                             <v-text-field
                                 :model-value="equipo.Distribucion"
-                                :label="modern ? undefined : 'Distribución'"
+                                :label="modern ? undefined : 'Distribución*'"
                                 placeholder="Ej: Ubuntu 22.04, macOS Ventura"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-linux"
                                 @update:model-value="$emit('update', 'Distribucion', $event)"
+                                :rules="[v => !!v || ' ']"
                             ></v-text-field>
                         </v-col>
                     </v-row>
@@ -69,7 +81,7 @@
         <!-- Section 2: Ofimática -->
         <v-col cols="12" md="6">
             <v-card class="mb-4 rounded-xl border-thin shadow-sm" elevation="0">
-                <v-card-text class="pa-6">
+                <v-card-text :class="isMobileApp ? 'px-3 py-4' : 'pa-6'">
                     <div class="d-flex align-center gap-3 mb-6">
                         <div class="rounded-circle bg-corporate-blue d-flex align-center justify-center text-white font-weight-bold shadow-md" style="width: 32px; height: 32px; font-size: 14px;">2</div>
                         <h3 class="text-h6 font-weight-bold text-grey-darken-3">Ofimática</h3>
@@ -77,10 +89,13 @@
 
                     <v-row dense>
                         <v-col cols="12">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Suite Ofimática</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Suite Ofimática*</label>
                             <v-autocomplete
                                 :model-value="equipo.OfimaticaId"
-                                :label="modern ? undefined : 'Suite Ofimática'"
+                                :label="modern ? undefined : 'Suite Ofimática*'"
                                 :items="ofimaticas"
                                 item-title="Nombre"
                                 item-value="Id"
@@ -88,43 +103,52 @@
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-file-document-multiple"
                                 @update:model-value="$emit('update', 'OfimaticaId', $event)"
                                 auto-select-first
+                                :rules="[v => !!v || ' ']"
                             ></v-autocomplete>
                         </v-col>
                         
                         <!-- Campo para Licencia (Office Comercial) -->
                         <v-col cols="12" v-if="!isOfficeFree" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Licencia / Cuenta</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Licencia / Cuenta*</label>
                             <v-text-field
                                 :model-value="equipo.LicenciaOfimatica"
-                                :label="modern ? undefined : 'Licencia / Cuenta'"
+                                :label="modern ? undefined : 'Licencia / Cuenta*'"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-account-key"
                                 @update:model-value="$emit('update', 'LicenciaOfimatica', $event)"
+                                :rules="[v => !!v || ' ']"
                             ></v-text-field>
                         </v-col>
 
                         <!-- Campo para Distribución (Office Libre) -->
                         <v-col cols="12" v-if="isOfficeFree" class="mt-4">
-                             <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Distribución</label>
+                             <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                             >Distribución*</label>
                              <v-text-field
                                 :model-value="equipo.DistribucionOfimatica"
-                                :label="modern ? undefined : 'Distribución'"
+                                :label="modern ? undefined : 'Distribución*'"
                                 placeholder="Ej: LibreOffice 7.5"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-package-variant"
                                 @update:model-value="$emit('update', 'DistribucionOfimatica', $event)"
+                                :rules="[v => !!v || ' ']"
                             ></v-text-field>
                         </v-col>
                     </v-row>
@@ -135,7 +159,7 @@
         <!-- Section 3: Red y Seguridad -->
         <v-col cols="12">
             <v-card class="mb-4 rounded-xl border-thin shadow-sm" elevation="0">
-                <v-card-text class="pa-6">
+                <v-card-text :class="isMobileApp ? 'px-3 py-4' : 'pa-6'">
                     <div class="d-flex align-center gap-3 mb-6">
                         <div class="rounded-circle bg-corporate-blue d-flex align-center justify-center text-white font-weight-bold shadow-md" style="width: 32px; height: 32px; font-size: 14px;">3</div>
                         <h3 class="text-h6 font-weight-bold text-grey-darken-3">Red y Seguridad</h3>
@@ -144,60 +168,75 @@
                     <v-row dense>
                         <!-- 1. Pertenece a -->
                         <v-col cols="12" md="4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Pertenece a</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Pertenece a*</label>
                             <v-autocomplete
                                 :model-value="equipo.EquipoPertenece"
-                                :label="modern ? undefined : 'Pertenece a'"
+                                :label="modern ? undefined : 'Pertenece a*'"
                                 :items="['Dominio', 'Grupo de Trabajo']"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-domain"
                                 @update:model-value="$emit('update', 'EquipoPertenece', $event)"
                                 auto-select-first
+                                :rules="[v => !!v || ' ']"
                             ></v-autocomplete>
                         </v-col>
 
                         <!-- 2. Nombre Grupo / Dominio (Nuevo) -->
                         <v-col cols="12" md="4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Nombre Grupo / Dominio</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Nombre Grupo / Dominio*</label>
                             <v-text-field
                                 :model-value="equipo.NombreGrupoDominio"
-                                :label="modern ? undefined : 'Nombre Grupo / Dominio'"
+                                :label="modern ? undefined : 'Nombre Grupo / Dominio*'"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-server-network"
                                 @update:model-value="$emit('update', 'NombreGrupoDominio', $event)"
+                                :rules="[v => !!v || ' ']"
                             ></v-text-field>
                         </v-col>
 
                         <!-- 3. Nombre en Red (Hostname) -->
                         <v-col cols="12" md="4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Nombre equipo (hostname)</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Nombre equipo (hostname)*</label>
                             <v-text-field
                                 :model-value="equipo.NombreEnRed"
-                                :label="modern ? undefined : 'Nombre equipo (hostname)'"
+                                :label="modern ? undefined : 'Nombre equipo (hostname)*'"
                                 :variant="modern ? 'solo' : 'outlined'"
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-input' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-desktop-tower"
                                 @update:model-value="$emit('update', 'NombreEnRed', $event)"
+                                :rules="[v => !!v || ' ']"
                             ></v-text-field>
                         </v-col>
 
                         <!-- 4. Antivirus -->
                         <v-col cols="12" md="4" class="mt-4">
-                            <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Antivirus</label>
+                            <label v-if="modern" 
+                                class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                                :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                            >Antivirus*</label>
                             <v-autocomplete
                                 :model-value="equipo.AntivirusId"
-                                :label="modern ? undefined : 'Antivirus'"
+                                :label="modern ? undefined : 'Antivirus*'"
                                 :items="antivirus"
                                 item-title="Nombre"
                                 item-value="Id"
@@ -205,10 +244,11 @@
                                 :flat="modern"
                                 :readonly="!isEditing"
                                 hide-details="auto"
-                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3']"
+                                :class="['rounded-xl', modern ? 'modern-select' : 'mb-3', isMobileApp ? 'mobile-input' : '']"
                                 prepend-inner-icon="mdi-shield-check"
                                 @update:model-value="$emit('update', 'AntivirusId', $event)"
                                 auto-select-first
+                                :rules="[v => !!v || ' ']"
                             ></v-autocomplete>
                         </v-col>
                     </v-row>
@@ -222,12 +262,15 @@
 import { onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCatalogsStore } from '@/stores/catalogs'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     equipo: Object,
     isEditing: Boolean,
     modern: Boolean
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update'])
 
@@ -283,6 +326,19 @@ onMounted(() => {
     font-weight: 500;
 }
 
+/* Mobile Input Optimizations */
+:deep(.mobile-input .v-field) {
+    min-height: 56px !important;
+    border-radius: 16px !important; /* Larger radius for mobile */
+}
+
+:deep(.mobile-input input),
+:deep(.mobile-select .v-select__selection-text) {
+    font-size: 1.1rem !important; /* Larger text */
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
+
 :deep(.modern-input .v-field:hover),
 :deep(.modern-select .v-field:hover) {
     background-color: #ffffff !important;
@@ -314,8 +370,19 @@ onMounted(() => {
 .bg-corporate-blue { background-color: #223551 !important; }
 .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; }
 .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; }
-</style>
 
-<style scoped>
+/* Existing border-thin */
 .border-thin { border: 1px solid rgba(0,0,0,0.08) !important; }
+
+/* Error State Styling - Red Shadow instead of Text */
+:deep(.v-field--error) {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important; /* red-500 with opacity */
+    border-color: #ef4444 !important;
+}
+:deep(.v-field--error .v-field__outline) {
+    color: #ef4444 !important;
+}
+:deep(.v-input--error .v-input__details) {
+    display: none !important;
+}
 </style>

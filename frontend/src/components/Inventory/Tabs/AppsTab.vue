@@ -11,14 +11,14 @@
                     flat
                     hide-details
                     density="comfortable"
-                    class="flex-grow-1 rounded-xl modern-input"
+                    :class="['flex-grow-1 rounded-xl modern-input', isMobileApp ? 'mobile-input' : '']"
                     prepend-inner-icon="mdi-magnify"
                     clearable
                 ></v-text-field>
 
                 <!-- View Toggle -->
                 <v-menu
-                    v-if="selectedApps.length > 0"
+                    v-if="selectedApps.length > 0 && !isMobileApp"
                     location="bottom end"
                     :close-on-content-click="false"
                 >
@@ -87,13 +87,15 @@
                 <!-- Create Button -->
                 <v-btn
                     color="corporate-blue"
-                    prepend-icon="mdi-plus"
-                    class="rounded-xl text-capitalize font-weight-bold px-6 text-white"
+                    :prepend-icon="!isMobileApp ? 'mdi-plus' : undefined"
+                    :class="['rounded-xl text-white', isMobileApp ? 'px-0' : 'px-6 font-weight-bold text-capitalize']"
                     elevation="0"
                     height="44"
+                    :min-width="isMobileApp ? '44' : undefined"
                     @click="showCreateDialog = true"
                 >
-                    Crear App
+                    <v-icon v-if="isMobileApp">mdi-plus</v-icon>
+                    <span v-else>Crear App</span>
                 </v-btn>
             </div>
         </div>
@@ -128,7 +130,7 @@
                     <v-col
                         v-for="app in paginatedApps"
                         :key="app.Id"
-                        cols="12"
+                        :cols="isMobileApp ? 6 : 12"
                         sm="6"
                         md="4"
                         lg="3"
@@ -152,19 +154,19 @@
                                     </div>
                                 </v-scale-transition>
 
-                                <v-card-text class="d-flex flex-column align-center pa-4 text-center h-100">
+                                <v-card-text class="d-flex flex-column align-center text-center h-100" :class="isMobileApp ? 'pa-2' : 'pa-4'">
                                     <v-avatar
                                         :color="getAppColor(app.Nombre)"
-                                        size="56"
+                                        :size="isMobileApp ? 42 : 56"
                                         class="mb-3 shadow-sm"
                                         rounded="xl"
                                     >
-                                        <span class="text-h5 font-weight-bold text-white">
+                                        <span class="font-weight-bold text-white" :class="isMobileApp ? 'text-subtitle-1' : 'text-h5'">
                                             {{ app.Nombre.charAt(0).toUpperCase() }}
                                         </span>
                                     </v-avatar>
                                     
-                                    <div class="text-subtitle-2 font-weight-bold text-grey-darken-3 text-truncate w-100 mb-1" :title="app.Nombre">
+                                    <div class="font-weight-bold text-grey-darken-3 text-truncate w-100 mb-1" :class="isMobileApp ? 'text-caption' : 'text-subtitle-2'" :title="app.Nombre">
                                         {{ app.Nombre }}
                                     </div>
                                     <div class="text-caption text-grey text-truncate w-100">
@@ -309,12 +311,14 @@
                         class="mb-3"
                         autofocus
                         rounded="lg"
+                        :density="isMobileApp ? undefined : 'comfortable'"
                     ></v-text-field>
                     <v-text-field
                         v-model="newApp.Version"
                         label="Versión (Opcional)"
                         variant="outlined"
                         rounded="lg"
+                        :density="isMobileApp ? undefined : 'comfortable'"
                     ></v-text-field>
                 </v-card-text>
                 <v-card-actions class="pa-4 pt-0 justify-end">
@@ -338,6 +342,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useCatalogsStore } from '@/stores/catalogs'
 import { storeToRefs } from 'pinia'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     equipo: Object,
@@ -346,7 +351,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update'])
-
+const { isMobileApp } = useMobileDetection()
 const catalogsStore = useCatalogsStore()
 const { aplicativos, loading } = storeToRefs(catalogsStore)
 
@@ -502,5 +507,18 @@ onMounted(() => {
     background-color: #ffffff !important;
     border-color: #3b82f6 !important;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Mobile Input Optimizations */
+:deep(.mobile-input .v-field) {
+    min-height: 56px !important;
+    border-radius: 16px !important; /* Larger radius for mobile */
+}
+
+:deep(.mobile-input input),
+:deep(.mobile-select .v-select__selection-text) {
+    font-size: 1.1rem !important; /* Larger text */
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
 }
 </style>

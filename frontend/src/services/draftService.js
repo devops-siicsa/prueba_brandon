@@ -30,5 +30,22 @@ export const draftService = {
     async deleteDraft(key) {
         const db = await getDB()
         return db.delete(STORE_NAME, key)
+    },
+
+    async getDraftsByCompany(companyId) {
+        const db = await getDB()
+        const keys = await db.getAllKeys(STORE_NAME)
+        const drafts = []
+
+        for (const key of keys) {
+            if (typeof key === 'string' && key.startsWith('draft_')) {
+                const draft = await db.get(STORE_NAME, key)
+                // Filter by companyId if provided and matches
+                if (draft && draft.EmpresaId === parseInt(companyId)) {
+                    drafts.push({ key, ...draft })
+                }
+            }
+        }
+        return drafts
     }
 }

@@ -421,7 +421,7 @@ function loadItems({ page, itemsPerPage: ipp }) {
 
 async function fetchFilterOptions() {
     try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL || ''}/api/audit/filters`, {
+        const response = await axios.get('/api/audit/filters', {
             withCredentials: true
         })
         filterOptions.value = {
@@ -471,7 +471,7 @@ async function fetchLogs() {
             if (params[key] === null || params[key] === '') delete params[key]
         })
 
-        const url = `${import.meta.env.VITE_API_URL || ''}/api/audit/logs`
+        const url = '/api/audit/logs'
         
         const response = await axios.get(url, {
             params,

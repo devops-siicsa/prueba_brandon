@@ -1,5 +1,5 @@
 <template>
-    <v-row class="position-relative">
+    <v-row class="position-relative" :no-gutters="isMobileApp">
         <!-- Vertical Divider (Desktop only) -->
         <div v-if="modern" class="d-none d-md-block position-absolute bg-gradient-vertical" style="left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); z-index: 1;"></div>
 
@@ -11,83 +11,105 @@
             </div>
 
             <div class="mb-6 group">
-                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Usuario Asignado</label>
+                <label v-if="modern" 
+                    class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                    :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                >Usuario Asignado <span class="text-error">*</span></label>
                 <v-text-field
                     :model-value="equipo.UsuarioNombre"
-                    :label="modern ? undefined : 'Usuario Asignado'"
+                    :label="modern ? undefined : 'Usuario Asignado*'"
                     :placeholder="modern ? 'Escribir nombre...' : undefined"
                     :variant="modern ? 'solo' : 'outlined'"
                     :flat="modern"
                     :readonly="!isEditing"
                     hide-details="auto"
-                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                     prepend-inner-icon="mdi-account"
+                    :rules="[v => !!v || ' ']"
                     @update:model-value="$emit('update', 'UsuarioNombre', $event)"
                 ></v-text-field>
             </div>
 
             <v-row dense class="mb-6">
                 <v-col cols="12" md="6">
-                    <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Cargo</label>
+                    <label v-if="modern" 
+                        class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                        :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                    >Cargo <span class="text-error">*</span></label>
                     <v-text-field
                         :model-value="equipo.Cargo"
-                        :label="modern ? undefined : 'Cargo'"
+                        :label="modern ? undefined : 'Cargo*'"
                         :placeholder="modern ? 'Ej. Analista' : undefined"
                         :variant="modern ? 'solo' : 'outlined'"
                         :flat="modern"
                         :readonly="!isEditing"
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-input' : '']"
+                        :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                         prepend-inner-icon="mdi-briefcase"
+                        :rules="[v => !!v || ' ']"
                         @update:model-value="$emit('update', 'Cargo', $event)"
                     ></v-text-field>
                 </v-col>
                 <v-col cols="12" md="6">
-                    <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Área</label>
+                    <label v-if="modern" 
+                        class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                        :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                    >Área <span class="text-error">*</span></label>
                     <v-text-field
                         :model-value="equipo.Area"
-                        :label="modern ? undefined : 'Área'"
+                        :label="modern ? undefined : 'Área*'"
                         :placeholder="modern ? 'Ej. IT' : undefined"
                         :variant="modern ? 'solo' : 'outlined'"
                         :flat="modern"
                         :readonly="!isEditing"
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-input' : '']"
+                        :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                         prepend-inner-icon="mdi-layers"
+                        :rules="[v => !!v || ' ']"
                         @update:model-value="$emit('update', 'Area', $event)"
                     ></v-text-field>
                 </v-col>
             </v-row>
 
             <div class="mb-6">
-                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Correo Electrónico</label>
+                <label v-if="modern" 
+                    class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                    :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                >Correo Electrónico <span class="text-error">*</span></label>
                 <v-text-field
                     :model-value="equipo.Correo"
-                    :label="modern ? undefined : 'Correo Electrónico'"
+                    :label="modern ? undefined : 'Correo Electrónico*'"
                     :placeholder="modern ? 'usuario@empresa.com' : undefined"
                     :variant="modern ? 'solo' : 'outlined'"
                     :flat="modern"
                     :readonly="!isEditing"
                     hide-details="auto"
-                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                     prepend-inner-icon="mdi-email"
+                    :rules="[v => !!v || ' ', v => /.+@.+\..+/.test(v) || 'Inválido']"
                     @update:model-value="$emit('update', 'Correo', $event)"
                 ></v-text-field>
             </div>
 
             <div class="mb-6">
-                <label v-if="modern" class="d-block text-caption font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider">Teléfono / Extensión</label>
+                <label v-if="modern" 
+                    class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                    :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                >Teléfono / Extensión <span class="text-error">*</span></label>
                 <v-text-field
                     :model-value="equipo.Telefono"
-                    :label="modern ? undefined : 'Teléfono / Extensión'"
+                    :label="modern ? undefined : 'Teléfono / Extensión*'"
                     :placeholder="modern ? '(+57) 300 ...' : undefined"
                     :variant="modern ? 'solo' : 'outlined'"
                     :flat="modern"
                     :readonly="!isEditing"
                     hide-details="auto"
-                    :class="['rounded-xl', modern ? 'modern-input' : '']"
+                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                     prepend-inner-icon="mdi-phone"
-                    @update:model-value="$emit('update', 'Telefono', $event)"
+                    :rules="[v => (!!v && /^\d+$/.test(v) && v.length <= 12) || ' ']"
+                    maxlength="12"
+                    inputmode="numeric"
+                    @update:model-value="$emit('update', 'Telefono', $event.replace(/\D/g, '').slice(0, 12))"
                 ></v-text-field>
             </div>
         </v-col>
@@ -102,10 +124,13 @@
             <!-- Card de Ubicación destacada -->
             <div class="bg-gradient-location rounded-3xl pa-8 border border-blue-lighten-4 shadow-inner-custom">
                 <div class="mb-8">
-                    <label v-if="modern" class="d-block text-caption font-weight-bold text-blue-darken-3 text-uppercase mb-2 ml-1 opacity-60 tracking-wider">Sede Principal</label>
+                    <label v-if="modern" 
+                        class="d-block font-weight-bold text-blue-darken-3 text-uppercase mb-2 ml-1 opacity-60 tracking-wider"
+                        :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                    >Sede Principal <span class="text-error">*</span></label>
                     <v-select
                         :model-value="equipo.SedeId"
-                        :label="modern ? undefined : 'Sede Principal'"
+                        :label="modern ? undefined : 'Sede Principal*'"
                         :placeholder="modern ? 'Seleccione una sede...' : undefined"
                         :items="sedes"
                         item-title="NombreSede"
@@ -115,15 +140,19 @@
                         bg-color="white"
                         :readonly="!isEditing"
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-select' : '']"
+                        :class="['rounded-xl', modern ? 'modern-select' : '', isMobileApp ? 'mobile-input' : '']"
                         prepend-inner-icon="mdi-office-building"
                         menu-icon="mdi-chevron-down"
+                        :rules="[v => !!v || ' ']"
                         @update:model-value="updateSede"
                     ></v-select>
                 </div>
 
                 <div class="mb-6">
-                    <label v-if="modern" class="d-block text-caption font-weight-bold text-blue-darken-3 text-uppercase mb-2 ml-1 opacity-60 tracking-wider">Ciudad</label>
+                    <label v-if="modern" 
+                        class="d-block font-weight-bold text-blue-darken-3 text-uppercase mb-2 ml-1 opacity-60 tracking-wider"
+                        :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                    >Ciudad</label>
                     <v-text-field
                         :model-value="equipo.Ciudad"
                         :label="modern ? undefined : 'Ciudad'"
@@ -132,7 +161,7 @@
                         bg-color="white"
                         readonly
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-input' : '']"
+                        :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
                         prepend-inner-icon="mdi-map-marker"
                     ></v-text-field>
                 </div>
@@ -151,12 +180,15 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 
 const props = defineProps({
     equipo: Object,
     isEditing: Boolean,
     modern: Boolean
 })
+
+const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update'])
 const sedes = ref([])
@@ -237,6 +269,19 @@ onMounted(() => {
     font-weight: 500; /* Slightly bolder text */
 }
 
+/* Mobile Input Optimizations */
+:deep(.mobile-input .v-field) {
+    min-height: 56px !important;
+    border-radius: 16px !important; /* Larger radius for mobile */
+}
+
+:deep(.mobile-input input),
+:deep(.mobile-select .v-select__selection-text) {
+    font-size: 1.1rem !important; /* Larger text */
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
+
 :deep(.modern-input .v-field:hover),
 :deep(.modern-select .v-field:hover) {
     background-color: #ffffff !important;
@@ -265,5 +310,17 @@ onMounted(() => {
 
 :deep(.modern-select .v-field__append-inner) {
     color: #9ca3af !important;
+}
+
+/* Error State Styling - Red Shadow instead of Text */
+:deep(.v-field--error) {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important; /* red-500 with opacity */
+    border-color: #ef4444 !important;
+}
+:deep(.v-field--error .v-field__outline) {
+    color: #ef4444 !important;
+}
+:deep(.v-input--error .v-input__details) {
+    display: none !important;
 }
 </style>

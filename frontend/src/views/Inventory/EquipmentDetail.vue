@@ -56,37 +56,37 @@
                 v-model="activeTab" 
                 color="primary" 
                 bg-color="white" 
-                :show-arrows="isMobileDevice"
-                :grow="!isMobileDevice"
-                :density="isMobileDevice ? 'compact' : 'default'"
+                :show-arrows="isMobileApp"
+                :grow="!isMobileApp"
+                :density="isMobileApp ? 'compact' : 'default'"
             >
-                <v-tab value="user" class="text-capitalize"><v-icon start>mdi-account</v-icon> {{ isMobileDevice ? '' : 'Usuario' }}</v-tab>
-                <v-tab value="general" class="text-capitalize"><v-icon start>mdi-laptop</v-icon> {{ isMobileDevice ? '' : 'Equipo' }}</v-tab>
-                <v-tab value="hardware" class="text-capitalize"><v-icon start>mdi-cpu-64-bit</v-icon> {{ isMobileDevice ? '' : 'Hardware' }}</v-tab>
-                <v-tab value="software" class="text-capitalize"><v-icon start>mdi-microsoft-windows</v-icon> {{ isMobileDevice ? '' : 'Software' }}</v-tab>
-                <v-tab value="apps" class="text-capitalize"><v-icon start>mdi-apps</v-icon> {{ isMobileDevice ? '' : 'Aplicativos' }}</v-tab>
-                <v-tab value="files" class="text-capitalize"><v-icon start>mdi-paperclip</v-icon> {{ isMobileDevice ? '' : 'Adjuntos' }}</v-tab>
-                <v-tab value="history" class="text-capitalize"><v-icon start>mdi-history</v-icon> {{ isMobileDevice ? '' : 'Historial' }}</v-tab>
+                <v-tab value="user" class="text-capitalize"><v-icon start>mdi-account</v-icon> {{ isMobileApp ? '' : 'Usuario' }}</v-tab>
+                <v-tab value="general" class="text-capitalize"><v-icon start>mdi-laptop</v-icon> {{ isMobileApp ? '' : 'Equipo' }}</v-tab>
+                <v-tab value="hardware" class="text-capitalize"><v-icon start>mdi-cpu-64-bit</v-icon> {{ isMobileApp ? '' : 'Hardware' }}</v-tab>
+                <v-tab value="software" class="text-capitalize"><v-icon start>mdi-microsoft-windows</v-icon> {{ isMobileApp ? '' : 'Software' }}</v-tab>
+                <v-tab value="apps" class="text-capitalize"><v-icon start>mdi-apps</v-icon> {{ isMobileApp ? '' : 'Aplicativos' }}</v-tab>
+                <v-tab value="files" class="text-capitalize"><v-icon start>mdi-paperclip</v-icon> {{ isMobileApp ? '' : 'Adjuntos' }}</v-tab>
+                <v-tab value="history" class="text-capitalize"><v-icon start>mdi-history</v-icon> {{ isMobileApp ? '' : 'Historial' }}</v-tab>
             </v-tabs>
 
             <v-divider></v-divider>
 
-            <v-card-text :class="isMobileDevice ? 'pa-3' : 'pa-6'" style="min-height: 500px;">
+            <v-card-text :class="isMobileApp ? 'pa-3' : 'pa-6'" style="min-height: 500px;">
                 <v-window v-model="activeTab">
                     <v-window-item value="user">
-                        <UserInfoTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileDevice" @update="updateEquipoField" />
+                        <UserInfoTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileApp" @update="updateEquipoField" />
                     </v-window-item>
                     
                     <v-window-item value="general">
-                        <GeneralInfoTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileDevice" @update="updateEquipoField" />
+                        <GeneralInfoTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileApp" @update="updateEquipoField" />
                     </v-window-item>
 
                     <v-window-item value="hardware">
-                        <HardwareTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileDevice" />
+                        <HardwareTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileApp" />
                     </v-window-item>
 
                     <v-window-item value="software">
-                        <SoftwareTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileDevice" @update="updateEquipoField" />
+                        <SoftwareTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileApp" @update="updateEquipoField" />
                     </v-window-item>
                     
                     <v-window-item value="apps">
@@ -110,15 +110,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useDisplay } from 'vuetify'
+import { useMobileDetection } from '@/composables/useMobileDetection'
 import axios from 'axios'
 import UserInfoTab from '@/components/Inventory/Tabs/UserInfoTab.vue'
 import GeneralInfoTab from '@/components/Inventory/Tabs/GeneralInfoTab.vue'
 import HardwareTab from '@/components/Inventory/Tabs/HardwareTab.vue'
 import SoftwareTab from '@/components/Inventory/Tabs/SoftwareTab.vue'
 
-const { mobile } = useDisplay()
-const isMobileDevice = computed(() => mobile.value)
+const { isMobileApp } = useMobileDetection()
 
 const route = useRoute()
 const router = useRouter()

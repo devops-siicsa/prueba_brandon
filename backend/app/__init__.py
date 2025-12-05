@@ -13,11 +13,8 @@ def create_app(config_class=Config):
     # Inicializar extensiones con la app creada
     db.init_app(app)
     
-    # Permitir CORS para localhost y dominios de ngrok
-    cors.init_app(app, resources={r"/api/*": {"origins": [
-        "http://localhost:3000",
-        r"https://.*\.ngrok-free\.dev"
-    ]}}, supports_credentials=True)
+    # Permitir CORS desde configuración
+    cors.init_app(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}}, supports_credentials=True)
 
     # Registrar Blueprints
     from app.routes.auth_routes import auth_bp
