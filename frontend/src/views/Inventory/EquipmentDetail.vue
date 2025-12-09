@@ -43,6 +43,7 @@
                         prepend-icon="mdi-content-save"
                         @click="saveChanges"
                         :loading="saving"
+                        :disabled="!isModified"
                     >
                         Guardar Cambios
                     </v-btn>
@@ -90,15 +91,15 @@
                     </v-window-item>
                     
                     <v-window-item value="apps">
-                        <div class="text-center py-12 text-grey">Módulo de Aplicativos en construcción</div>
+                        <AppsTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileApp" @update="updateEquipoField" />
                     </v-window-item>
 
                     <v-window-item value="files">
-                        <div class="text-center py-12 text-grey">Módulo de Adjuntos en construcción</div>
+                        <AttachmentsTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileApp" @update="loadEquipo" />
                     </v-window-item>
 
                     <v-window-item value="history">
-                        <div class="text-center py-12 text-grey">Módulo de Historial en construcción</div>
+                        <HistoryTab :equipo="equipo" :is-editing="isEditing" :is-mobile="isMobileApp" @update="loadEquipo" :key="historyKey" />
                     </v-window-item>
                 </v-window>
             </v-card-text>
@@ -116,6 +117,9 @@ import UserInfoTab from '@/components/Inventory/Tabs/UserInfoTab.vue'
 import GeneralInfoTab from '@/components/Inventory/Tabs/GeneralInfoTab.vue'
 import HardwareTab from '@/components/Inventory/Tabs/HardwareTab.vue'
 import SoftwareTab from '@/components/Inventory/Tabs/SoftwareTab.vue'
+import AppsTab from '@/components/Inventory/Tabs/AppsTab.vue'
+import AttachmentsTab from '@/components/Inventory/Tabs/AttachmentsTab.vue'
+import HistoryTab from '@/components/Inventory/Tabs/HistoryTab.vue'
 
 const { isMobileApp } = useMobileDetection()
 
@@ -125,14 +129,22 @@ const activeTab = ref('user')
 const isEditing = ref(false)
 const saving = ref(false)
 const equipo = ref({})
+const originalEquipo = ref({})
+const historyKey = ref(0)
 
 const equipoId = computed(() => route.params.id)
+
+const isModified = computed(() => {
+    return JSON.stringify(equipo.value) !== JSON.stringify(originalEquipo.value)
+})
 
 async function loadEquipo() {
     if (!equipoId.value) return
     try {
         const res = await axios.get(`/api/inventory/equipos/${equipoId.value}`, { withCredentials: true })
         equipo.value = res.data
+        // Deep copy for comparison
+        originalEquipo.value = JSON.parse(JSON.stringify(res.data))
     } catch (e) {
         console.error("Error loading equipo", e)
     }
@@ -151,14 +163,25 @@ function updateEquipoField(field, value) {
 }
 
 async function saveChanges() {
+    if (!isModified.value) return 
     saving.value = true
     try {
+        // Enforce Slot Numbers based on Index
+        if (equipo.value.MemoriasRAM) {
+            equipo.value.MemoriasRAM.forEach((ram, index) => { ram.SlotNumero = index + 1 })
+        }
+        if (equipo.value.Almacenamiento) {
+            equipo.value.Almacenamiento.forEach((disk, index) => { disk.SlotNumero = index + 1 })
+        }
+
         await axios.put(`/api/inventory/equipos/${equipoId.value}`, equipo.value, { withCredentials: true })
         isEditing.value = false
+        await loadEquipo() // Reload to get fresh timestamps/audit and reset state
+        historyKey.value++ // Force refresh of HistoryTab
         // TODO: Show success notification
     } catch (e) {
         console.error("Error saving", e)
-        alert("Error al guardar cambios")
+        alert("Error al guardar cambios: " + (e.response?.data?.message || e.message))
     } finally {
         saving.value = false
     }

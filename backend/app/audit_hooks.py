@@ -104,7 +104,13 @@ def create_log(session, instance, action):
                 
                 if not detalle:
                     return 
-                    
+                
+                # Ensure EquipoId is present for searchability purposes (Hardware/Apps)
+                if hasattr(instance, 'EquipoId') and instance.EquipoId is not None:
+                    if 'EquipoId' not in detalle:
+                        # Add it as a raw value (not a change dict) ensuring search finds it
+                        detalle['EquipoId'] = instance.EquipoId
+
                 detalle_str = json.dumps(detalle, default=str)
 
         elif action == 'CREAR':
@@ -118,7 +124,14 @@ def create_log(session, instance, action):
             valor_despues = "Registro Creado"
 
         elif action == 'ELIMINAR':
-            detalle_str = "Registro Eliminado"
+            # Capture full state before deletion to allow searching by foreign keys (e.g. EquipoId)
+            state = inspect(instance)
+            data = {}
+            for attr in state.mapper.column_attrs:
+                val = getattr(instance, attr.key)
+                if val is not None:
+                    data[attr.key] = val
+            detalle_str = json.dumps(data, default=str)
             valor_antes = "Registro Eliminado"
 
         # Usar Core Insert para evitar problemas con la sesión ORM en el hook

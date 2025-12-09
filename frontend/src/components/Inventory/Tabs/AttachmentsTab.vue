@@ -1,59 +1,60 @@
 <template>
     <div class="h-100 d-flex flex-column">
         <!-- Toolbar -->
-        <div class="flex-shrink-0 pb-4">
+        <div class="flex-shrink-0 pb-4" v-if="isEditing || files.length > 0">
             <div class="d-flex align-center gap-3">
                 <h3 class="text-h6 font-weight-bold text-grey-darken-3 mr-auto">
                     Galería de Adjuntos
                 </h3>
                 
-                <!-- Hidden Inputs -->
-                <input
-                    ref="fileInput"
-                    type="file"
-                    multiple
-                    class="d-none"
-                    @change="handleFileSelect"
-                >
-                <input
-                    ref="cameraInput"
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    class="d-none"
-                    @change="handleCameraCapture"
-                >
+                <template v-if="isEditing">
+                    <!-- Hidden Inputs -->
+                    <input
+                        ref="fileInput"
+                        type="file"
+                        multiple
+                        class="d-none"
+                        @change="handleFileSelect"
+                    >
+                    <input
+                        ref="cameraInput"
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        class="d-none"
+                        @change="handleCameraCapture"
+                    >
 
-                <!-- Action Buttons -->
-                <v-btn
-                    v-if="isMobileApp && files.length > 0"
-                    color="white"
-                    :prepend-icon="!isMobileApp ? 'mdi-camera' : undefined"
-                    class="rounded-xl border-thin"
-                    elevation="0"
-                    height="44"
-                    min-width="44"
-                    :class="isMobileApp ? 'px-0' : 'text-capitalize'"
-                    @click="triggerCamera"
-                >
-                    <v-icon v-if="isMobileApp">mdi-camera</v-icon>
-                    <span v-else>Tomar Foto</span>
-                </v-btn>
+                    <!-- Action Buttons -->
+                    <v-btn
+                        v-if="isMobileApp"
+                        color="white"
+                        :prepend-icon="!isMobileApp ? 'mdi-camera' : undefined"
+                        class="rounded-xl border-thin"
+                        elevation="0"
+                        height="44"
+                        min-width="44"
+                        :class="isMobileApp ? 'px-0' : 'text-capitalize'"
+                        @click="triggerCamera"
+                    >
+                        <v-icon v-if="isMobileApp">mdi-camera</v-icon>
+                        <span v-else>Tomar Foto</span>
+                    </v-btn>
 
-                <v-btn
-                    v-if="!isMobileApp || files.length > 0"
-                    color="corporate-blue"
-                    :prepend-icon="!isMobileApp ? 'mdi-paperclip' : undefined"
-                    class="rounded-xl font-weight-bold ml-auto text-white"
-                    elevation="0"
-                    height="44"
-                    :min-width="isMobileApp ? '44' : undefined"
-                    :class="isMobileApp ? 'px-0' : 'text-capitalize px-6'"
-                    @click="triggerFileInput"
-                >
-                    <v-icon v-if="isMobileApp">mdi-paperclip</v-icon>
-                    <span v-else>Agregar Archivos</span>
-                </v-btn>
+                    <v-btn
+                        color="corporate-blue"
+                        :prepend-icon="!isMobileApp ? 'mdi-paperclip' : undefined"
+                        class="rounded-xl font-weight-bold ml-auto text-white"
+                        elevation="0"
+                        height="44"
+                        :min-width="isMobileApp ? '44' : undefined"
+                        :class="isMobileApp ? 'px-0' : 'text-capitalize px-6'"
+                        @click="triggerFileInput"
+                    >
+                        <v-icon v-if="isMobileApp">mdi-paperclip</v-icon>
+                        <span v-else>Agregar Archivos</span>
+                    </v-btn>
+                </template>
             </div>
         </div>
 
@@ -61,14 +62,14 @@
         <div 
             class="flex-grow-1 overflow-y-auto custom-scrollbar position-relative"
             :class="isMobileApp ? 'pr-0' : 'pr-2'"
-            @dragover.prevent="isDragging = true"
+            @dragover.prevent="isEditing ? isDragging = true : null"
             @dragleave.prevent="isDragging = false"
             @drop.prevent="handleDrop"
         >
             <!-- Drag Overlay -->
             <v-fade-transition>
                 <div 
-                    v-if="isDragging"
+                    v-if="isDragging && isEditing"
                     class="position-absolute fill-height w-100 d-flex align-center justify-center bg-blue-lighten-5"
                     style="z-index: 10; opacity: 0.9; border: 3px dashed #3b82f6; border-radius: 24px;"
                 >
@@ -79,8 +80,8 @@
                 </div>
             </v-fade-transition>
             
-            <!-- Empty State (Desktop) -->
-            <div v-if="files.length === 0 && !isMobileApp" class="d-flex flex-column align-center justify-center h-75 text-grey border-dashed rounded-xl ma-2 transition-all" :class="{'bg-grey-lighten-5': isDragging}">
+            <!-- Empty State (Desktop) - Editing -->
+            <div v-if="files.length === 0 && !isMobileApp && isEditing" class="d-flex flex-column align-center justify-center h-75 text-grey border-dashed rounded-xl ma-2 transition-all" :class="{'bg-grey-lighten-5': isDragging}">
                 <div class="bg-white elevation-1 rounded-circle pa-6 mb-4">
                     <v-icon size="48" color="primary">mdi-cloud-upload-outline</v-icon>
                 </div>
@@ -97,8 +98,18 @@
                 </v-btn>
             </div>
 
-            <!-- Mobile Empty State (Simpler) -->
-            <div v-else-if="files.length === 0 && isMobileApp" class="d-flex flex-column align-center justify-center h-50 text-grey ma-4">
+            <!-- Empty State (Desktop/Mobile) - View Only -->
+            <div v-else-if="files.length === 0 && !isEditing" class="d-flex flex-column align-center justify-center h-75 text-grey ma-2">
+                 <v-empty-state
+                    icon="mdi-file-document-outline"
+                    title="No hay adjuntos"
+                    text="Este equipo no tiene archivos adjuntos cargados."
+                    class="text-grey-darken-1"
+                 ></v-empty-state>
+            </div>
+
+            <!-- Mobile Empty State (Simpler) - Editing -->
+            <div v-else-if="files.length === 0 && isMobileApp && isEditing" class="d-flex flex-column align-center justify-center h-50 text-grey ma-4">
                 <v-icon size="64" color="grey-lighten-2">mdi-image-multiple-outline</v-icon>
                 <div class="text-subtitle-1 text-grey-darken-1 font-weight-bold mt-4">Sin Adjuntos</div>
                 <div class="d-flex gap-3 mt-4">
@@ -127,17 +138,20 @@
                             class="rounded-xl transition-all h-100 position-relative border-thin"
                             :class="isHovering ? 'elevation-4 transform-up' : 'elevation-0'"
                             color="white"
+                            :href="`/api/inventory/equipos/${props.equipo.Id}/attachments/${file.Id}`"
+                            target="_blank"
+                            style="text-decoration: none;"
                         >
                             <!-- Delete Button (Overlay) -->
                             <v-scale-transition>
                                 <v-btn
-                                    v-if="isHovering"
+                                    v-if="isHovering && isEditing"
                                     icon="mdi-close"
                                     size="x-small"
                                     color="error"
                                     variant="flat"
                                     class="delete-btn"
-                                    @click="removeFile(index)"
+                                    @click.prevent="removeFile(index)"
                                 ></v-btn>
                             </v-scale-transition>
 
@@ -183,7 +197,7 @@
                 </v-col>
 
                 <!-- Add New Card -->
-                <v-col cols="6" sm="4" md="3" lg="2">
+                <v-col cols="6" sm="4" md="3" lg="2" v-if="isEditing">
                     <v-card
                         class="rounded-xl border-dashed d-flex flex-column align-center justify-center h-100 cursor-pointer bg-grey-lighten-5 transition-all"
                         elevation="0"
@@ -201,8 +215,9 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, watch } from 'vue'
 import { useMobileDetection } from '@/composables/useMobileDetection'
+import axios from 'axios'
 
 const props = defineProps({
     equipo: Object,
@@ -217,6 +232,16 @@ const fileInput = ref(null)
 const cameraInput = ref(null)
 const files = ref([])
 const isDragging = ref(false)
+
+// Initialize files from props
+watch(() => props.equipo, (newVal) => {
+    if (newVal && newVal.Adjuntos) {
+        files.value = newVal.Adjuntos.map(adj => ({
+            ...adj,
+            preview: adj.type.startsWith('image/') ? `/api/inventory/equipos/${props.equipo.Id}/attachments/${adj.Id}` : null
+        }))
+    }
+}, { immediate: true, deep: true })
 
 function triggerFileInput() {
     fileInput.value.click()
@@ -245,28 +270,55 @@ function handleDrop(event) {
     processFiles(droppedFiles)
 }
 
-function processFiles(newFiles) {
-    newFiles.forEach(file => {
-        // Create preview for images
-        if (file.type.startsWith('image/')) {
-            file.preview = URL.createObjectURL(file)
+async function processFiles(newFiles) {
+    if (!props.isEditing) {
+        alert("Debes estar en modo edición para agregar archivos.")
+        return
+    }
+
+    for (const file of newFiles) {
+        // Create form data
+        const formData = new FormData()
+        formData.append('file', file)
+
+        try {
+            const res = await axios.post(`/api/inventory/equipos/${props.equipo.Id}/attachments`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true
+            })
+            
+            // Add returned file to list
+            const uploadedFile = res.data.file
+            if (uploadedFile.type.startsWith('image/')) {
+                uploadedFile.preview = `/api/inventory/equipos/${props.equipo.Id}/attachments/${uploadedFile.Id}`
+            }
+            files.value.push(uploadedFile)
+            emit('update') // Refresh parent data
+        } catch (error) {
+            console.error("Error uploading file:", error)
+            alert("Error al subir archivo: " + (error.response?.data?.message || error.message))
         }
-        files.value.push(file)
-    })
-    // Update parent if needed (though we are storing local state for now)
-    // emit('update', 'Adjuntos', files.value)
+    }
 }
 
-function removeFile(index) {
+async function removeFile(index) {
+    if (!props.isEditing) return
+
     const file = files.value[index]
-    if (file.preview) {
-        URL.revokeObjectURL(file.preview)
+    if (!confirm(`¿Estás seguro de eliminar el archivo ${file.name}?`)) return
+
+    try {
+        await axios.delete(`/api/inventory/equipos/${props.equipo.Id}/attachments/${file.Id}`, { withCredentials: true })
+        files.value.splice(index, 1)
+        emit('update')
+    } catch (error) {
+         console.error("Error deleting file:", error)
+         alert("Error al eliminar archivo")
     }
-    files.value.splice(index, 1)
 }
 
 function isImage(file) {
-    return file.type.startsWith('image/')
+    return file.type && file.type.startsWith('image/')
 }
 
 function getFileExtension(filename) {

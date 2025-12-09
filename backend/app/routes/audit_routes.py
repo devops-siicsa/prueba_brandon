@@ -37,10 +37,30 @@ def get_audit_logs(current_user):
         if action:
             print(f"DEBUG AUDIT: Filtering by action: {action}")
             query = query.filter(AuditoriaLog.Accion == action)
-        if table:
+        if table and table != 'Equipos':
             query = query.filter(AuditoriaLog.TablaAfectada.ilike(f"%{table}%"))
+            
         if record_id:
-            query = query.filter(AuditoriaLog.RegistroId == record_id)
+            if table == 'Equipos':
+                # Special case: Search for main record OR related records (via JSON search in DetalleCambio)
+                from sqlalchemy import or_
+                search_term_spaced = f'"EquipoId": {record_id}'
+                search_term_compact = f'"EquipoId":{record_id}'
+                
+                query = query.filter(
+                    or_(
+                        (AuditoriaLog.TablaAfectada == 'Equipos') & (AuditoriaLog.RegistroId == record_id),
+                        AuditoriaLog.DetalleCambio.ilike(f'%{search_term_spaced}%'),
+                        AuditoriaLog.DetalleCambio.ilike(f'%{search_term_compact}%')
+                    )
+                )
+            else:
+                query = query.filter(AuditoriaLog.RegistroId == record_id)
+                # If table was passed (and not Equipos, handled above), it's already filtered.
+                
+        # Handle case where table='Equipos' but no record_id (list all equipment logs)
+        if table == 'Equipos' and not record_id:
+            query = query.filter(AuditoriaLog.TablaAfectada == 'Equipos')
         if date_from:
             query = query.filter(AuditoriaLog.Fecha >= date_from)
         if date_to:

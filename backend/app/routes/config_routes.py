@@ -179,6 +179,29 @@ def update_user(current_user, user_id):
         return jsonify({'message': 'Usuario actualizado'}), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 400
+        
+@config_bp.route('/contacts', methods=['GET'])
+@token_required
+def get_contacts_by_company(current_user):
+    empresa_id = request.args.get('EmpresaId')
+    if not empresa_id:
+        return jsonify({'message': 'EmpresaId es requerido'}), 400
+        
+    try:
+        # Reutilizamos get_users pero filtrando por empresa
+        users = ConfigService.get_users({'EmpresaId': empresa_id})
+        return jsonify([{
+            'Id': u.Id, 
+            'Nombre': u.Nombre, 
+            'Apellido': u.Apellido, 
+            'Correo': u.Correo, 
+            'Celular': u.Celular, 
+            'Cargo': u.Cargo.Nombre if u.Cargo else None,
+            'Area': u.Area.Nombre if u.Area else None,
+            'SedeId': u.SedeId
+        } for u in users]), 200
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 
 # --- CATÁLOGOS ---
 @config_bp.route('/catalogs/<catalog_name>', methods=['GET'])
@@ -199,6 +222,13 @@ def get_catalog(current_user, catalog_name):
             # Incluir FKs para jerarquías
             if hasattr(item, 'MarcaId'): data['MarcaId'] = item.MarcaId
             if hasattr(item, 'TipoId'): data['TipoId'] = item.TipoId
+            
+            # Enrich with Relationship Names (Generic)
+            if hasattr(item, 'Tipo') and item.Tipo: 
+                if hasattr(item.Tipo, 'Nombre'): data['TipoNombre'] = item.Tipo.Nombre
+                if hasattr(item.Tipo, 'Marca') and item.Tipo.Marca and hasattr(item.Tipo.Marca, 'Nombre'):
+                    data['MarcaNombre'] = item.Tipo.Marca.Nombre
+            
             result.append(data)
         return jsonify(result), 200
     except ValueError:
@@ -298,7 +328,13 @@ def get_velocidades_ram(current_user):
             query = query.filter_by(TipoId=request.args['TipoRAMId'])
         
         items = query.order_by(BusRAM.Velocidad).all()
-        return jsonify([{'Id': i.Id, 'Nombre': i.Velocidad, 'TipoRAMId': i.TipoId, 'Activo': i.Activo} for i in items])
+        return jsonify([{
+            'Id': i.Id, 
+            'Nombre': i.Velocidad, 
+            'TipoRAMId': i.TipoId, 
+            'TipoNombre': i.Tipo.Nombre if i.Tipo else '',
+            'Activo': i.Activo
+        } for i in items])
     except Exception as e:
         return jsonify({'message': str(e)}), 500
 
@@ -413,7 +449,13 @@ def protocolos_almacenamiento(current_user):
         if 'TipoId' in request.args:
             query = query.filter_by(TipoId=request.args['TipoId'])
         items = query.all()
-        return jsonify([{'Id': i.Id, 'Nombre': i.Nombre, 'TipoId': i.TipoId, 'Activo': i.Activo} for i in items])
+        return jsonify([{
+            'Id': i.Id, 
+            'Nombre': i.Nombre, 
+            'TipoId': i.TipoId, 
+            'TipoNombre': i.Tipo.Nombre if i.Tipo else '',
+            'Activo': i.Activo
+        } for i in items])
     
     if request.method == 'POST':
         if not current_user.has_permission('catalogs:create'):

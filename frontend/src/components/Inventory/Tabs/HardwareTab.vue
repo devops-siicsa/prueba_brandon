@@ -27,13 +27,13 @@
                                     :items="marcasProcesador"
                                     item-title="Nombre"
                                     item-value="Id"
-                                    variant="outlined"
+                                    :variant="isEditing ? 'outlined' : 'plain'"
                                     :density="isMobileApp ? undefined : 'comfortable'"
                                     color="blue-grey"
-                                    bg-color="white"
+                                    :bg-color="isEditing ? 'white' : undefined"
                                     :readonly="!isEditing"
                                     hide-details="auto"
-                                    prepend-inner-icon="mdi-label-outline"
+                                    :prepend-inner-icon="isEditing ? 'mdi-label-outline' : undefined"
                                     @update:model-value="onMarcaChange"
                                 ></v-select>
                             </v-col>
@@ -44,13 +44,13 @@
                                     :items="filteredTiposProcesador"
                                     item-title="Nombre"
                                     item-value="Id"
-                                    variant="outlined"
+                                    :variant="isEditing ? 'outlined' : 'plain'"
                                     :density="isMobileApp ? undefined : 'comfortable'"
                                     color="blue-grey"
-                                    bg-color="white"
+                                    :bg-color="isEditing ? 'white' : undefined"
                                     :readonly="!isEditing"
                                     hide-details="auto"
-                                    prepend-inner-icon="mdi-chip"
+                                    :prepend-inner-icon="isEditing ? 'mdi-chip' : undefined"
                                     @update:model-value="onTipoChange"
                                     :disabled="!equipo.Procesadores[0].MarcaId"
                                 ></v-select>
@@ -62,13 +62,13 @@
                                     :items="filteredGeneracionesProcesador"
                                     item-title="Nombre"
                                     item-value="Id"
-                                    variant="outlined"
+                                    :variant="isEditing ? 'outlined' : 'plain'"
                                     :density="isMobileApp ? undefined : 'comfortable'"
                                     color="blue-grey"
-                                    bg-color="white"
+                                    :bg-color="isEditing ? 'white' : undefined"
                                     :readonly="!isEditing"
                                     hide-details="auto"
-                                    prepend-inner-icon="mdi-timeline-clock-outline"
+                                    :prepend-inner-icon="isEditing ? 'mdi-timeline-clock-outline' : undefined"
                                     :disabled="!equipo.Procesadores[0].TipoId"
                                 ></v-select>
                             </v-col>
@@ -141,23 +141,25 @@
                                             item-value="Id"
                                             :density="isMobileApp ? undefined : 'comfortable'" 
                                             label="Tipo*" 
-                                            variant="outlined" 
+                                            :readonly="!isEditing"
+                                            :variant="isEditing ? 'outlined' : 'plain'" 
                                             hide-details="auto"
                                             color="teal"
-                                            prepend-inner-icon="mdi-memory"
+                                            :prepend-inner-icon="isEditing ? 'mdi-memory' : undefined"
                                             :rules="[v => !!v || ' ']"
                                             @update:model-value="onRamTypeChange(slot)"
                                         ></v-select>
                                     </v-col>
                                     <v-col cols="6">
                                         <v-select 
-                                            v-model="slot.VelocidadId"
+                                            v-model="slot.BusId"
                                             :items="getFilteredBuses(slot.TipoId)"
                                             item-title="Nombre"
                                             item-value="Id"
                                             :density="isMobileApp ? undefined : 'comfortable'" 
                                             label="Bus*" 
-                                            variant="outlined" 
+                                            :readonly="!isEditing"
+                                            :variant="isEditing ? 'outlined' : 'plain'" 
                                             hide-details="auto"
                                             color="teal"
                                             :disabled="!slot.TipoId"
@@ -172,7 +174,8 @@
                                             item-value="Id"
                                             :density="isMobileApp ? undefined : 'comfortable'" 
                                             label="Capacidad*" 
-                                            variant="outlined" 
+                                            :readonly="!isEditing"
+                                            :variant="isEditing ? 'outlined' : 'plain'" 
                                             hide-details="auto"
                                             color="teal"
                                             :disabled="!slot.TipoId"
@@ -250,10 +253,11 @@
                                             item-value="Id"
                                             :density="isMobileApp ? undefined : 'comfortable'" 
                                             label="Tipo*" 
-                                            variant="outlined" 
+                                            :readonly="!isEditing"
+                                            :variant="isEditing ? 'outlined' : 'plain'" 
                                             hide-details="auto"
                                             color="indigo"
-                                            prepend-inner-icon="mdi-harddisk"
+                                            :prepend-inner-icon="isEditing ? 'mdi-harddisk' : undefined"
                                             :rules="[v => !!v || ' ']"
                                             @update:model-value="onStorageTypeChange(disk)"
                                         ></v-select>
@@ -266,10 +270,11 @@
                                             item-value="Id"
                                             :density="isMobileApp ? undefined : 'comfortable'" 
                                             label="Protocolo*" 
-                                            variant="outlined" 
+                                            :readonly="!isEditing"
+                                            :variant="isEditing ? 'outlined' : 'plain'" 
                                             hide-details="auto"
                                             color="indigo"
-                                            prepend-inner-icon="mdi-connection"
+                                            :prepend-inner-icon="isEditing ? 'mdi-connection' : undefined"
                                             :disabled="!disk.TipoId"
                                             :rules="[v => !getFilteredProtocols(disk.TipoId).length || !!v || ' ']"
                                         ></v-select>
@@ -282,10 +287,11 @@
                                             item-value="Id"
                                             :density="isMobileApp ? undefined : 'comfortable'" 
                                             label="Factor Forma*" 
-                                            variant="outlined" 
+                                            :readonly="!isEditing"
+                                            :variant="isEditing ? 'outlined' : 'plain'" 
                                             hide-details="auto"
                                             color="indigo"
-                                            prepend-inner-icon="mdi-ruler-square"
+                                            :prepend-inner-icon="isEditing ? 'mdi-ruler-square' : undefined"
                                             :disabled="!disk.TipoId"
                                             :rules="[v => !getFilteredFormFactors(disk.TipoId).length || !!v || ' ']"
                                         ></v-select>
@@ -298,7 +304,8 @@
                                             item-value="Id"
                                             :density="isMobileApp ? undefined : 'comfortable'" 
                                             label="Capacidad*" 
-                                            variant="outlined" 
+                                            :readonly="!isEditing"
+                                            :variant="isEditing ? 'outlined' : 'plain'" 
                                             hide-details="auto"
                                             color="indigo"
                                             :disabled="!disk.TipoId"
@@ -389,7 +396,7 @@ function getFilteredBuses(tipoId) {
 }
 
 function onRamTypeChange(slot) {
-    slot.VelocidadId = null
+    slot.BusId = null
 }
 
 function getFilteredProtocols(tipoId) {
@@ -408,15 +415,15 @@ function onStorageTypeChange(disk) {
 }
 
 function isBusNA(slot) {
-    if (!slot.VelocidadId || !busesRam.value) return false
-    const bus = busesRam.value.find(b => b.Id === slot.VelocidadId)
+    if (!slot.BusId || !busesRam.value) return false
+    const bus = busesRam.value.find(b => b.Id === slot.BusId)
     return bus && (bus.Nombre.toUpperCase() === 'N/A' || bus.Nombre.toUpperCase() === 'NA')
 }
 
 const canAddRamSlot = computed(() => {
     if (!props.equipo.MemoriasRAM || props.equipo.MemoriasRAM.length === 0) return false
     const firstSlot = props.equipo.MemoriasRAM[0]
-    return !!firstSlot.TipoId && !!firstSlot.VelocidadId && (isBusNA(firstSlot) || !!firstSlot.CapacidadId)
+    return !!firstSlot.TipoId && !!firstSlot.BusId && (isBusNA(firstSlot) || !!firstSlot.CapacidadId)
 })
 
 const canAddStorageSlot = computed(() => {
@@ -445,7 +452,7 @@ onMounted(() => {
     
     // Ensure arrays exist
     if (!props.equipo.MemoriasRAM || props.equipo.MemoriasRAM.length === 0) {
-        props.equipo.MemoriasRAM = [{ TipoId: null, CapacidadId: null, VelocidadId: null }]
+        props.equipo.MemoriasRAM = [{ TipoId: null, CapacidadId: null, BusId: null }]
     }
     if (!props.equipo.Almacenamiento || props.equipo.Almacenamiento.length === 0) {
         props.equipo.Almacenamiento = [{ TipoId: null, CapacidadId: null, ProtocoloId: null, FactorFormaId: null }]

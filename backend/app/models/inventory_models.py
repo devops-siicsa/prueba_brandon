@@ -12,12 +12,16 @@ class TipoProcesador(db.Model):
     Id = db.Column(db.Integer, primary_key=True)
     MarcaId = db.Column(db.Integer, db.ForeignKey('MarcaProcesador.Id'))
     Nombre = db.Column(db.String(50))
+    
+    Marca = db.relationship('MarcaProcesador', foreign_keys=[MarcaId])
 
 class GeneracionProcesador(db.Model):
     __tablename__ = 'GeneracionProcesador'
     Id = db.Column(db.Integer, primary_key=True)
     TipoId = db.Column(db.Integer, db.ForeignKey('TipoProcesador.Id'))
     Nombre = db.Column(db.String(50))
+    
+    Tipo = db.relationship('TipoProcesador', foreign_keys=[TipoId])
 
 class TipoRAM(db.Model):
     __tablename__ = 'TipoRAM'
@@ -37,6 +41,8 @@ class BusRAM(db.Model):
     TipoId = db.Column(db.Integer, db.ForeignKey('TipoRAM.Id'))
     Velocidad = db.Column(db.String(50))
     Activo = db.Column(db.Boolean, default=True)
+    
+    Tipo = db.relationship('TipoRAM', foreign_keys=[TipoId])
 
 class TipoAlmacenamiento(db.Model):
     __tablename__ = 'TipoAlmacenamiento'
@@ -56,6 +62,8 @@ class ProtocoloAlmacenamiento(db.Model):
     TipoId = db.Column(db.Integer, db.ForeignKey('TipoAlmacenamiento.Id'))
     Nombre = db.Column(db.String(50))
     Activo = db.Column(db.Boolean, default=True)
+    
+    Tipo = db.relationship('TipoAlmacenamiento', foreign_keys=[TipoId])
 
 class FactorFormaAlmacenamiento(db.Model):
     __tablename__ = 'FactorFormaAlmacenamiento'
@@ -71,6 +79,7 @@ class Equipo(db.Model):
     Id = db.Column(db.Integer, primary_key=True)
     CodigoEquipo = db.Column(db.String(50), unique=True, nullable=False)
     EmpresaId = db.Column(db.Integer, db.ForeignKey('Empresas.Id'))
+    SedeId = db.Column(db.Integer, db.ForeignKey('Sedes.Id'))
     UsuarioAsignadoId = db.Column(db.Integer, db.ForeignKey('Personas.Id'))
     
     EstadoEquipoId = db.Column(db.Integer, db.ForeignKey('EstadoEquipo.Id'))
@@ -92,17 +101,29 @@ class Equipo(db.Model):
     AntivirusId = db.Column(db.Integer, db.ForeignKey('Antivirus.Id'))
     
     EquipoPertenece = db.Column(db.String(20))
+    NombreGrupoDominio = db.Column(db.String(100))
     NombreEnRed = db.Column(db.String(100))
+    
+    Distribucion = db.Column(db.String(100))
+    DistribucionOfimatica = db.Column(db.String(100))
+    
     UltimoMantenimiento = db.Column(db.DateTime)
     
     FechaCreacion = db.Column(db.DateTime, default=datetime.now)
     CreadoPorId = db.Column(db.Integer)
+
+    # Relaciones
+    UsuarioAsignado = db.relationship('Persona', foreign_keys=[UsuarioAsignadoId])
+    Sede = db.relationship('Sede', foreign_keys=[SedeId])
+    Empresa = db.relationship('Empresa', foreign_keys=[EmpresaId])
 
 class EquipoProcesador(db.Model):
     __tablename__ = 'EquipoProcesadores'
     Id = db.Column(db.Integer, primary_key=True)
     EquipoId = db.Column(db.Integer, db.ForeignKey('Equipos.Id'))
     GeneracionId = db.Column(db.Integer, db.ForeignKey('GeneracionProcesador.Id'))
+    
+    Generacion = db.relationship('GeneracionProcesador', foreign_keys=[GeneracionId])
 
 class EquipoRAM(db.Model):
     __tablename__ = 'EquipoRAM'
@@ -111,6 +132,9 @@ class EquipoRAM(db.Model):
     CapacidadId = db.Column(db.Integer, db.ForeignKey('CapacidadRAM.Id'))
     BusId = db.Column(db.Integer, db.ForeignKey('BusRAM.Id'))
     SlotNumero = db.Column(db.Integer)
+    
+    Capacidad = db.relationship('CapacidadRAM', foreign_keys=[CapacidadId])
+    Bus = db.relationship('BusRAM', foreign_keys=[BusId])
 
 class EquipoAlmacenamiento(db.Model):
     __tablename__ = 'EquipoAlmacenamiento'
@@ -120,6 +144,10 @@ class EquipoAlmacenamiento(db.Model):
     FactorFormaId = db.Column(db.Integer, db.ForeignKey('FactorFormaAlmacenamiento.Id'))
     CapacidadId = db.Column(db.Integer, db.ForeignKey('CapacidadAlmacenamiento.Id'))
     SlotNumero = db.Column(db.Integer)
+    
+    Protocolo = db.relationship('ProtocoloAlmacenamiento', foreign_keys=[ProtocoloId])
+    FactorForma = db.relationship('FactorFormaAlmacenamiento', foreign_keys=[FactorFormaId])
+    Capacidad = db.relationship('CapacidadAlmacenamiento', foreign_keys=[CapacidadId])
 
 class EquipoAplicacion(db.Model):
     __tablename__ = 'EquipoAplicaciones'

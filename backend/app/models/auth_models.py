@@ -53,6 +53,8 @@ class Persona(db.Model):
     # Relaciones
     Cargo = db.relationship('Cargo', foreign_keys=[CargoId])
     Rol = db.relationship('Rol', foreign_keys=[RolId])
+    Sede = db.relationship('Sede', foreign_keys=[SedeId])
+    Area = db.relationship('Area', foreign_keys=[AreaId])
     
     # Relación Many-to-Many para Permisos Específicos
     PermisosEspecificos = db.relationship('Permiso', secondary=usuario_permisos, lazy='subquery',

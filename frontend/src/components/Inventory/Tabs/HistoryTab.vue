@@ -1,11 +1,16 @@
 <template>
     <div class="h-100 d-flex flex-column bg-grey-lighten-5">
         <!-- Toolbar -->
-        <div class="flex-shrink-0 pa-4 bg-white border-b d-flex align-center justify-space-between">
+        <!-- Toolbar -->
+        <div 
+            class="flex-shrink-0 pa-4 d-flex align-center justify-space-between transition-all"
+            :class="isEditing ? 'bg-white border-b elevation-1' : 'bg-transparent'"
+        >
             <h3 class="text-h6 font-weight-bold text-grey-darken-3">
                 Historial de Cambios
             </h3>
             <v-btn
+                v-if="isEditing"
                 color="#223551"
                 :prepend-icon="!isMobileApp ? 'mdi-comment-plus-outline' : undefined"
                 class="text-capitalize rounded-lg"
@@ -47,9 +52,16 @@
                         </div>
                     </div>
 
-                    <v-card class="rounded-xl border-thin elevation-0 overflow-hidden">
+                    <v-card 
+                        class="rounded-xl overflow-hidden transition-all"
+                        :class="isEditing ? 'border-thin elevation-1' : 'border-0 bg-transparent'"
+                        :variant="isEditing ? 'elevated' : 'flat'"
+                    >
                         <!-- Card Header -->
-                        <div class="px-4 py-3 d-flex align-center justify-space-between bg-white border-b-thin">
+                        <div 
+                            class="px-4 py-3 d-flex align-center justify-space-between border-b-thin"
+                            :class="isEditing ? 'bg-white' : 'bg-transparent'"
+                        >
                             <div class="d-flex align-center gap-3">
                                 <v-avatar color="grey-lighten-4" size="32">
                                     <span class="text-caption font-weight-bold text-corporate-blue">
@@ -76,7 +88,7 @@
                         </div>
 
                         <!-- Card Body -->
-                        <div class="pa-4 bg-white">
+                        <div class="pa-4" :class="isEditing ? 'bg-white' : 'bg-white rounded-xl'">
                             <div v-if="log.Accion === 'COMENTARIO'" class="text-body-2 text-grey-darken-3 bg-blue-grey-lighten-5 pa-3 rounded-lg border-thin">
                                 <v-icon size="16" color="blue-grey" class="mr-2 mb-1">mdi-comment-quote-outline</v-icon>
                                 <div v-html="log.Detalle" class="d-inline-block align-top ml-1 rich-text-content"></div>
@@ -85,23 +97,36 @@
                             <!-- Creation -->
                             <div v-else-if="log.Accion === 'CREAR'" class="text-body-2 text-grey-darken-1">
                                 <v-icon size="16" color="success" class="mr-2">mdi-plus-circle-outline</v-icon>
-                                Equipo creado exitosamente.
+                                {{ getCreationMessage(log.Tabla) }}
+                            </div>
+
+                            <!-- Deletion -->
+                            <div v-else-if="log.Accion === 'ELIMINAR'" class="text-body-2 text-grey-darken-1">
+                                <div class="font-weight-bold text-red mb-1">{{ getDeletionMessage(log.Tabla) }}</div>
+                                <div v-if="isJson(log.Detalle)" class="ml-2">
+                                    <div v-for="(value, field) in parseDeleted(log.Detalle)" :key="field" class="d-flex gap-2 mb-1">
+                                        <span class="text-caption font-weight-bold text-grey-darken-2">{{ formatFieldName(field, log.Tabla) }}:</span>
+                                        <span class="text-caption text-grey-darken-1">{{ formatValue(field, value, log.Tabla) }}</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Edits -->
                             <div v-else>
                                 <div v-if="isJson(log.Detalle)">
                                     <div v-for="(change, field) in parseChanges(log.Detalle)" :key="field" class="mb-2 last-mb-0">
-                                        <div class="text-caption font-weight-bold text-grey-darken-2 mb-1">
-                                            Cambio en {{ formatFieldName(field) }}
-                                        </div>
-                                        <div class="d-flex align-center gap-2 text-body-2">
-                                            <div class="bg-red-lighten-5 text-red-darken-2 px-2 py-1 rounded text-decoration-line-through">
-                                                {{ change.antes || 'Vacío' }}
+                                        <div v-if="field !== 'EquipoId'" class="d-flex flex-column">
+                                            <div class="text-caption font-weight-bold text-grey-darken-2 mb-1">
+                                                Cambio en {{ formatFieldName(field, log.Tabla) }}
                                             </div>
-                                            <v-icon size="16" color="grey">mdi-arrow-right</v-icon>
-                                            <div class="bg-green-lighten-5 text-green-darken-2 px-2 py-1 rounded font-weight-medium">
-                                                {{ change.despues || 'Vacío' }}
+                                            <div class="d-flex align-center gap-2 text-body-2">
+                                                <div class="bg-red-lighten-5 text-red-darken-2 px-2 py-1 rounded text-decoration-line-through">
+                                                    {{ formatValue(field, change.antes, log.Tabla) }}
+                                                </div>
+                                                <v-icon size="16" color="grey">mdi-arrow-right</v-icon>
+                                                <div class="bg-green-lighten-5 text-green-darken-2 px-2 py-1 rounded font-weight-medium">
+                                                    {{ formatValue(field, change.despues, log.Tabla) }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -197,6 +222,8 @@ import axios from 'axios'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { useMobileDetection } from '@/composables/useMobileDetection'
+import { useCatalogsStore } from '@/stores/catalogs'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps({
     equipo: Object,
@@ -366,19 +393,144 @@ function parseChanges(jsonStr) {
     }
 }
 
-function formatFieldName(field) {
+function parseDeleted(jsonStr) {
+    try {
+        const obj = JSON.parse(jsonStr)
+        // Exclude internal fields
+        const ignored = ['Id', 'EquipoId', 'UsuarioId', 'TenantId']
+        const result = {}
+        for (const key in obj) {
+            if (!ignored.includes(key) && obj[key] !== null) {
+                result[key] = obj[key]
+            }
+        }
+        return result
+    } catch (e) {
+        return {}
+    }
+}
+
+function formatFieldName(field, table) {
     // Map technical names to user friendly names
     const map = {
         'UsuarioId': 'Usuario Asignado',
         'EstadoEquipoId': 'Estado',
         'SedeId': 'Sede',
         'EmpresaId': 'Empresa',
-        // Add more mappings as needed
+        'TipoEquipoId': 'Tipo de Equipo',
+        'FabricanteId': 'Fabricante',
+        'Modelo': 'Modelo',
+        'Serial': 'Número de Serie',
+        'CodigoEquipo': 'Código Interno',
+        'SistemaOperativoId': 'Sistema Operativo',
+        'LicenciaSO': 'Licencia S.O.',
+        'OfimaticaId': 'Ofimática',
+        'AntivirusId': 'Antivirus',
+        'NombreEnRed': 'Nombre en Red',
+        'DireccionIP': 'Dirección IP',
+        'MacAddress': 'Dirección MAC',
+        'AnioAdquisicion': 'Año Adquisición',
+        'CapacidadId': 'Capacidad',
+        'BusId': 'Velocidad/Bus',
+        'GeneracionId': 'Generación',
+        'ProtocoloId': 'Protocolo',
+        'FactorFormaId': 'Factor de Forma'
     }
+
+    // Contextual overrides
+    if (field === 'CapacidadId') {
+        if (table === 'EquipoRAM') return 'Capacidad (RAM)'
+        if (table === 'EquipoAlmacenamiento') return 'Capacidad (Disco)'
+    }
+    if (field === 'SlotNumero') {
+        if (table === 'EquipoRAM') return 'Slot RAM'
+        if (table === 'EquipoAlmacenamiento') return 'Slot Disco'
+    }
+
     return map[field] || field
 }
 
+// Catalogs Store
+const catalogsStore = useCatalogsStore()
+const { 
+    tiposEquipo, estadosEquipo, fabricantes, sistemasOperativos, ofimaticas, antivirus,
+    capacidadesRam, busesRam, generacionesProcesador,
+    capacidadesAlmacenamiento, protocolosAlmacenamiento, factoresFormaAlmacenamiento
+} = storeToRefs(catalogsStore)
+
+function formatValue(field, value, table) {
+    if (value === null || value === undefined || value === '') return 'Vacío'
+    
+    let catalog = null
+    // Assign catalog based on field name and table context
+    if (field === 'TipoEquipoId') catalog = tiposEquipo.value
+    else if (field === 'EstadoEquipoId') catalog = estadosEquipo.value
+    else if (field === 'FabricanteId') catalog = fabricantes.value
+    else if (field === 'SistemaOperativoId') catalog = sistemasOperativos.value
+    else if (field === 'OfimaticaId') catalog = ofimaticas.value
+    else if (field === 'AntivirusId') catalog = antivirus.value
+    // Hardware Mappings
+    else if (field === 'CapacidadId') {
+        if (table === 'EquipoRAM') catalog = capacidadesRam.value
+        else if (table === 'EquipoAlmacenamiento') catalog = capacidadesAlmacenamiento.value
+    }
+    else if (field === 'BusId') catalog = busesRam.value
+    else if (field === 'GeneracionId') catalog = generacionesProcesador.value
+    else if (field === 'ProtocoloId') catalog = protocolosAlmacenamiento.value
+    else if (field === 'FactorFormaId') catalog = factoresFormaAlmacenamiento.value
+    
+    // Look up
+    if (catalog && Array.isArray(catalog)) {
+        const item = catalog.find(i => i.Id == value) // Loose equality for string/int mismatch
+        if (item) {
+            // Special formatting for RAM Bus (Type + Speed)
+            if (field === 'BusId' && item.TipoNombre) {
+                return `${item.TipoNombre} - ${item.Nombre}`
+            }
+            // Special formatting for Storage Protocol (Type + Protocol)
+            if (field === 'ProtocoloId' && item.TipoNombre) {
+                return `${item.TipoNombre} - ${item.Nombre}`
+            }
+            // Special formatting for Processor (Brand + Type + Generation)
+            if (field === 'GeneracionId') {
+                const parts = []
+                if (item.MarcaNombre) parts.push(item.MarcaNombre)
+                if (item.TipoNombre) parts.push(item.TipoNombre)
+                parts.push(item.Nombre)
+                return parts.join(' ')
+            }
+            // Fallback for others
+            return item.Nombre || item.Capacidad || item.Velocidad || item.Descripcion || item.Generacion
+        }
+    }
+    
+    return value
+}
+
+function getCreationMessage(table) {
+    if (table.includes('RAM')) return 'Memoria RAM agregada.'
+    if (table.includes('Procesador')) return 'Procesador agregado.'
+    if (table.includes('Almacenamiento')) return 'Disco de almacenamiento agregado.'
+    if (table.includes('Aplicaciones')) return 'Aplicación asignada.'
+    if (table.includes('Adjuntos')) return 'Archivo adjunto subido.'
+    return 'Elemento creado exitosamente.'
+}
+
+function getDeletionMessage(table) {
+    if (table.includes('RAM')) return 'Memoria RAM eliminada.'
+    if (table.includes('Procesador')) return 'Procesador eliminado.'
+    if (table.includes('Almacenamiento')) return 'Disco de almacenamiento eliminado.'
+    if (table.includes('Aplicaciones')) return 'Aplicación desasignada.'
+    if (table.includes('Adjuntos')) return 'Archivo adjunto eliminado.'
+    return 'Elemento eliminado exitosamente.'
+}
+
 onMounted(() => {
+    catalogsStore.fetchCatalogs([
+        'tiposEquipo', 'estadosEquipo', 'fabricantes', 'sistemasOperativos', 'ofimaticas', 'antivirus',
+        'capacidadesRam', 'busesRam', 'generacionesProcesador',
+        'capacidadesAlmacenamiento', 'protocolosAlmacenamiento', 'factoresFormaAlmacenamiento'
+    ])
     fetchLogs()
 })
 

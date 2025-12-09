@@ -4,14 +4,15 @@
         <div class="flex-shrink-0 pb-4">
             <div class="d-flex align-center gap-3">
                 <!-- Search -->
+                <!-- Search -->
                 <v-text-field
                     v-model="searchQuery"
                     placeholder="Buscar aplicativos..."
-                    variant="solo"
-                    flat
+                    :variant="isEditing ? 'solo' : 'outlined'"
+                    :flat="isEditing"
                     hide-details
                     density="comfortable"
-                    :class="['flex-grow-1 rounded-xl modern-input', isMobileApp ? 'mobile-input' : '']"
+                    :class="['flex-grow-1 rounded-xl', isEditing ? 'modern-input' : 'bg-transparent', isMobileApp ? 'mobile-input' : '']"
                     prepend-inner-icon="mdi-magnify"
                     clearable
                 ></v-text-field>
@@ -86,6 +87,7 @@
 
                 <!-- Create Button -->
                 <v-btn
+                    v-if="isEditing"
                     color="corporate-blue"
                     :prepend-icon="!isMobileApp ? 'mdi-plus' : undefined"
                     :class="['rounded-xl text-white', isMobileApp ? 'px-0' : 'px-6 font-weight-bold text-capitalize']"
@@ -112,10 +114,17 @@
                 </div>
 
                 <!-- Empty State -->
+                <!-- Empty State -->
                 <div v-else-if="filteredApps.length === 0" class="d-flex flex-column align-center justify-center h-50 text-grey">
                     <v-icon size="64" color="grey-lighten-2">mdi-store-search</v-icon>
-                    <div class="text-h6 text-grey-lighten-1 mt-4">No se encontraron aplicativos</div>
+                    <div class="text-h6 text-grey-lighten-1 mt-4">
+                        {{ isEditing ? 'No se encontraron aplicativos' : 'Sin aplicativos asignados' }}
+                    </div>
+                    <div v-if="!isEditing" class="text-body-2 text-grey-lighten-1 mt-2 text-center" style="max-width: 300px;">
+                        Para asignar aplicativos a este equipo, haz clic en el botón <span class="font-weight-bold">"Editar Equipo"</span>.
+                    </div>
                     <v-btn
+                        v-if="isEditing"
                         variant="text"
                         color="primary"
                         class="mt-2 text-capitalize"
@@ -132,44 +141,44 @@
                         :key="app.Id"
                         :cols="isMobileApp ? 6 : 12"
                         sm="6"
-                        md="4"
-                        lg="3"
-                        xl="2"
+                        class="v-col-md-custom-5"
                     >
                         <v-hover v-slot="{ isHovering, props }">
                             <v-card
                                 v-bind="props"
-                                class="rounded-xl transition-all cursor-pointer h-100 position-relative"
+                                class="rounded-xl transition-all h-100 position-relative"
                                 :class="[
-                                    isSelected(app) ? 'border-primary ring-2' : 'border-thin',
-                                    isHovering ? 'elevation-3 transform-up' : 'elevation-0'
+                                    isSelected(app) && isEditing ? 'border-primary ring-2' : 'border-thin',
+                                    isHovering && isEditing ? 'elevation-3 transform-up' : 'elevation-0',
+                                    isEditing ? 'cursor-pointer' : '',
+                                    !isEditing ? 'bg-grey-lighten-5 border-0' : 'bg-white'
                                 ]"
                                 @click="toggleSelection(app)"
-                                color="white"
+                                :ripple="isEditing"
                             >
                                 <!-- Selected Badge -->
                                 <v-scale-transition>
-                                    <div v-if="isSelected(app)" class="selected-badge">
+                                    <div v-if="isSelected(app) && isEditing" class="selected-badge">
                                         <v-icon color="white" size="12">mdi-check</v-icon>
                                     </div>
                                 </v-scale-transition>
 
-                                <v-card-text class="d-flex flex-column align-center text-center h-100" :class="isMobileApp ? 'pa-2' : 'pa-4'">
+                                <v-card-text class="d-flex flex-column align-center text-center h-100" :class="isMobileApp ? 'pa-2' : 'pa-3'">
                                     <v-avatar
                                         :color="getAppColor(app.Nombre)"
-                                        :size="isMobileApp ? 42 : 56"
-                                        class="mb-3 shadow-sm"
+                                        :size="isMobileApp ? 40 : 48"
+                                        class="mb-2 shadow-sm"
                                         rounded="xl"
                                     >
-                                        <span class="font-weight-bold text-white" :class="isMobileApp ? 'text-subtitle-1' : 'text-h5'">
+                                        <span class="font-weight-bold text-white" :class="isMobileApp ? 'text-subtitle-2' : 'text-h6'">
                                             {{ app.Nombre.charAt(0).toUpperCase() }}
                                         </span>
                                     </v-avatar>
                                     
-                                    <div class="font-weight-bold text-grey-darken-3 text-truncate w-100 mb-1" :class="isMobileApp ? 'text-caption' : 'text-subtitle-2'" :title="app.Nombre">
+                                    <div class="font-weight-bold text-grey-darken-3 text-truncate w-100 mb-0" :class="isMobileApp ? 'text-caption' : 'text-body-2'" :title="app.Nombre">
                                         {{ app.Nombre }}
                                     </div>
-                                    <div class="text-caption text-grey text-truncate w-100">
+                                    <div class="text-caption text-grey text-truncate w-100" style="font-size: 0.7rem !important;">
                                         {{ app.Version || 'v1.0' }}
                                     </div>
                                 </v-card-text>
@@ -184,9 +193,13 @@
                         v-for="app in paginatedApps"
                         :key="app.Id"
                         :value="app"
-                        class="mb-2 rounded-xl border-thin bg-white transition-all"
-                        :class="isSelected(app) ? 'border-primary bg-blue-lighten-5' : ''"
+                        class="mb-2 rounded-xl border-thin transition-all"
+                        :class="[
+                            isSelected(app) && isEditing ? 'border-primary bg-blue-lighten-5' : 'bg-white',
+                            !isEditing ? 'bg-grey-lighten-5 border-0' : ''
+                        ]"
                         @click="toggleSelection(app)"
+                        :ripple="isEditing"
                     >
                         <template v-slot:prepend>
                             <v-avatar
@@ -204,7 +217,7 @@
                         <v-list-item-subtitle>{{ app.Version || 'v1.0' }}</v-list-item-subtitle>
                         
                         <template v-slot:append>
-                            <v-icon v-if="isSelected(app)" color="primary">mdi-check-circle</v-icon>
+                            <v-icon v-if="isSelected(app) && isEditing" color="primary">mdi-check-circle</v-icon>
                         </template>
                     </v-list-item>
                 </v-list>
@@ -382,14 +395,33 @@ function getAppColor(name) {
 }
 
 const selectedIds = computed({
-    get: () => props.equipo.Aplicativos || [],
+    get: () => {
+        const apps = props.equipo.Aplicativos || []
+        // Map assignments to Catalog Ids
+        return apps.map(a => {
+            if (typeof a === 'object' && a !== null) {
+                // If we have the catalog loaded, find by Name
+                if (aplicativos.value.length > 0) {
+                    const catalogApp = aplicativos.value.find(ca => ca.Nombre === a.Nombre)
+                    if (catalogApp) return catalogApp.Id
+                }
+                // Fallback: This might be the relationship ID if catalog isn't loaded yet,
+                // but usually we need the Catalog ID for the UI selection to work.
+                return a.Id 
+            }
+            return a
+        })
+    },
     set: (val) => emit('update', 'Aplicativos', val)
 })
 
 const filteredApps = computed(() => {
-    if (!searchQuery.value) return aplicativos.value
+    // In View Mode, only show selected (assigned) apps. In Edit Mode, show all for selection.
+    const source = props.isEditing ? aplicativos.value : selectedApps.value
+    
+    if (!searchQuery.value) return source
     const query = searchQuery.value.toLowerCase()
-    return aplicativos.value.filter(app => 
+    return source.filter(app => 
         app.Nombre.toLowerCase().includes(query)
     )
 })
@@ -426,6 +458,7 @@ function isSelected(app) {
 }
 
 function toggleSelection(app) {
+    if (!props.isEditing) return
     const ids = [...selectedIds.value]
     const index = ids.indexOf(app.Id)
     if (index === -1) {
@@ -520,5 +553,12 @@ onMounted(() => {
     font-size: 1.1rem !important; /* Larger text */
     padding-top: 12px !important;
     padding-bottom: 12px !important;
+}
+
+@media (min-width: 960px) {
+    .v-col-md-custom-5 {
+        flex: 0 0 20% !important;
+        max-width: 20% !important;
+    }
 }
 </style>

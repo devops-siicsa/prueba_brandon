@@ -154,9 +154,17 @@ class ConfigService:
         if filters:
             if 'EsUsuarioSistema' in filters:
                 query = query.filter_by(EsUsuarioSistema=filters['EsUsuarioSistema'])
+            
             if 'EmpresaId' in filters:
-                # TODO: Filtrar por empresa si implementamos relación Persona-Empresa directa o vía Sede
-                pass
+                from sqlalchemy import or_
+                # Filtrar usuarios que pertenecen a una Sede de esta Empresa O son Super Admins
+                query = query.outerjoin(Sede).outerjoin(Rol).filter(
+                    or_(
+                        Sede.EmpresaId == filters['EmpresaId'],
+                        Rol.Nombre == 'SUPER ADMINISTRADOR'
+                    )
+                )
+                
         return query.all()
 
     @staticmethod

@@ -33,6 +33,8 @@ class Sede(db.Model):
     CiudadId = db.Column(db.Integer, db.ForeignKey('Ciudades.Id'))
     Telefono = db.Column(db.String(20))
     Activo = db.Column(db.Boolean, default=True)
+    
+    Ciudad = db.relationship('Ciudad', foreign_keys=[CiudadId])
 
 class Area(db.Model):
     __tablename__ = 'Areas'

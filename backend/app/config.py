@@ -25,6 +25,10 @@ class Config:
     SQLALCHEMY_ECHO = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev_key')
 
+    # Upload Configuration
+    UPLOAD_FOLDER = os.path.join(basedir, '..', 'uploads')
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB limit
+
     # CORS Configuration
     @staticmethod
     def get_cors_origins():

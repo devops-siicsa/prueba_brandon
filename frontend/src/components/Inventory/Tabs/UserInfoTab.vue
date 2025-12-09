@@ -10,67 +10,104 @@
                 <h3 class="text-h6 font-weight-bold text-grey-darken-3">Datos del Responsable</h3>
             </div>
 
-            <div class="mb-6 group">
-                <label v-if="modern" 
-                    class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
-                    :class="isMobileApp ? 'text-body-2' : 'text-caption'"
-                >Usuario Asignado <span class="text-error">*</span></label>
-                <v-text-field
-                    :model-value="equipo.UsuarioNombre"
-                    :label="modern ? undefined : 'Usuario Asignado*'"
-                    :placeholder="modern ? 'Escribir nombre...' : undefined"
-                    :variant="modern ? 'solo' : 'outlined'"
-                    :flat="modern"
-                    :readonly="!isEditing"
-                    hide-details="auto"
-                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
-                    prepend-inner-icon="mdi-account"
-                    :rules="[v => !!v || ' ']"
-                    @update:model-value="$emit('update', 'UsuarioNombre', $event)"
-                ></v-text-field>
-            </div>
-
             <v-row dense class="mb-6">
                 <v-col cols="12" md="6">
                     <label v-if="modern" 
                         class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
                         :class="isMobileApp ? 'text-body-2' : 'text-caption'"
-                    >Cargo <span class="text-error">*</span></label>
-                    <v-text-field
-                        :model-value="equipo.Cargo"
-                        :label="modern ? undefined : 'Cargo*'"
-                        :placeholder="modern ? 'Ej. Analista' : undefined"
-                        :variant="modern ? 'solo' : 'outlined'"
-                        :flat="modern"
+                    >Nombre <span class="text-error">*</span></label>
+                    <v-combobox
+                        :model-value="equipo.UsuarioNombre"
+                        :label="modern ? undefined : 'Nombre*'"
+                        :placeholder="isEditing ? (modern ? 'Escribir o seleccionar...' : undefined) : undefined"
+                        :items="contacts"
+                        item-title="FullName"
+                        item-value="Nombre"
+                        :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                        :flat="modern || !isEditing"
                         :readonly="!isEditing"
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
-                        prepend-inner-icon="mdi-briefcase"
+                        :class="['rounded-xl', isEditing && modern ? 'modern-input' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                        :prepend-inner-icon="isEditing ? 'mdi-account' : undefined"
+                        :rules="[v => !!v || ' ']"
+                        @update:model-value="onUserSelected"
+                        return-object
+                    ></v-combobox>
+                </v-col>
+                <v-col cols="12" md="6">
+                    <label v-if="modern" 
+                        class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                        :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                    >Apellido <span class="text-error">*</span></label>
+                    <v-combobox
+                        :model-value="equipo.UsuarioApellido"
+                        :label="modern ? undefined : 'Apellido*'"
+                        :placeholder="isEditing ? (modern ? 'Escribir o seleccionar...' : undefined) : undefined"
+                        :items="contacts"
+                        item-title="FullName"
+                        item-value="Apellido"
+                        :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                        :flat="modern || !isEditing"
+                        :readonly="!isEditing"
+                        hide-details="auto"
+                        :class="['rounded-xl', isEditing && modern ? 'modern-input' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                        :prepend-inner-icon="isEditing ? 'mdi-account-outline' : undefined"
+                        :rules="[v => !!v || ' ']"
+                        @update:model-value="onSurnameSelected"
+                        return-object
+                    ></v-combobox>
+                </v-col>
+            </v-row>
+
+            <v-row dense class="mb-6">
+                <!-- ... existing Cargo/Area fields ... -->
+                <v-col cols="12" md="6">
+                    <label v-if="modern" 
+                        class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
+                        :class="isMobileApp ? 'text-body-2' : 'text-caption'"
+                    >Cargo <span class="text-error">*</span></label>
+                    <v-combobox
+                        :model-value="equipo.Cargo"
+                        :label="modern ? undefined : 'Cargo*'"
+                        :placeholder="isEditing ? (modern ? 'Seleccione o escriba...' : undefined) : undefined"
+                        :items="cargos"
+                        item-title="Nombre"
+                        item-value="Nombre"
+                        :return-object="false"
+                        :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                        :flat="modern || !isEditing"
+                        :readonly="!isEditing"
+                        hide-details="auto"
+                        :class="['rounded-xl', isEditing && modern ? 'modern-input' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                        :prepend-inner-icon="isEditing ? 'mdi-briefcase' : undefined"
                         :rules="[v => !!v || ' ']"
                         @update:model-value="$emit('update', 'Cargo', $event)"
-                    ></v-text-field>
+                    ></v-combobox>
                 </v-col>
                 <v-col cols="12" md="6">
                     <label v-if="modern" 
                         class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
                         :class="isMobileApp ? 'text-body-2' : 'text-caption'"
                     >Área <span class="text-error">*</span></label>
-                    <v-text-field
+                    <v-combobox
                         :model-value="equipo.Area"
                         :label="modern ? undefined : 'Área*'"
-                        :placeholder="modern ? 'Ej. IT' : undefined"
-                        :variant="modern ? 'solo' : 'outlined'"
-                        :flat="modern"
+                        :placeholder="isEditing ? (modern ? 'Seleccione o escriba...' : undefined) : undefined"
+                        :items="areas"
+                        item-title="Nombre"
+                        item-value="Nombre"
+                        :return-object="false"
+                        :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                        :flat="modern || !isEditing"
                         :readonly="!isEditing"
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
-                        prepend-inner-icon="mdi-layers"
+                        :class="['rounded-xl', isEditing && modern ? 'modern-input' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                        :prepend-inner-icon="isEditing ? 'mdi-layers' : undefined"
                         :rules="[v => !!v || ' ']"
                         @update:model-value="$emit('update', 'Area', $event)"
-                    ></v-text-field>
+                    ></v-combobox>
                 </v-col>
             </v-row>
-
             <div class="mb-6">
                 <label v-if="modern" 
                     class="d-block font-weight-bold text-grey-darken-3 text-uppercase mb-2 ml-1 tracking-wider"
@@ -79,13 +116,13 @@
                 <v-text-field
                     :model-value="equipo.Correo"
                     :label="modern ? undefined : 'Correo Electrónico*'"
-                    :placeholder="modern ? 'usuario@empresa.com' : undefined"
-                    :variant="modern ? 'solo' : 'outlined'"
-                    :flat="modern"
+                    :placeholder="isEditing ? (modern ? 'usuario@empresa.com' : undefined) : undefined"
+                    :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                    :flat="modern || !isEditing"
                     :readonly="!isEditing"
                     hide-details="auto"
-                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
-                    prepend-inner-icon="mdi-email"
+                    :class="['rounded-xl', isEditing && modern ? 'modern-input' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                    :prepend-inner-icon="isEditing ? 'mdi-email' : undefined"
                     :rules="[v => !!v || ' ', v => /.+@.+\..+/.test(v) || 'Inválido']"
                     @update:model-value="$emit('update', 'Correo', $event)"
                 ></v-text-field>
@@ -99,13 +136,13 @@
                 <v-text-field
                     :model-value="equipo.Telefono"
                     :label="modern ? undefined : 'Teléfono / Extensión*'"
-                    :placeholder="modern ? '(+57) 300 ...' : undefined"
-                    :variant="modern ? 'solo' : 'outlined'"
-                    :flat="modern"
+                    :placeholder="isEditing ? (modern ? '(+57) 300 ...' : undefined) : undefined"
+                    :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                    :flat="modern || !isEditing"
                     :readonly="!isEditing"
                     hide-details="auto"
-                    :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
-                    prepend-inner-icon="mdi-phone"
+                    :class="['rounded-xl', isEditing && modern ? 'modern-input' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                    :prepend-inner-icon="isEditing ? 'mdi-phone' : undefined"
                     :rules="[v => (!!v && /^\d+$/.test(v) && v.length <= 12) || ' ']"
                     maxlength="12"
                     inputmode="numeric"
@@ -131,18 +168,18 @@
                     <v-select
                         :model-value="equipo.SedeId"
                         :label="modern ? undefined : 'Sede Principal*'"
-                        :placeholder="modern ? 'Seleccione una sede...' : undefined"
+                        :placeholder="isEditing ? (modern ? 'Seleccione una sede...' : undefined) : undefined"
                         :items="sedes"
                         item-title="NombreSede"
                         item-value="Id"
-                        :variant="modern ? 'solo' : 'outlined'"
-                        :flat="modern"
-                        bg-color="white"
+                        :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                        :flat="modern || !isEditing"
+                        :bg-color="isEditing ? 'white' : undefined"
                         :readonly="!isEditing"
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-select' : '', isMobileApp ? 'mobile-input' : '']"
-                        prepend-inner-icon="mdi-office-building"
-                        menu-icon="mdi-chevron-down"
+                        :class="['rounded-xl', isEditing && modern ? 'modern-select' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                        :prepend-inner-icon="isEditing ? 'mdi-office-building' : undefined"
+                        :menu-icon="isEditing ? 'mdi-chevron-down' : undefined"
                         :rules="[v => !!v || ' ']"
                         @update:model-value="updateSede"
                     ></v-select>
@@ -156,13 +193,13 @@
                     <v-text-field
                         :model-value="equipo.Ciudad"
                         :label="modern ? undefined : 'Ciudad'"
-                        :variant="modern ? 'solo' : 'outlined'"
-                        :flat="modern"
-                        bg-color="white"
+                        :variant="isEditing ? (modern ? 'solo' : 'outlined') : 'plain'"
+                        :flat="modern || !isEditing"
+                        :bg-color="isEditing ? 'white' : undefined"
                         readonly
                         hide-details="auto"
-                        :class="['rounded-xl', modern ? 'modern-input' : '', isMobileApp ? 'mobile-input' : '']"
-                        prepend-inner-icon="mdi-map-marker"
+                        :class="['rounded-xl', isEditing && modern ? 'modern-input' : '', isEditing ? '' : 'pa-0', isMobileApp ? 'mobile-input' : '']"
+                        :prepend-inner-icon="isEditing ? 'mdi-map-marker' : undefined"
                     ></v-text-field>
                 </div>
 
@@ -192,6 +229,27 @@ const { isMobileApp } = useMobileDetection()
 
 const emit = defineEmits(['update'])
 const sedes = ref([])
+const contacts = ref([])
+const cargos = ref([])
+const areas = ref([])
+
+async function loadCargos() {
+    try {
+        const res = await axios.get('/api/config/catalogs/cargos', { withCredentials: true })
+        cargos.value = res.data
+    } catch (e) {
+        console.error("Error loading cargos", e)
+    }
+}
+
+async function loadAreas() {
+    try {
+        const res = await axios.get('/api/config/catalogs/areas', { withCredentials: true })
+        areas.value = res.data
+    } catch (e) {
+        console.error("Error loading areas", e)
+    }
+}
 
 async function loadSedes() {
     // Strict filtering: Do not load if no Company ID is provided
@@ -212,6 +270,61 @@ async function loadSedes() {
     }
 }
 
+async function loadContacts() {
+    if (!props.equipo.EmpresaId) {
+        contacts.value = []
+        return
+    }
+    
+    try {
+        const res = await axios.get('/api/config/contacts', {
+            withCredentials: true,
+            params: { EmpresaId: props.equipo.EmpresaId }
+        })
+        contacts.value = res.data.map(c => ({
+            ...c,
+            FullName: `${c.Nombre} ${c.Apellido}`
+        }))
+    } catch (e) {
+        console.error("Error loading contacts", e)
+    }
+}
+
+function onUserSelected(val) {
+    if (typeof val === 'string') {
+        // User typed a name manually
+        emit('update', 'UsuarioNombre', val)
+        // If typing manual name, we assume surname is separate
+    } else if (val && typeof val === 'object') {
+        // User selected from list
+        emit('update', 'UsuarioNombre', val.Nombre)
+        emit('update', 'UsuarioApellido', val.Apellido)
+        emit('update', 'UsuarioAsignadoId', val.Id)
+        
+        if (val.Cargo) emit('update', 'Cargo', val.Cargo)
+        if (val.Area) emit('update', 'Area', val.Area)
+        if (val.Correo) emit('update', 'Correo', val.Correo)
+        if (val.Celular) emit('update', 'Telefono', val.Celular)
+    }
+}
+
+function onSurnameSelected(val) {
+    if (typeof val === 'string') {
+        // User typed surname manually
+        emit('update', 'UsuarioApellido', val)
+    } else if (val && typeof val === 'object') {
+        // User selected from list via surname field
+        emit('update', 'UsuarioNombre', val.Nombre)
+        emit('update', 'UsuarioApellido', val.Apellido)
+        emit('update', 'UsuarioAsignadoId', val.Id)
+
+        if (val.Cargo) emit('update', 'Cargo', val.Cargo)
+        if (val.Area) emit('update', 'Area', val.Area)
+        if (val.Correo) emit('update', 'Correo', val.Correo)
+        if (val.Celular) emit('update', 'Telefono', val.Celular)
+    }
+}
+
 function updateSede(sedeId) {
     emit('update', 'SedeId', sedeId)
     
@@ -224,12 +337,19 @@ function updateSede(sedeId) {
 watch(() => props.equipo.EmpresaId, (newVal) => {
     if (newVal) {
         loadSedes()
+        loadContacts()
+    } else {
+        sedes.value = []
+        contacts.value = []
     }
 })
 
 onMounted(() => {
     // Initial load if ID is already present
     loadSedes()
+    loadContacts()
+    loadCargos()
+    loadAreas()
 })
 </script>
 
