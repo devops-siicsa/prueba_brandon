@@ -132,15 +132,14 @@
                     md="3"
                     lg="2"
                 >
-                    <v-hover v-slot="{ isHovering, props }">
+                    <v-hover v-slot="{ isHovering, props: hoverProps }">
                         <v-card
-                            v-bind="props"
+                            v-bind="hoverProps"
                             class="rounded-xl transition-all h-100 position-relative border-thin"
                             :class="isHovering ? 'elevation-4 transform-up' : 'elevation-0'"
                             color="white"
-                            :href="`/api/inventory/equipos/${props.equipo.Id}/attachments/${file.Id}`"
-                            target="_blank"
-                            style="text-decoration: none;"
+                            @click="downloadFile(file)"
+                            style="cursor: pointer;"
                         >
                             <!-- Delete Button (Overlay) -->
                             <v-scale-transition>
@@ -238,10 +237,30 @@ watch(() => props.equipo, (newVal) => {
     if (newVal && newVal.Adjuntos) {
         files.value = newVal.Adjuntos.map(adj => ({
             ...adj,
-            preview: adj.type.startsWith('image/') ? `/api/inventory/equipos/${props.equipo.Id}/attachments/${adj.Id}` : null
+            preview: adj.type && adj.type.startsWith('image/') ? adj.url : null  // Use Azure URL directly
         }))
     }
 }, { immediate: true, deep: true })
+
+// Download file with correct name (handles cross-origin Azure URLs)
+const downloadFile = async (file) => {
+    try {
+        const response = await fetch(file.url || file.path)
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = file.name
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+    } catch (error) {
+        console.error('Error downloading file:', error)
+        // Fallback: open in new tab
+        window.open(file.url || file.path, '_blank')
+    }
+}
 
 function triggerFileInput() {
     fileInput.value.click()
@@ -289,8 +308,8 @@ async function processFiles(newFiles) {
             
             // Add returned file to list
             const uploadedFile = res.data.file
-            if (uploadedFile.type.startsWith('image/')) {
-                uploadedFile.preview = `/api/inventory/equipos/${props.equipo.Id}/attachments/${uploadedFile.Id}`
+            if (uploadedFile.type && uploadedFile.type.startsWith('image/')) {
+                uploadedFile.preview = uploadedFile.url  // Use Azure URL directly
             }
             files.value.push(uploadedFile)
             emit('update') // Refresh parent data

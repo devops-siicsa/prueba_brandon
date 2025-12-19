@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, current_app, send_from_directory, redirect
 from app.extensions import db
 from app.models.inventory_models import Equipo
 from app.utils.decorators import token_required, requires_permission
@@ -66,11 +66,22 @@ def get_equipo_detail(current_user, equipo_id):
         
         # Cargar relaciones
         from app.models.inventory_models import EquipoProcesador, EquipoRAM, EquipoAlmacenamiento, EquipoAplicacion, EquipoAdjunto
+        from app.models.core_models import Aplicacion
         
         procesadores = EquipoProcesador.query.filter_by(EquipoId=equipo.Id).all()
         memorias = EquipoRAM.query.filter_by(EquipoId=equipo.Id).all()
         discos = EquipoAlmacenamiento.query.filter_by(EquipoId=equipo.Id).all()
-        apps = EquipoAplicacion.query.filter_by(EquipoId=equipo.Id).all()
+        
+        # Load applications - use individual queries for pyodbc compatibility
+        apps_relations = EquipoAplicacion.query.filter_by(EquipoId=equipo.Id).all()
+        
+        # Build lookup dict by loading each application individually
+        app_lookup = {}
+        for rel in apps_relations:
+            if rel.AplicacionId and rel.AplicacionId not in app_lookup:
+                app = Aplicacion.query.get(rel.AplicacionId)
+                if app:
+                    app_lookup[rel.AplicacionId] = app
         
         return jsonify({
             'Id': equipo.Id,
@@ -130,13 +141,19 @@ def get_equipo_detail(current_user, equipo_id):
                 'TipoId': d.Protocolo.TipoId if d.Protocolo else None
             } for d in discos],
 
-            'Aplicativos': [{'Id': a.Id, 'Nombre': a.NombreAplicacion, 'Version': a.Version} for a in apps],
+            'Aplicativos': [{
+                'Id': ea.Id,
+                'AplicacionId': ea.AplicacionId,
+                'Nombre': (app_lookup[ea.AplicacionId].Nombre if ea.AplicacionId in app_lookup else None),
+                'Version': ea.Version or (app_lookup[ea.AplicacionId].Version if ea.AplicacionId in app_lookup else None)
+            } for ea in apps_relations],
             'Adjuntos': [{
                 'Id': adj.Id,
-                'name': os.path.basename(adj.RutaArchivo),
-                'type': adj.TipoArchivo, # MIME type logic needed if stored simply as ext
-                'path': adj.RutaArchivo
-            } for adj in EquipoAdjunto.query.filter_by(EquipoId=equipo.Id).all()]
+                'name': adj.NombreOriginal or 'archivo',  # Direct retrieval from database
+                'type': adj.TipoArchivo,
+                'size': 0,  # Size not stored currently
+                'url': adj.RutaArchivo
+            } for adj in EquipoAdjunto.query.filter_by(EquipoId=equipo.Id).all()],
         }), 200
     except Exception as e:
         return jsonify({'message': str(e)}), 500
@@ -188,18 +205,15 @@ def create_equipo(current_user):
 
         # Handle Apps (Aplicativos)
         if 'Aplicativos' in data and isinstance(data['Aplicativos'], list):
-             from app.models.core_models import Aplicacion
-             from app.models.inventory_models import EquipoAplicacion
-             
-             for app_id in data['Aplicativos']:
-                 app_catalog = Aplicacion.query.get(app_id)
-                 if app_catalog:
-                     new_app_rel = EquipoAplicacion(
-                         EquipoId=new_equipo.Id,
-                         NombreAplicacion=app_catalog.Nombre,
-                         Version=app_catalog.Version
-                     )
-                     db.session.add(new_app_rel)
+              from app.models.inventory_models import EquipoAplicacion
+              
+              for app_id in data['Aplicativos']:
+                  new_app_rel = EquipoAplicacion(
+                      EquipoId=new_equipo.Id,
+                      AplicacionId=app_id
+                  )
+                  db.session.add(new_app_rel)
+
 
         # Handle Hardware (Procesadores, RAM, Discos)
         from app.models.inventory_models import EquipoProcesador, EquipoRAM, EquipoAlmacenamiento
@@ -494,44 +508,22 @@ def update_equipo(current_user, equipo_id):
 
         # Aplicativos (Apps) - Update
         if 'Aplicativos' in data and isinstance(data['Aplicativos'], list):
-             from app.models.inventory_models import EquipoAplicacion
-             from app.models.core_models import Aplicacion
-             
-             # Apps logic: Match by Name and Version roughly? 
-             # Actually, simpler: The frontend sends the App ID if it exists?
-             # In Create, we use App ID to lookup Name/Version.
-             # In Update, we do the same.
-             # The DB stores Name and Version copies (Snapshot).
-             # We should compare the *resulting* Name/Version or just the source App IDs if available?
-             # But the DB table 'EquipoAplicacion' does NOT store 'AplicacionId' (FK), strictly copies.
-             # So we can only rely on the *Names* and *Versions* stored.
-             # But the input `data['Aplicativos']` is a list of App Catalog IDs (integers) or dicts with Id?
-             
-             current_apps = EquipoAplicacion.query.filter_by(EquipoId=equipo.Id).all()
-             current_app_sig = set((a.NombreAplicacion, a.Version) for a in current_apps)
-             
-             incoming_app_ids = []
-             for app_item in data['Aplicativos']:
-                 if isinstance(app_item, dict):
-                     if app_item.get('Id'): incoming_app_ids.append(app_item.get('Id'))
-                 else:
-                     incoming_app_ids.append(app_item)
-             
-             # Resolve incoming IDs to Name/Version to compare
-             incoming_app_sig = set()
-             catalogs = Aplicacion.query.filter(Aplicacion.Id.in_(incoming_app_ids)).all() if incoming_app_ids else []
-             for c in catalogs:
-                 incoming_app_sig.add((c.Nombre, c.Version))
-                 
-             if current_app_sig != incoming_app_sig:
-                 EquipoAplicacion.query.filter_by(EquipoId=equipo.Id).delete()
-                 for cat in catalogs:
-                     new_app_rel = EquipoAplicacion(
-                         EquipoId=equipo.Id,
-                         NombreAplicacion=cat.Nombre,
-                         Version=cat.Version
-                     )
-                     db.session.add(new_app_rel)
+              from app.models.inventory_models import EquipoAplicacion
+              
+              # Get current and incoming application IDs
+              current_app_ids = set(a.AplicacionId for a in EquipoAplicacion.query.filter_by(EquipoId=equipo.Id).all())
+              incoming_app_ids = set(data['Aplicativos'])
+              
+              if current_app_ids != incoming_app_ids:
+                  # Delete all and recreate (simple and clean approach)
+                  EquipoAplicacion.query.filter_by(EquipoId=equipo.Id).delete()
+                  for app_id in incoming_app_ids:
+                      new_app_rel = EquipoAplicacion(
+                          EquipoId=equipo.Id,
+                          AplicacionId=app_id
+                      )
+                      db.session.add(new_app_rel)
+
 
         db.session.commit()
         return jsonify({'message': 'Equipo actualizado'}), 200
@@ -543,42 +535,66 @@ def update_equipo(current_user, equipo_id):
 
 @inventory_bp.route('/equipos/<int:equipo_id>/attachments', methods=['POST'])
 @token_required
-@requires_permission('equipment:edit_all') # Assuming editing permission required
+@requires_permission('equipment:edit_all')
 def upload_attachment(current_user, equipo_id):
+    print(f"\n{'='*60}")
+    print(f"[UPLOAD ENDPOINT] Starting upload for equipo {equipo_id}")
+    
     if 'file' not in request.files:
+        print("[UPLOAD ENDPOINT] Error: No file part in request")
         return jsonify({'message': 'No file part'}), 400
+    
     file = request.files['file']
+    print(f"[UPLOAD ENDPOINT] File received: {file.filename}")
+    
     if file.filename == '':
+        print("[UPLOAD ENDPOINT] Error: No filename provided")
         return jsonify({'message': 'No selected file'}), 400
     
-    if file:
-        filename = secure_filename(file.filename)
-        # Unique filename to prevent overwrites
-        unique_filename = f"{equipo_id}_{int(datetime.now().timestamp())}_{filename}"
+    try:
+        print("[UPLOAD ENDPOINT] Importing Azure storage service...")
+        from app.services.azure_storage_service import azure_storage
+        print("[UPLOAD ENDPOINT] ✓ Azure storage service imported")
         
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
-        file.save(upload_path)
+        print("[UPLOAD ENDPOINT] Calling upload_file...")
+        upload_result = azure_storage.upload_file(file, equipo_id)
+        print(f"[UPLOAD ENDPOINT] ✓ Upload successful to Azure: {upload_result['url']}")
         
+        print("[UPLOAD ENDPOINT] Saving to database...")
         from app.models.inventory_models import EquipoAdjunto
         new_adjunto = EquipoAdjunto(
             EquipoId=equipo_id,
-            TipoArchivo=file.content_type,
-            RutaArchivo=unique_filename,
+            TipoArchivo=upload_result['content_type'],
+            RutaArchivo=upload_result['url'],
+            NombreOriginal=upload_result['original_name'],  # Store original filename
             FechaSubida=datetime.now()
         )
         db.session.add(new_adjunto)
         db.session.commit()
+        print(f"[UPLOAD ENDPOINT] ✓ Saved to database with ID: {new_adjunto.Id}")
         
-        return jsonify({
-            'message': 'Archivo subido exitosamente',
+        response = {
+            'message': 'Archivo subido exitosamente a Azure',
             'file': {
                 'Id': new_adjunto.Id,
-                'name': filename,
-                'type': new_adjunto.TipoArchivo,
-                'size': os.path.getsize(upload_path),
-                'path': unique_filename
+                'name': upload_result['original_name'],
+                'type': upload_result['content_type'],
+                'size': upload_result['size'],
+                'path': upload_result['blob_name'],
+                'url': upload_result['url']
             }
-        }), 201
+        }
+        print(f"[UPLOAD ENDPOINT] ✓ Returning 201 response")
+        print(f"{'='*60}\n")
+        return jsonify(response), 201
+        
+    except Exception as e:
+        error_msg = f'Error al subir archivo: {str(e)}'
+        print(f"[UPLOAD ENDPOINT] ✗ ERROR: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        print(f"{'='*60}\n")
+        return jsonify({'message': error_msg}), 500
 
 @inventory_bp.route('/equipos/<int:equipo_id>/attachments/<int:attachment_id>', methods=['DELETE'])
 @token_required
@@ -591,26 +607,15 @@ def delete_attachment(current_user, equipo_id, attachment_id):
         return jsonify({'message': 'Adjunto no corresponde al equipo'}), 400
         
     try:
-        # Delete from disk
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], adjunto.RutaArchivo)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        # Delete from Azure Blob Storage
+        from app.services.azure_storage_service import azure_storage
+        azure_storage.delete_file(adjunto.RutaArchivo)
             
+        # Delete from database
         db.session.delete(adjunto)
         db.session.commit()
-        return jsonify({'message': 'Adjunto eliminado'}), 200
+        return jsonify({'message': 'Adjunto eliminado de Azure'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': str(e)}), 500
-
-@inventory_bp.route('/equipos/<int:equipo_id>/attachments/<int:attachment_id>', methods=['GET'])
-@token_required
-def get_attachment(current_user, equipo_id, attachment_id):
-    from app.models.inventory_models import EquipoAdjunto
-    adjunto = EquipoAdjunto.query.get_or_404(attachment_id)
-    
-    if adjunto.EquipoId != equipo_id:
-        return jsonify({'message': 'Adjunto no corresponde al equipo'}), 400
-        
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], adjunto.RutaArchivo, as_attachment=False)
 

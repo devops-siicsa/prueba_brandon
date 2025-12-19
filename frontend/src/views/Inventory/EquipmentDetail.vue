@@ -159,7 +159,12 @@ function toggleEdit() {
 }
 
 function updateEquipoField(field, value) {
-    equipo.value[field] = value
+    // For Aplicativos, we receive an array of IDs and need to keep it simple
+    if (field === 'Aplicativos') {
+        equipo.value[field] = value  // Just store the array of IDs
+    } else {
+        equipo.value[field] = value
+    }
 }
 
 async function saveChanges() {

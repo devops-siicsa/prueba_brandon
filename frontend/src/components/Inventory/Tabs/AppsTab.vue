@@ -394,26 +394,23 @@ function getAppColor(name) {
     return appColors[index]
 }
 
-const selectedIds = computed({
-    get: () => {
-        const apps = props.equipo.Aplicativos || []
-        // Map assignments to Catalog Ids
-        return apps.map(a => {
-            if (typeof a === 'object' && a !== null) {
-                // If we have the catalog loaded, find by Name
-                if (aplicativos.value.length > 0) {
-                    const catalogApp = aplicativos.value.find(ca => ca.Nombre === a.Nombre)
-                    if (catalogApp) return catalogApp.Id
-                }
-                // Fallback: This might be the relationship ID if catalog isn't loaded yet,
-                // but usually we need the Catalog ID for the UI selection to work.
-                return a.Id 
-            }
-            return a
-        })
-    },
-    set: (val) => emit('update', 'Aplicativos', val)
-})
+// Use ref for selected IDs to ensure proper reactivity
+const selectedIds = ref([])
+const isTogglingManually = ref(false) // Flag to prevent watch interference
+
+// Sync selectedIds with props when equipo changes (but not during manual toggles)
+watch(() => props.equipo.Aplicativos, (newApps) => {
+    // Skip if we're in the middle of a manual toggle
+    if (isTogglingManually.value) return
+    
+    if (newApps) {
+        selectedIds.value = newApps
+            .filter(a => a && a.AplicacionId)
+            .map(a => a.AplicacionId)
+    } else {
+        selectedIds.value = []
+    }
+}, { immediate: true })
 
 const filteredApps = computed(() => {
     // In View Mode, only show selected (assigned) apps. In Edit Mode, show all for selection.
@@ -459,14 +456,23 @@ function isSelected(app) {
 
 function toggleSelection(app) {
     if (!props.isEditing) return
-    const ids = [...selectedIds.value]
-    const index = ids.indexOf(app.Id)
+    
+    isTogglingManually.value = true // Set flag to prevent watch
+    
+    const index = selectedIds.value.indexOf(app.Id)
     if (index === -1) {
-        ids.push(app.Id)
+        selectedIds.value.push(app.Id)
     } else {
-        ids.splice(index, 1)
+        selectedIds.value.splice(index, 1)
     }
-    selectedIds.value = ids
+    
+    // Emit the update
+    emit('update', 'Aplicativos', selectedIds.value)
+    
+    // Reset flag after a short delay to allow parent update
+    setTimeout(() => {
+        isTogglingManually.value = false
+    }, 100)
 }
 
 async function createApp() {

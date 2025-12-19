@@ -203,7 +203,7 @@
                     ></v-text-field>
                 </div>
 
-                <div class="d-flex align-start gap-3 pa-4 bg-blue-lighten-4 rounded-xl">
+                <div v-if="!equipo.Ciudad" class="d-flex align-start gap-3 pa-4 bg-blue-lighten-4 rounded-xl">
                     <div class="rounded-circle bg-primary mt-1.5" style="width: 6px; height: 6px; min-width: 6px;"></div>
                     <p class="text-caption text-blue-darken-3 mb-0" style="line-height: 1.6;">
                         La ciudad se completará automáticamente al seleccionar la sede. Si necesita agregar una nueva sede, contacte al administrador.

@@ -153,14 +153,17 @@ class EquipoAplicacion(db.Model):
     __tablename__ = 'EquipoAplicaciones'
     Id = db.Column(db.Integer, primary_key=True)
     EquipoId = db.Column(db.Integer, db.ForeignKey('Equipos.Id'))
-    NombreAplicacion = db.Column(db.String(150))
+    AplicacionId = db.Column(db.Integer, db.ForeignKey('Aplicaciones.Id'))
     Version = db.Column(db.String(50))
     FechaInstalacion = db.Column(db.DateTime, default=datetime.now)
+
+
 
 class EquipoAdjunto(db.Model):
     __tablename__ = 'EquipoAdjuntos'
     Id = db.Column(db.Integer, primary_key=True)
     EquipoId = db.Column(db.Integer, db.ForeignKey('Equipos.Id'))
-    TipoArchivo = db.Column(db.String(20))
+    TipoArchivo = db.Column(db.String(500))
     RutaArchivo = db.Column(db.String(500))
+    NombreOriginal = db.Column(db.String(255))  # Original filename
     FechaSubida = db.Column(db.DateTime, default=datetime.now)

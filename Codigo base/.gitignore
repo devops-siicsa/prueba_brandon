@@ -1,0 +1,32 @@
+# === PYTHON BACKEND ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.log
+.env
+.vscode/
+.venv/
+build/
+dist/
+*.sqlite3
+config.json
+
+# === VUE + VUETIFY FRONTEND ===
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# === GENERAL ===
+*.log
+.DS_Store
+Thumbs.db
+*.swp
+
+files/
+ffmpeg/
